@@ -1,0 +1,35 @@
+{
+  "name": "ktd-cesium",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cesium二次封装库",
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "build": "pnpm -r --filter=\"!@ktd-cesium/vue\" build && pnpm --filter @ktd-cesium/vue build",
+    "clean": "pnpm -r exec rm -rf dist node_modules",
+    "lint": "pnpm -r lint",
+    "type-check": "pnpm -r type-check",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "keywords": [
+    "cesium",
+    "gis",
+    "3d",
+    "monorepo"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "vite": "^5.0.0",
+    "vitepress": "^1.6.4",
+    "vitest": "^1.0.0"
+  }
+}

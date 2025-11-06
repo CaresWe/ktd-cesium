@@ -1,0 +1,134 @@
+import { CoordinateOffset } from '@ktd-cesium/shared'
+
+/**
+ * 支持的坐标系类型
+ */
+export enum CoordinateSystem {
+  /** Web Mercator 投影 (EPSG:3857) */
+  EPSG3857 = 'EPSG:3857',
+  /** WGS84 地理坐标系 (EPSG:4326) */
+  WGS84 = 'EPSG:4326',
+  /** 中国大地2000坐标系 (CGCS2000) - 与 WGS84 高度兼容 */
+  CGCS2000 = 'CGCS2000'
+}
+
+// 重新导出 CoordinateOffset
+export { CoordinateOffset }
+
+/**
+ * 通用图层选项
+ */
+export interface BaseLayerOptions {
+  /** 透明度 (0-1) */
+  alpha?: number
+  /** 亮度 */
+  brightness?: number
+  /** 对比度 */
+  contrast?: number
+  /** 是否显示 */
+  show?: boolean
+  /** 图层索引位置 */
+  index?: number
+  /** 坐标系类型，默认为 EPSG:3857 (Web Mercator) */
+  coordinateSystem?: CoordinateSystem | string
+  /** 坐标偏移类型（用于国内地图），默认无偏移 */
+  coordinateOffset?: CoordinateOffset
+}
+
+/**
+ * XYZ 瓦片配置
+ */
+export interface XYZLayerOptions extends BaseLayerOptions {
+  /** 瓦片 URL 模板，支持 {x} {y} {z} {s} 占位符 */
+  url: string
+  /** 子域名数组，用于负载均衡 */
+  subdomains?: string[]
+  /** 最小层级 */
+  minimumLevel?: number
+  /** 最大层级 */
+  maximumLevel?: number
+  /** 瓦片宽度 */
+  tileWidth?: number
+  /** 瓦片高度 */
+  tileHeight?: number
+  /** 区域范围 [west, south, east, north] (度) */
+  rectangle?: [number, number, number, number]
+}
+
+/**
+ * TMS 瓦片配置
+ */
+export interface TMSLayerOptions extends BaseLayerOptions {
+  /** 瓦片 URL 模板 */
+  url: string
+  /** 最小层级 */
+  minimumLevel?: number
+  /** 最大层级 */
+  maximumLevel?: number
+  /** 瓦片宽度 */
+  tileWidth?: number
+  /** 瓦片高度 */
+  tileHeight?: number
+  /** 区域范围 [west, south, east, north] (度) */
+  rectangle?: [number, number, number, number]
+}
+
+/**
+ * WMS 服务配置
+ */
+export interface WMSLayerOptions extends BaseLayerOptions {
+  /** WMS 服务地址 */
+  url: string
+  /** 图层名称 */
+  layers: string
+  /** WMS 版本 */
+  version?: string
+  /** 坐标系统 */
+  crs?: string
+  /** 样式 */
+  styles?: string
+  /** 图片格式 */
+  format?: string
+  /** 是否透明 */
+  transparent?: boolean
+  /** 瓦片宽度 */
+  tileWidth?: number
+  /** 瓦片高度 */
+  tileHeight?: number
+  /** 区域范围 [west, south, east, north] (度) */
+  rectangle?: [number, number, number, number]
+}
+
+/**
+ * WMTS 服务配置
+ */
+export interface WMTSLayerOptions extends BaseLayerOptions {
+  /** WMTS 服务地址 */
+  url: string
+  /** 图层标识 */
+  layer: string
+  /** 样式 */
+  style: string
+  /** 瓦片矩阵集 */
+  tileMatrixSetID: string
+  /** 图片格式 */
+  format?: string
+  /** 瓦片矩阵标签 */
+  tileMatrixLabels?: string[]
+  /** 区域范围 [west, south, east, north] (度) */
+  rectangle?: [number, number, number, number]
+}
+
+/**
+ * ArcGIS MapServer 配置
+ */
+export interface ArcGISLayerOptions extends BaseLayerOptions {
+  /** ArcGIS 服务地址 */
+  url: string
+  /** 图层 ID 列表 */
+  layers?: string
+  /** 是否启用服务器端拾取 */
+  enablePickFeatures?: boolean
+  /** 区域范围 [west, south, east, north] (度) */
+  rectangle?: [number, number, number, number]
+}
