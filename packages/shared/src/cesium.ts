@@ -8,7 +8,7 @@ import { clone } from './utils'
 
 // ==================== 类型定义 ====================
 
-interface StyleConfig {
+export interface StyleConfig {
   [key: string]: string | number | boolean | undefined
 }
 
@@ -16,14 +16,14 @@ interface DefConfigStyle {
   [key: string]: StyleConfig
 }
 
-type Coordinates = number[] | number[][] | number[][][]
+export type Coordinates = number[] | number[][] | number[][][]
 
-interface GeoJSONGeometry {
+export interface GeoJSONGeometry {
   type: string
   coordinates: Coordinates
 }
 
-interface GeoJSONFeature {
+export interface GeoJSONFeature {
   type: string
   geometry?: GeoJSONGeometry
   properties?: {

@@ -1,5 +1,11 @@
 import * as Cesium from 'cesium'
-import { message } from '../core/Tooltip'
+
+/**
+ * 拖拽点提示消息
+ */
+const draggerMessage = {
+  def: '拖动以移动位置'
+}
 
 /**
  * 编辑点的像素大小
@@ -136,11 +142,11 @@ export function createDragger(
 
     dragger = dataSource.entities.add({
       position: options.position || Cesium.Cartesian3.ZERO,
-      point: attr,
-      draw_tooltip: options.tooltip || message.dragger.def
+      point: attr
     }) as DraggerEntity
 
     dragger.contextmenuItems = false // 不加右键菜单
+    dragger.draw_tooltip = options.tooltip || draggerMessage.def
   }
 
   dragger._isDragger = true
