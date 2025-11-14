@@ -1,3 +1,5 @@
+import * as Cesium from 'cesium'
+
 /**
  * 国内坐标偏移类型
  * 用于处理国内地图服务商使用的加密坐标系
@@ -197,4 +199,72 @@ export function transformCoordinate(
   }
 
   return wgs84Coord
+}
+
+// ==================== Cesium Cartesian3 与经纬度数组转换 ====================
+
+/**
+ * 将 Cartesian3 数组转换为经纬度数组
+ * @param cartesians Cartesian3 数组
+ * @returns 经纬度数组 [[lon, lat, height], ...]
+ */
+export function cartesians2lonlats(cartesians: Cesium.Cartesian3[]): number[][] {
+  if (!cartesians || cartesians.length === 0) {
+    return []
+  }
+
+  return cartesians.map(cartesian => {
+    const cartographic = Cesium.Cartographic.fromCartesian(cartesian)
+    return [
+      Cesium.Math.toDegrees(cartographic.longitude),
+      Cesium.Math.toDegrees(cartographic.latitude),
+      cartographic.height
+    ]
+  })
+}
+
+/**
+ * 将 Cartesian3 转换为经纬度数组
+ * @param cartesian Cartesian3 坐标
+ * @returns 经纬度数组 [lon, lat, height]
+ */
+export function cartesian2lonlat(cartesian: Cesium.Cartesian3): number[] {
+  const cartographic = Cesium.Cartographic.fromCartesian(cartesian)
+  return [
+    Cesium.Math.toDegrees(cartographic.longitude),
+    Cesium.Math.toDegrees(cartographic.latitude),
+    cartographic.height
+  ]
+}
+
+/**
+ * 将经纬度数组转换为 Cartesian3 数组
+ * @param lonlats 经纬度数组 [[lon, lat, height], ...]
+ * @param defHeight 默认高度（如果坐标中没有高度信息）
+ * @returns Cartesian3 数组
+ */
+export function lonlats2cartesians(lonlats: number[][], defHeight?: number): Cesium.Cartesian3[] {
+  if (!lonlats || lonlats.length === 0) {
+    return []
+  }
+
+  return lonlats.map(lonlat => {
+    const lon = lonlat[0]
+    const lat = lonlat[1]
+    const height = lonlat[2] !== undefined ? lonlat[2] : (defHeight || 0)
+    return Cesium.Cartesian3.fromDegrees(lon, lat, height)
+  })
+}
+
+/**
+ * 将经纬度数组转换为 Cartesian3
+ * @param lonlat 经纬度数组 [lon, lat, height]
+ * @param defHeight 默认高度（如果坐标中没有高度信息）
+ * @returns Cartesian3 坐标
+ */
+export function lonlat2cartesian(lonlat: number[], defHeight?: number): Cesium.Cartesian3 {
+  const lon = lonlat[0]
+  const lat = lonlat[1]
+  const height = lonlat[2] !== undefined ? lonlat[2] : (defHeight || 0)
+  return Cesium.Cartesian3.fromDegrees(lon, lat, height)
 }

@@ -1,4 +1,14 @@
 /**
+ * 格式化数字，保留指定小数位数
+ * @param num 数字
+ * @param digits 小数位数（默认 0）
+ * @returns 格式化后的数字
+ */
+export function formatNum(num: number, digits: number = 0): number {
+  return Number(num.toFixed(digits))
+}
+
+/**
  * 格式化坐标显示
  * @param longitude 经度
  * @param latitude 纬度

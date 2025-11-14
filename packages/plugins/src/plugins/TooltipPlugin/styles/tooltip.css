@@ -1,0 +1,95 @@
+/**
+ * Tooltip 样式
+ */
+
+.ktd-tooltip {
+  position: absolute;
+  z-index: 9999;
+  display: block;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #fff;
+  word-wrap: break-word;
+  pointer-events: none;
+}
+
+.ktd-tooltip-inner {
+  max-width: 300px;
+  padding: 8px 12px;
+  background-color: rgba(0, 0, 0, 0.85);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.ktd-tooltip-arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+/* Right placement */
+.ktd-tooltip.right {
+  padding-left: 8px;
+}
+
+.ktd-tooltip.right .ktd-tooltip-arrow {
+  left: 0;
+  top: 50%;
+  margin-top: -5px;
+  border-width: 5px 5px 5px 0;
+  border-color: transparent rgba(0, 0, 0, 0.85) transparent transparent;
+}
+
+/* Left placement */
+.ktd-tooltip.left {
+  padding-right: 8px;
+}
+
+.ktd-tooltip.left .ktd-tooltip-arrow {
+  right: 0;
+  top: 50%;
+  margin-top: -5px;
+  border-width: 5px 0 5px 5px;
+  border-color: transparent transparent transparent rgba(0, 0, 0, 0.85);
+}
+
+/* Top placement */
+.ktd-tooltip.top {
+  padding-bottom: 8px;
+}
+
+.ktd-tooltip.top .ktd-tooltip-arrow {
+  bottom: 0;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px 5px 0;
+  border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent;
+}
+
+/* Bottom placement */
+.ktd-tooltip.bottom {
+  padding-top: 8px;
+}
+
+.ktd-tooltip.bottom .ktd-tooltip-arrow {
+  top: 0;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 0 5px 5px;
+  border-color: transparent transparent rgba(0, 0, 0, 0.85) transparent;
+}
+
+/* 为了向后兼容，保留旧的类名 */
+.ktd3d-draw-tooltip {
+  composes: ktd-tooltip;
+}
+
+.ktd3d-draw-tooltip-inner {
+  composes: ktd-tooltip-inner;
+}
+
+.ktd3d-draw-tooltip-arrow {
+  composes: ktd-tooltip-arrow;
+}

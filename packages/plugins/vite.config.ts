@@ -7,7 +7,10 @@ export default defineConfig({
     dts({
       include: ['src/**/*'],
       outDir: 'dist',
-      rollupTypes: false
+      rollupTypes: false,
+      compilerOptions: {
+        composite: false
+      }
     })
   ],
   build: {

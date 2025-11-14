@@ -164,3 +164,61 @@ export interface EventConfig {
   /** 是否获取经纬度 */
   enableCoordinates?: boolean
 }
+
+// ==================== GraphicsPlugin 事件类型常量 ====================
+
+/**
+ * GraphicsPlugin 绘制和编辑事件类型
+ */
+export enum GraphicsEventType {
+  /** 开始绘制 */
+  DRAW_START = 'draw-start',
+  /** 绘制过程中增加了点 */
+  DRAW_ADD_POINT = 'draw-add-point',
+  /** 绘制过程中删除了最后一个点 */
+  DRAW_REMOVE_POINT = 'draw-remove-lastpoint',
+  /** 绘制过程中鼠标移动 */
+  DRAW_MOUSE_MOVE = 'draw-mouse-move',
+  /** 创建完成 */
+  DRAW_CREATED = 'draw-created',
+  /** 开始编辑 */
+  EDIT_START = 'edit-start',
+  /** 编辑修改了点 */
+  EDIT_MOVE_POINT = 'edit-move-point',
+  /** 编辑删除了点 */
+  EDIT_REMOVE_POINT = 'edit-remove-point',
+  /** 停止编辑 */
+  EDIT_STOP = 'edit-stop',
+  /** 删除对象 */
+  DELETE = 'delete'
+}
+
+/** 开始绘制 */
+export const DrawStart = GraphicsEventType.DRAW_START
+
+/** 绘制过程中增加了点 */
+export const DrawAddPoint = GraphicsEventType.DRAW_ADD_POINT
+
+/** 绘制过程中删除了最后一个点 */
+export const DrawRemovePoint = GraphicsEventType.DRAW_REMOVE_POINT
+
+/** 绘制过程中鼠标移动 */
+export const DrawMouseMove = GraphicsEventType.DRAW_MOUSE_MOVE
+
+/** 创建完成 */
+export const DrawCreated = GraphicsEventType.DRAW_CREATED
+
+/** 开始编辑 */
+export const EditStart = GraphicsEventType.EDIT_START
+
+/** 编辑修改了点 */
+export const EditMovePoint = GraphicsEventType.EDIT_MOVE_POINT
+
+/** 编辑删除了点 */
+export const EditRemovePoint = GraphicsEventType.EDIT_REMOVE_POINT
+
+/** 停止编辑 */
+export const EditStop = GraphicsEventType.EDIT_STOP
+
+/** 删除对象 */
+export const Delete = GraphicsEventType.DELETE

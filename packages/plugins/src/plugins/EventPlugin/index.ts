@@ -687,5 +687,283 @@ export class EventPlugin extends BasePlugin {
   }
 }
 
-// 导出类型
+// 导出类型（包含 GraphicsPlugin 事件类型常量）
 export * from './types'
+
+// ==================== 通用事件系统 ====================
+
+/**
+ * 事件监听器接口
+ */
+interface GraphicsEventListener {
+  fn: Function
+  ctx?: any
+}
+
+/**
+ * 分割空格分隔的字符串
+ */
+function splitWords(str: string): string[] {
+  return str.trim().split(/\s+/)
+}
+
+/**
+ * 空函数
+ */
+function falseFn(): boolean {
+  return false
+}
+
+/**
+ * 绑定函数上下文
+ */
+function bind(fn: Function, obj: any): any {
+  const slice = Array.prototype.slice
+  return fn.bind ? fn.bind(obj) : function() {
+    return fn.apply(obj, slice.call(arguments))
+  }
+}
+
+/**
+ * 获取对象唯一标识
+ */
+let lastId = 0
+const objIdKey = '_ktd_id'
+function stamp(obj: any): number {
+  if (!obj[objIdKey]) {
+    obj[objIdKey] = ++lastId
+  }
+  return obj[objIdKey]
+}
+
+/**
+ * 通用事件系统
+ * 提供事件监听、触发和管理功能
+ */
+export class EventEmitter {
+  private _events: Record<string, GraphicsEventListener[]> = {}
+  private _eventParents: Record<number, EventEmitter> = {}
+  private _firingCount = 0
+
+  /**
+   * 添加事件监听
+   * @param types 事件类型(可以是多个空格分隔的类型)
+   * @param fn 监听函数
+   * @param context 上下文对象
+   */
+  on(types: string | Record<string, Function>, fn?: Function, context?: any): this {
+    // types 可以是类型/处理器对的映射
+    if (typeof types === 'object') {
+      for (const type in types) {
+        this._on(type, types[type], fn)
+      }
+    } else {
+      // types 可以是空格分隔的字符串
+      const typesList = splitWords(types)
+      for (let i = 0, len = typesList.length; i < len; i++) {
+        this._on(typesList[i], fn!, context)
+      }
+    }
+
+    return this
+  }
+
+  /**
+   * 移除事件监听
+   * @param types 事件类型
+   * @param fn 监听函数
+   * @param context 上下文对象
+   */
+  off(types?: string | Record<string, Function>, fn?: Function, context?: any): this {
+    if (!types) {
+      // 如果没有参数则清除所有监听器
+      this._events = {}
+    } else if (typeof types === 'object') {
+      for (const type in types) {
+        this._off(type, types[type], fn)
+      }
+    } else {
+      const typesList = splitWords(types)
+      for (let i = 0, len = typesList.length; i < len; i++) {
+        this._off(typesList[i], fn, context)
+      }
+    }
+
+    return this
+  }
+
+  /**
+   * 添加监听器(内部方法)
+   */
+  private _on(type: string, fn: Function, context?: any): void {
+    const typeListeners = this._events[type] || []
+    if (!this._events[type]) {
+      this._events[type] = typeListeners
+    }
+
+    if (context === this) {
+      context = undefined
+    }
+
+    const newListener: GraphicsEventListener = { fn, ctx: context }
+
+    // 检查 fn 是否已经存在
+    for (let i = 0, len = typeListeners.length; i < len; i++) {
+      if (typeListeners[i].fn === fn && typeListeners[i].ctx === context) {
+        return
+      }
+    }
+
+    typeListeners.push(newListener)
+  }
+
+  /**
+   * 移除监听器(内部方法)
+   */
+  private _off(type: string, fn?: Function, context?: any): void {
+    const listeners = this._events[type]
+    if (!listeners) return
+
+    if (!fn) {
+      // 将所有移除的监听器设置为 noop
+      for (let i = 0, len = listeners.length; i < len; i++) {
+        listeners[i].fn = falseFn
+      }
+      delete this._events[type]
+      return
+    }
+
+    if (context === this) {
+      context = undefined
+    }
+
+    // 查找并移除
+    for (let i = 0, len = listeners.length; i < len; i++) {
+      const l = listeners[i]
+      if (l.ctx !== context) continue
+      if (l.fn === fn) {
+        l.fn = falseFn
+
+        if (this._firingCount) {
+          this._events[type] = listeners.slice()
+        }
+        listeners.splice(i, 1)
+        return
+      }
+    }
+  }
+
+  /**
+   * 触发事件
+   * @param type 事件类型
+   * @param data 数据对象
+   * @param propagate 是否传播
+   */
+  fire(type: string, data?: any, propagate?: boolean): this {
+    if (!this.listens(type, propagate)) return this
+
+    const event = {
+      ...data,
+      type,
+      target: this,
+      sourceTarget: data?.sourceTarget || this
+    }
+
+    const listeners = this._events[type]
+
+    if (listeners) {
+      this._firingCount = (this._firingCount + 1) || 1
+      for (let i = 0, len = listeners.length; i < len; i++) {
+        const l = listeners[i]
+        l.fn.call(l.ctx || this, event)
+      }
+      this._firingCount--
+    }
+
+    if (propagate) {
+      this._propagateEvent(event)
+    }
+
+    return this
+  }
+
+  /**
+   * 检查是否有监听器
+   * @param type 事件类型
+   * @param propagate 是否检查父级
+   */
+  listens(type: string, propagate?: boolean): boolean {
+    const listeners = this._events?.[type]
+    if (listeners && listeners.length) return true
+
+    if (propagate) {
+      for (const id in this._eventParents) {
+        if (this._eventParents[id].listens(type, propagate)) {
+          return true
+        }
+      }
+    }
+
+    return false
+  }
+
+  /**
+   * 添加一次性监听器
+   * @param types 事件类型
+   * @param fn 监听函数
+   * @param context 上下文
+   */
+  once(types: string | Record<string, Function>, fn?: Function, context?: any): this {
+    if (typeof types === 'object') {
+      for (const type in types) {
+        this.once(type, types[type], fn)
+      }
+      return this
+    }
+
+    const handler = bind(() => {
+      this.off(types, fn, context).off(types, handler, context)
+    }, this)
+
+    return this.on(types, fn, context).on(types, handler, context)
+  }
+
+  /**
+   * 添加事件父级
+   * @param obj EventEmitter 对象
+   */
+  addEventParent(obj: EventEmitter): this {
+    this._eventParents[stamp(obj)] = obj
+    return this
+  }
+
+  /**
+   * 移除事件父级
+   * @param obj EventEmitter 对象
+   */
+  removeEventParent(obj: EventEmitter): this {
+    delete this._eventParents[stamp(obj)]
+    return this
+  }
+
+  /**
+   * 传播事件
+   */
+  private _propagateEvent(e: any): void {
+    for (const id in this._eventParents) {
+      this._eventParents[id].fire(
+        e.type,
+        { ...e, layer: e.target, propagatedFrom: e.target },
+        true
+      )
+    }
+  }
+
+  // 别名方法
+  addEventListener = this.on
+  removeEventListener = this.off
+  clearAllEventListeners = this.off
+  addOneTimeEventListener = this.once
+  fireEvent = this.fire
+  hasEventListeners = this.listens
+}
