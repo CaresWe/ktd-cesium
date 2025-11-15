@@ -1,34 +1,74 @@
 import * as Cesium from 'cesium'
 import { EditPolyline } from './EditPolyline'
+import { setPositionsHeight } from '@ktd-cesium/shared'
+import type { ExtendedEntity } from './EditBase'
 
 /**
- * 设置坐标的高度
+ * 扩展的 Entity 接口，包含 Corridor 特有属性
  */
-function setPositionsHeight(position: Cesium.Cartesian3, newHeight: number): Cesium.Cartesian3 {
-  const cartographic = Cesium.Cartographic.fromCartesian(position)
-  return Cesium.Cartesian3.fromRadians(cartographic.longitude, cartographic.latitude, newHeight)
+interface CorridorEntity {
+  _positions_draw?: Cesium.Cartesian3[]
+  attribute?: {
+    type?: string
+    [key: string]: unknown
+  }
+  corridor?: Cesium.CorridorGraphics & {
+    positions?: Cesium.Property
+    height?: Cesium.Property
+  }
 }
 
 /**
  * 走廊编辑类
  * 继承自 EditPolyline
  */
-export const EditCorridor = EditPolyline.extend({
+export class EditCorridor extends EditPolyline {
+  declare entity: ExtendedEntity & CorridorEntity
+
   /**
    * 获取图形对象
    */
-  getGraphic(this: any) {
-    return this.entity.corridor
-  },
+  getGraphic(): Cesium.CorridorGraphics {
+    try {
+      if (!this.entity) {
+        throw new Error('实体对象不存在')
+      }
+
+      if (!this.entity.corridor) {
+        throw new Error('实体的 corridor 属性不存在')
+      }
+
+      return this.entity.corridor
+    } catch (error) {
+      console.error('EditCorridor.getGraphic: 获取图形对象失败', error)
+      throw error
+    }
+  }
 
   /**
    * 继承父类，根据属性更新坐标
+   * 如果设置了 height 属性，将位置调整到指定高度
    */
-  updatePositionsHeightByAttr(this: any, position: Cesium.Cartesian3): Cesium.Cartesian3 {
-    if (this.getGraphic().height !== undefined) {
-      const newHeight = this.getGraphic().height.getValue(this.viewer.clock.currentTime)
-      position = setPositionsHeight(position, newHeight)
+  updatePositionsHeightByAttr(position: Cesium.Cartesian3): Cesium.Cartesian3 {
+    try {
+      const graphic = this.getGraphic()
+
+      if (graphic.height !== undefined && graphic.height) {
+        const newHeight = (graphic.height as Cesium.Property).getValue(
+          this.viewer.clock.currentTime
+        ) as number
+
+        if (Number.isFinite(newHeight)) {
+          // 使用 shared 中的 setPositionsHeight 函数
+          const result = setPositionsHeight(position, newHeight)
+          return result as Cesium.Cartesian3
+        }
+      }
+
+      return position
+    } catch (error) {
+      console.error('EditCorridor.updatePositionsHeightByAttr: 更新位置高度失败', error)
+      return position
     }
-    return position
   }
-})
+}

@@ -1,11 +1,13 @@
 import * as Cesium from 'cesium'
 import { EditPolygon } from './EditPolygon'
 import * as draggerCtl from './Dragger'
-import { message } from '../core/Tooltip'
+import { defaultMessages } from '../../TooltipPlugin/messages'
 import { getEllipseOuterPositions } from '../attr/AttrCircle'
+import { setPositionSurfaceHeight } from '@ktd-cesium/shared'
+import type { ExtendedEntity } from './EditBase'
 
 /**
- * �nMnئ
+ * 设置位置高度
  */
 function setPositionsHeight(position: Cesium.Cartesian3, newHeight: number): Cesium.Cartesian3 {
   const cartographic = Cesium.Cartographic.fromCartesian(position)
@@ -13,202 +15,394 @@ function setPositionsHeight(position: Cesium.Cartesian3, newHeight: number): Ces
 }
 
 /**
- * b/-�{
- * �� EditPolygon
+ * 扩展的 Entity 接口，包含 Circle/Ellipse 特有属性
  */
-export const EditCircle = EditPolygon.extend({
-  /**
-   * ���b�a
-   */
-  getGraphic(this: any) {
-    return this.entity.ellipse
-  },
-
-  /**
-   * Mnlb:��p
-   */
-  changePositionsToCallback(this: any) {
-    this._positions_draw = this.entity._positions_draw
-    this.finish()
-  },
-
-  /**
-   * ��_(
-   */
-  finish(this: any) {
-    this.entity._positions_draw = this._positions_draw
-  },
-
-  /**
-   * /&40
-   */
-  isClampToGround(this: any): boolean {
-    return this.entity.attribute.style.clampToGround
-  },
-
-  /**
-   * ��Mn
-   */
-  getPosition(this: any): Cesium.Cartesian3[] {
-    // �
-ئ
-    if (this.getGraphic().height !== undefined) {
-      const newHeight = this.getGraphic().height.getValue(this.viewer.clock.currentTime)
-      for (let i = 0, len = this._positions_draw.length; i < len; i++) {
-        this._positions_draw[i] = setPositionsHeight(this._positions_draw[i], newHeight)
-      }
+interface CircleEntity {
+  _positions_draw?: Cesium.Cartesian3[]
+  attribute?: {
+    style?: {
+      clampToGround?: boolean
+      height?: number
+      extrudedHeight?: number
+      radius?: number
+      semiMajorAxis?: number
+      semiMinorAxis?: number
+      rotation?: number
+      [key: string]: unknown
     }
-    return this._positions_draw
-  },
+    [key: string]: unknown
+  }
+  ellipse?: Cesium.EllipseGraphics & {
+    height?: Cesium.Property
+    extrudedHeight?: Cesium.Property
+    semiMajorAxis?: Cesium.Property
+    semiMinorAxis?: Cesium.Property
+  }
+}
+
+/**
+ * 扩展的 Dragger 接口
+ */
+interface CircleDragger extends draggerCtl.DraggerEntity {
+  index?: number
+  majorDragger?: draggerCtl.DraggerEntity
+  minorDragger?: draggerCtl.DraggerEntity
+}
+
+/**
+ * 圆/椭圆编辑类
+ * 继承自 EditPolygon
+ */
+export class EditCircle extends EditPolygon {
+  declare entity: ExtendedEntity & CircleEntity
 
   /**
-   * њ���
+   * 获取图形对象
    */
-  bindDraggers(this: any) {
-    const that = this
-    const clampToGround = this.isClampToGround()
-    const positions = this.getPosition()
-    const style = this.entity.attribute.style
-
-    // -ù
-    let position = positions[0]
-
-    const dragger = draggerCtl.createDragger(this.dataSource, {
-      position: position,
-      onDrag: function (dragger: any, position: Cesium.Cartesian3) {
-        // �U�<
-        const diff = Cesium.Cartesian3.subtract(
-          position,
-          positions[dragger.index],
-          new Cesium.Cartesian3()
-        )
-
-        positions[dragger.index] = position
-
-        // ئ
-        if (!style.clampToGround) {
-          const height = that.formatNum(Cesium.Cartographic.fromCartesian(position).height, 2)
-          that.getGraphic().height = height
-          style.height = height
-        }
-
-        const time = that.viewer.clock.currentTime
-
-        // J�e
-        let newPos = Cesium.Cartesian3.add(
-          dragger.majorDragger.position.getValue(time),
-          diff,
-          new Cesium.Cartesian3()
-        )
-        dragger.majorDragger.position = newPos
-
-        if (dragger.minorDragger) {
-          newPos = Cesium.Cartesian3.add(
-            dragger.minorDragger.position.getValue(time),
-            diff,
-            new Cesium.Cartesian3()
-          )
-          dragger.minorDragger.position = newPos
-        }
-
-        // ئt���
-        if (that.entity.attribute.style.extrudedHeight !== undefined) {
-          that.updateDraggers()
-        }
+  getGraphic(): Cesium.EllipseGraphics {
+    try {
+      if (!this.entity) {
+        throw new Error('实体对象不存在')
       }
-    })
-    dragger.index = 0
-    this.draggers.push(dragger)
 
-    const time = this.viewer.clock.currentTime
-
-    // ��-	��
-�P�p�
-    const outerPositions = getEllipseOuterPositions({
-      position: position,
-      semiMajorAxis: this.getGraphic().semiMajorAxis.getValue(time),
-      semiMinorAxis: this.getGraphic().semiMinorAxis.getValue(time),
-      rotation: Cesium.Math.toRadians(Number(style.rotation || 0))
-    })
-
-    // Jt
-�P�
-    let majorPos = outerPositions[1]
-    positions[1] = majorPos
-
-    const majorDragger = draggerCtl.createDragger(this.dataSource, {
-      position: majorPos,
-      type: draggerCtl.PointType.EditAttr,
-      tooltip: message.dragger.editRadius,
-      onDrag: function (dragger: any, position: Cesium.Cartesian3) {
-        if (that.getGraphic().height !== undefined) {
-          const newHeight = that.getGraphic().height.getValue(time)
-          position = setPositionsHeight(position, newHeight)
-          dragger.position = position
-        }
-        positions[dragger.index] = position
-
-        const radius = that.formatNum(Cesium.Cartesian3.distance(positions[0], position), 2)
-        that.getGraphic().semiMajorAxis = radius
-
-        if (that._maxPointNum === 3 || !Cesium.defined(style.radius)) {
-          // -
-          style.semiMajorAxis = radius
-        } else {
-          // 
-          that.getGraphic().semiMinorAxis = radius
-          style.radius = radius
-        }
-
-        that.updateDraggers()
+      if (!this.entity.ellipse) {
+        throw new Error('实体的 ellipse 属性不存在')
       }
-    })
-    majorDragger.index = 1
-    dragger.majorDragger = majorDragger
-    this.draggers.push(majorDragger)
 
-    // �Jt
-�P�(-)
-    if (this._maxPointNum === 3) {
-      let minorPos = outerPositions[0]
-      positions[2] = minorPos
-
-      const minorDragger = draggerCtl.createDragger(this.dataSource, {
-        position: minorPos,
-        type: draggerCtl.PointType.EditAttr,
-        tooltip: message.dragger.editRadius,
-        onDrag: function (dragger: any, position: Cesium.Cartesian3) {
-          if (that.getGraphic().height !== undefined) {
-            const newHeight = that.getGraphic().height.getValue(time)
-            position = setPositionsHeight(position, newHeight)
-            dragger.position = position
-          }
-          positions[dragger.index] = position
-
-          const radius = that.formatNum(Cesium.Cartesian3.distance(positions[0], position), 2)
-          that.getGraphic().semiMinorAxis = radius
-
-          if (that._maxPointNum === 3 || !Cesium.defined(style.radius)) {
-            // -
-            style.semiMinorAxis = radius
-          } else {
-            // 
-            that.getGraphic().semiMajorAxis = radius
-            style.radius = radius
-          }
-
-          that.updateDraggers()
-        }
-      })
-      minorDragger.index = 2
-      dragger.minorDragger = minorDragger
-      this.draggers.push(minorDragger)
-    }
-
-    // �ئ��� (��	�8ئ)
-    if (this.getGraphic().extrudedHeight) {
-      const _pos = this._maxPointNum === 3 ? [positions[1], positions[2]] : [positions[1]]
-      this.bindHeightDraggers(_pos)
+      return this.entity.ellipse
+    } catch (error) {
+      console.error('EditCircle.getGraphic: 获取图形对象失败', error)
+      throw error
     }
   }
-})
+
+  /**
+   * 将位置转换为回调函数
+   */
+  protected changePositionsToCallback(): void {
+    try {
+      if (!this.entity) {
+        throw new Error('实体对象不存在')
+      }
+
+      this._positions_draw = this.entity._positions_draw || null
+      this.finish()
+    } catch (error) {
+      console.error('EditCircle.changePositionsToCallback: 转换位置失败', error)
+      throw error
+    }
+  }
+
+  /**
+   * 图形编辑结束后调用
+   */
+  protected finish(): void {
+    try {
+      if (!this.entity) {
+        console.warn('EditCircle.finish: 实体对象不存在')
+        return
+      }
+
+      this.entity._positions_draw = this._positions_draw || undefined
+    } catch (error) {
+      console.error('EditCircle.finish: 完成编辑失败', error)
+      // finish 方法的错误不向上抛出，避免影响编辑结束流程
+    }
+  }
+
+  /**
+   * 是否贴地
+   */
+  isClampToGround(): boolean {
+    try {
+      return this.entity.attribute?.style?.clampToGround ?? false
+    } catch (error) {
+      console.error('EditCircle.isClampToGround: 获取贴地状态失败', error)
+      return false
+    }
+  }
+
+  /**
+   * 获取位置
+   */
+  getPosition(): Cesium.Cartesian3[] {
+    try {
+      if (!this._positions_draw) {
+        throw new Error('位置数组不存在')
+      }
+
+      // 更新高度
+      const graphic = this.getGraphic()
+      if (graphic.height !== undefined && graphic.height) {
+        const heightValue = (graphic.height as Cesium.Property).getValue(
+          this.viewer.clock.currentTime
+        ) as number
+
+        if (Number.isFinite(heightValue)) {
+          for (let i = 0, len = this._positions_draw.length; i < len; i++) {
+            this._positions_draw[i] = setPositionsHeight(this._positions_draw[i], heightValue)
+          }
+        }
+      }
+
+      return this._positions_draw
+    } catch (error) {
+      console.error('EditCircle.getPosition: 获取位置失败', error)
+      throw error
+    }
+  }
+
+  /**
+   * 绑定拖拽点
+   */
+  protected bindDraggers(): void {
+    try {
+      // 验证必要的属性
+      if (!this.entity) {
+        const error = new Error('实体对象不存在')
+        console.error('EditCircle.bindDraggers:', error.message)
+        throw error
+      }
+
+      if (!this.dataSource) {
+        const error = new Error('数据源对象不存在')
+        console.error('EditCircle.bindDraggers:', error.message)
+        throw error
+      }
+
+      const clampToGround = this.isClampToGround()
+      const positions = this.getPosition()
+      const style = this.entity.attribute?.style || {}
+
+      if (positions.length === 0) {
+        const error = new Error('位置数组为空')
+        console.error('EditCircle.bindDraggers:', error.message)
+        throw error
+      }
+
+      // 中心点
+      let position = positions[0]
+
+      // 贴地时求贴模型和贴地的高度
+      if (clampToGround) {
+        const surfacePosition = setPositionSurfaceHeight(this.viewer, position)
+        if (surfacePosition) {
+          position = surfacePosition
+          positions[0] = position
+        }
+      }
+
+      const dragger = draggerCtl.createDragger(this.dataSource, {
+        position: position,
+        onDrag: (_dragger: Cesium.Entity, position: Cesium.Cartesian3) => {
+          try {
+            const draggerEntity = _dragger as CircleDragger
+
+            // 计算偏移量
+            const diff = Cesium.Cartesian3.subtract(
+              position,
+              positions[draggerEntity.index ?? 0],
+              new Cesium.Cartesian3()
+            )
+
+            positions[draggerEntity.index ?? 0] = position
+
+            // 更新高度
+            if (!style.clampToGround) {
+              const height = this.formatNum(
+                Cesium.Cartographic.fromCartesian(position).height,
+                2
+              )
+              const graphic = this.getGraphic()
+              graphic.height = height as unknown as Cesium.Property
+              style.height = height
+            }
+
+            const time = this.viewer.clock.currentTime
+
+            // 更新长轴拖拽点
+            if (draggerEntity.majorDragger) {
+              const majorPos = draggerEntity.majorDragger.position
+              if (majorPos && typeof majorPos === 'object' && 'getValue' in majorPos) {
+                const currentMajorPos = (majorPos as Cesium.Property).getValue(time) as Cesium.Cartesian3
+                const newPos = Cesium.Cartesian3.add(
+                  currentMajorPos,
+                  diff,
+                  new Cesium.Cartesian3()
+                )
+                draggerEntity.majorDragger.position = newPos
+              }
+            }
+
+            // 更新短轴拖拽点
+            if (draggerEntity.minorDragger) {
+              const minorPos = draggerEntity.minorDragger.position
+              if (minorPos && typeof minorPos === 'object' && 'getValue' in minorPos) {
+                const currentMinorPos = (minorPos as Cesium.Property).getValue(time) as Cesium.Cartesian3
+                const newPos = Cesium.Cartesian3.add(
+                  currentMinorPos,
+                  diff,
+                  new Cesium.Cartesian3()
+                )
+                draggerEntity.minorDragger.position = newPos
+              }
+            }
+
+            // 更新拉伸高度拖拽点
+            if (this.entity.attribute?.style?.extrudedHeight !== undefined) {
+              this.updateDraggers()
+            }
+          } catch (error) {
+            console.error('EditCircle.dragger.onDrag: 拖拽中心点失败', error)
+            // 拖拽过程中的错误不向上抛出，避免中断交互
+          }
+        }
+      }) as CircleDragger
+
+      dragger.index = 0
+      this.draggers.push(dragger)
+
+      const time = this.viewer.clock.currentTime
+      const graphic = this.getGraphic()
+
+      // 计算椭圆外围控制点位置
+      const semiMajorAxis = (graphic.semiMajorAxis as Cesium.Property)?.getValue(time) as number
+      const semiMinorAxis = (graphic.semiMinorAxis as Cesium.Property)?.getValue(time) as number
+
+      if (!Number.isFinite(semiMajorAxis) || !Number.isFinite(semiMinorAxis)) {
+        throw new Error('椭圆轴长无效')
+      }
+
+      const outerPositions = getEllipseOuterPositions({
+        position: position,
+        semiMajorAxis: semiMajorAxis,
+        semiMinorAxis: semiMinorAxis,
+        rotation: Cesium.Math.toRadians(Number(style.rotation || 0))
+      })
+
+      // 长轴控制点
+      let majorPos = outerPositions[1]
+
+      // 贴地时求贴模型和贴地的高度
+      if (clampToGround) {
+        const surfacePosition = setPositionSurfaceHeight(this.viewer, majorPos)
+        if (surfacePosition) {
+          majorPos = surfacePosition
+        }
+      }
+
+      positions[1] = majorPos
+
+      const majorDragger = draggerCtl.createDragger(this.dataSource, {
+        position: majorPos,
+        type: draggerCtl.PointType.EditAttr,
+        tooltip: defaultMessages.dragger.editRadius,
+        onDrag: (_dragger: Cesium.Entity, position: Cesium.Cartesian3) => {
+          try {
+            const draggerEntity = _dragger as CircleDragger
+
+            // 调整高度
+            if (graphic.height !== undefined && graphic.height) {
+              const newHeight = (graphic.height as Cesium.Property).getValue(time) as number
+              if (Number.isFinite(newHeight)) {
+                position = setPositionsHeight(position, newHeight)
+                draggerEntity.position = position
+              }
+            }
+
+            positions[draggerEntity.index ?? 1] = position
+
+            const radius = this.formatNum(Cesium.Cartesian3.distance(positions[0], position), 2)
+            graphic.semiMajorAxis = radius as unknown as Cesium.Property
+
+            if (this._maxPointNum === 3 || !Cesium.defined(style.radius)) {
+              // 椭圆
+              style.semiMajorAxis = radius
+            } else {
+              // 圆
+              graphic.semiMinorAxis = radius as unknown as Cesium.Property
+              style.radius = radius
+            }
+
+            this.updateDraggers()
+          } catch (error) {
+            console.error('EditCircle.majorDragger.onDrag: 拖拽长轴失败', error)
+            // 拖拽过程中的错误不向上抛出，避免中断交互
+          }
+        }
+      }) as CircleDragger
+
+      majorDragger.index = 1
+      dragger.majorDragger = majorDragger
+      this.draggers.push(majorDragger)
+
+      // 短轴控制点（仅椭圆）
+      if (this._maxPointNum === 3) {
+        let minorPos = outerPositions[0]
+
+        // 贴地时求贴模型和贴地的高度
+        if (clampToGround) {
+          const surfacePosition = setPositionSurfaceHeight(this.viewer, minorPos)
+          if (surfacePosition) {
+            minorPos = surfacePosition
+          }
+        }
+
+        positions[2] = minorPos
+
+        const minorDragger = draggerCtl.createDragger(this.dataSource, {
+          position: minorPos,
+          type: draggerCtl.PointType.EditAttr,
+          tooltip: defaultMessages.dragger.editRadius,
+          onDrag: (_dragger: Cesium.Entity, position: Cesium.Cartesian3) => {
+            try {
+              const draggerEntity = _dragger as CircleDragger
+
+              // 调整高度
+              if (graphic.height !== undefined && graphic.height) {
+                const newHeight = (graphic.height as Cesium.Property).getValue(time) as number
+                if (Number.isFinite(newHeight)) {
+                  position = setPositionsHeight(position, newHeight)
+                  draggerEntity.position = position
+                }
+              }
+
+              positions[draggerEntity.index ?? 2] = position
+
+              const radius = this.formatNum(Cesium.Cartesian3.distance(positions[0], position), 2)
+              graphic.semiMinorAxis = radius as unknown as Cesium.Property
+
+              if (this._maxPointNum === 3 || !Cesium.defined(style.radius)) {
+                // 椭圆
+                style.semiMinorAxis = radius
+              } else {
+                // 圆
+                graphic.semiMajorAxis = radius as unknown as Cesium.Property
+                style.radius = radius
+              }
+
+              this.updateDraggers()
+            } catch (error) {
+              console.error('EditCircle.minorDragger.onDrag: 拖拽短轴失败', error)
+              // 拖拽过程中的错误不向上抛出，避免中断交互
+            }
+          }
+        }) as CircleDragger
+
+        minorDragger.index = 2
+        dragger.minorDragger = minorDragger
+        this.draggers.push(minorDragger)
+      }
+
+      // 创建高度拖拽点（拉伸高度）
+      if (graphic.extrudedHeight) {
+        const heightPos = this._maxPointNum === 3 ? [positions[1], positions[2]] : [positions[1]]
+        this.bindHeightDraggers(heightPos)
+      }
+    } catch (error) {
+      console.error('EditCircle.bindDraggers: 绑定拖拽点失败', error)
+      throw error // 向上抛出错误
+    }
+  }
+
+}

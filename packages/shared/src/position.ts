@@ -192,3 +192,38 @@ export function interpolatePositions(pos1: Cesium.Cartesian3, pos2: Cesium.Carte
   result.push(pos2)
   return result
 }
+
+/**
+ * 设置坐标中海拔高度为贴地或贴模型的高度
+ * @param viewer Cesium Viewer 或 Scene
+ * @param position 位置
+ * @returns 调整后的位置，如果获取高度失败则返回原位置
+ */
+export function setPositionSurfaceHeight(
+  viewer: Cesium.Viewer | Cesium.Scene,
+  position: Cesium.Cartesian3
+): Cesium.Cartesian3 | null {
+  try {
+    const scene = viewer instanceof Cesium.Viewer ? viewer.scene : viewer
+    const carto = Cesium.Cartographic.fromCartesian(position)
+
+    // 尝试获取贴模型高度（3D Tiles）
+    let height = scene.sampleHeight(carto)
+
+    // 如果没有获取到模型高度，尝试获取地形高度
+    if (!Cesium.defined(height) || height <= -1000) {
+      height = scene.globe.getHeight(carto)
+    }
+
+    // 如果获取到有效高度，创建新位置
+    if (Cesium.defined(height) && height > -1000) {
+      return Cesium.Cartesian3.fromRadians(carto.longitude, carto.latitude, height)
+    }
+
+    // 获取失败，返回 null
+    return null
+  } catch (error) {
+    console.error('setPositionSurfaceHeight: 获取表面高度失败', error)
+    return null
+  }
+}

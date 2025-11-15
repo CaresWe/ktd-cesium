@@ -77,7 +77,8 @@ export interface CreateDraggerOptions {
 /**
  * 扩展的 Entity 类型,包含拖拽相关属性
  */
-export interface DraggerEntity extends Cesium.Entity {
+export interface DraggerEntity extends Omit<Cesium.Entity, 'position'> {
+  position?: Cesium.PositionProperty | Cesium.Cartesian3
   _isDragger: boolean
   _noMousePosition: boolean
   _pointType: PointType

@@ -1,5 +1,5 @@
 import * as Cesium from 'cesium'
-import { getCurrentMousePosition } from '@ktd-cesium/shared'
+import { getCurrentMousePosition, formatNum as utilFormatNum } from '@ktd-cesium/shared'
 import { GraphicsEventType, type EventEmitter } from '../../EventPlugin'
 import * as draggerCtl from './Dragger'
 
@@ -35,7 +35,7 @@ interface ExtendedViewer extends Cesium.Viewer {
 /**
  * 扩展的 Entity 类型
  */
-interface ExtendedEntity extends Omit<Cesium.Entity, 'position'> {
+export interface ExtendedEntity extends Omit<Cesium.Entity, 'position'> {
   position?: Cesium.PositionProperty | Cesium.Cartesian3
   attribute?: Record<string, unknown>
   inProgress?: boolean
@@ -130,6 +130,16 @@ export class EditBase {
       this.eventPlugin.off(type, fn, context)
     }
     return this
+  }
+
+  /**
+   * 格式化数字
+   * @param num 数字
+   * @param digits 小数位数
+   * @returns 格式化后的数字
+   */
+  formatNum(num: number, digits?: number): number {
+    return utilFormatNum(num, digits)
   }
 
   /**

@@ -1,127 +1,308 @@
 import * as Cesium from 'cesium'
 import { EditPolygon } from './EditPolygon'
 import * as draggerCtl from './Dragger'
-import { message } from '../core/Tooltip'
-import { addPositionsHeight } from '../core/point'
+import { defaultMessages } from '../../TooltipPlugin/messages'
+import { addPositionsHeight } from '@ktd-cesium/shared'
 import { getEllipseOuterPositions } from '../attr/AttrCircle'
+import type { ExtendedEntity } from './EditBase'
+
+/**
+ * Cylinder 样式接口
+ */
+interface CylinderStyle {
+  topRadius?: number
+  bottomRadius?: number
+  length?: number
+  rotation?: number
+  [key: string]: unknown
+}
+
+/**
+ * 扩展的 Entity 接口，包含 Cylinder 特有属性
+ */
+interface CylinderEntity {
+  _positions_draw?: Cesium.Cartesian3[]
+  attribute?: {
+    style: CylinderStyle
+    [key: string]: unknown
+  }
+  cylinder?: Cesium.CylinderGraphics & {
+    topRadius?: Cesium.Property
+    bottomRadius?: Cesium.Property
+    length?: Cesium.Property
+  }
+}
 
 /**
  * 圆柱体编辑类
  * 继承自 EditPolygon
  */
-export const EditCylinder = EditPolygon.extend({
+export class EditCylinder extends EditPolygon {
+  declare entity: ExtendedEntity & CylinderEntity
+
   /**
-   * 取entity对象的对应矢量数据
+   * 获取图形对象
    */
-  getGraphic(this: any) {
-    return this.entity.cylinder
-  },
+  getGraphic(): Cesium.CylinderGraphics {
+    try {
+      if (!this.entity) {
+        throw new Error('实体对象不存在')
+      }
+
+      if (!this.entity.cylinder) {
+        throw new Error('实体的 cylinder 属性不存在')
+      }
+
+      return this.entity.cylinder
+    } catch (error) {
+      console.error('EditCylinder.getGraphic: 获取图形对象失败', error)
+      throw error
+    }
+  }
 
   /**
    * 修改坐标会回调，提高显示的效率
    */
-  changePositionsToCallback(this: any) {
-    this._positions_draw = this.entity._positions_draw
+  protected changePositionsToCallback(): void {
+    try {
+      if (!this.entity) {
+        throw new Error('实体对象不存在')
+      }
 
-    const time = this.viewer.clock.currentTime
-    const style = this.entity.attribute.style
+      this._positions_draw = this.entity._positions_draw || null
 
-    style.topRadius = this.getGraphic().topRadius.getValue(time)
-    this.getGraphic().topRadius = new Cesium.CallbackProperty(function (time: any) {
-      return style.topRadius
-    }, false)
+      if (!this._positions_draw) {
+        throw new Error('无法获取位置数据')
+      }
 
-    style.bottomRadius = this.getGraphic().bottomRadius.getValue(time)
-    this.getGraphic().bottomRadius = new Cesium.CallbackProperty(function (time: any) {
-      return style.bottomRadius
-    }, false)
+      const time = this.viewer.clock.currentTime
+      const style = this.entity.attribute?.style
 
-    style.length = this.getGraphic().length.getValue(time)
-    this.getGraphic().length = new Cesium.CallbackProperty(function (time: any) {
-      return style.length
-    }, false)
-  },
+      if (!style) {
+        throw new Error('实体样式不存在')
+      }
+
+      const graphic = this.getGraphic()
+
+      // 设置顶部半径为 CallbackProperty
+      if (graphic.topRadius && typeof graphic.topRadius === 'object' && 'getValue' in graphic.topRadius) {
+        style.topRadius = (graphic.topRadius as Cesium.Property).getValue(time) as number
+      }
+      graphic.topRadius = new Cesium.CallbackProperty(() => {
+        return style.topRadius
+      }, false)
+
+      // 设置底部半径为 CallbackProperty
+      if (graphic.bottomRadius && typeof graphic.bottomRadius === 'object' && 'getValue' in graphic.bottomRadius) {
+        style.bottomRadius = (graphic.bottomRadius as Cesium.Property).getValue(time) as number
+      }
+      graphic.bottomRadius = new Cesium.CallbackProperty(() => {
+        return style.bottomRadius
+      }, false)
+
+      // 设置长度为 CallbackProperty
+      if (graphic.length && typeof graphic.length === 'object' && 'getValue' in graphic.length) {
+        style.length = (graphic.length as Cesium.Property).getValue(time) as number
+      }
+      graphic.length = new Cesium.CallbackProperty(() => {
+        return style.length
+      }, false)
+    } catch (error) {
+      console.error('EditCylinder.changePositionsToCallback: 转换位置失败', error)
+      throw error
+    }
+  }
 
   /**
    * 图形编辑结束后调用
    */
-  finish(this: any) {
-    this.entity._positions_draw = this._positions_draw
+  protected finish(): void {
+    try {
+      if (!this.entity) {
+        console.warn('EditCylinder.finish: 实体对象不存在')
+        return
+      }
 
-    const style = this.entity.attribute.style
-    this.getGraphic().topRadius = style.topRadius
-    this.getGraphic().bottomRadius = style.bottomRadius
-    this.getGraphic().length = style.length
-  },
+      this.entity._positions_draw = this._positions_draw || undefined
+
+      const style = this.entity.attribute?.style
+      if (!style) {
+        console.warn('EditCylinder.finish: 实体样式不存在')
+        return
+      }
+
+      const graphic = this.getGraphic()
+      graphic.topRadius = style.topRadius as unknown as Cesium.Property
+      graphic.bottomRadius = style.bottomRadius as unknown as Cesium.Property
+      graphic.length = style.length as unknown as Cesium.Property
+    } catch (error) {
+      console.error('EditCylinder.finish: 完成编辑失败', error)
+      // finish 方法的错误不向上抛出，避免影响编辑结束流程
+    }
+  }
 
   /**
    * 绑定拖拽点
    */
-  bindDraggers(this: any) {
-    const that = this
-
-    const positions = this.getPosition()
-    const style = this.entity.attribute.style
-    const time = this.viewer.clock.currentTime
-
-    // 中心点
-    let index = 0
-    const position = positions[index]
-    const dragger = draggerCtl.createDragger(this.dataSource, {
-      position: position,
-      onDrag: function (dragger: any, position: Cesium.Cartesian3) {
-        positions[dragger.index] = position
-        that.updateDraggers()
+  protected bindDraggers(): void {
+    try {
+      // 验证必要的属性
+      if (!this.entity) {
+        const error = new Error('实体对象不存在')
+        console.error('EditCylinder.bindDraggers:', error.message)
+        throw error
       }
-    })
-    dragger.index = index
-    this.draggers.push(dragger)
 
-    // 获取圆（或椭圆）边线上的坐标点数组
-    const outerPositions = getEllipseOuterPositions({
-      position: position,
-      semiMajorAxis: style.bottomRadius,
-      semiMinorAxis: style.bottomRadius,
-      rotation: Cesium.Math.toRadians(Number(style.rotation || 0))
-    })
-
-    // 长半轴上的坐标点
-    index = 1
-    const majorPos = outerPositions[0]
-    positions[index] = majorPos
-    const bottomRadiusDragger = draggerCtl.createDragger(this.dataSource, {
-      position: majorPos,
-      type: draggerCtl.PointType.EditAttr,
-      tooltip: message.dragger.editRadius,
-      onDrag: function (dragger: any, position: Cesium.Cartesian3) {
-        positions[dragger.index] = position
-
-        const radius = that.formatNum(Cesium.Cartesian3.distance(positions[0], position), 2)
-        style.bottomRadius = radius
-
-        that.updateDraggers()
+      if (!this.dataSource) {
+        const error = new Error('数据源对象不存在')
+        console.error('EditCylinder.bindDraggers:', error.message)
+        throw error
       }
-    })
-    bottomRadiusDragger.index = index
-    this.draggers.push(bottomRadiusDragger)
 
-    // 创建高度拖拽点
-    index = 2
-    const positionHeight = addPositionsHeight(positions[0], style.length) as Cesium.Cartesian3
-    positions[index] = positionHeight
-    const draggerTop = draggerCtl.createDragger(this.dataSource, {
-      position: positionHeight,
-      type: draggerCtl.PointType.MoveHeight,
-      tooltip: message.dragger.moveHeight,
-      onDrag: function (dragger: any, position: Cesium.Cartesian3) {
-        positions[dragger.index] = position
-        const length = that.formatNum(Cesium.Cartesian3.distance(positions[0], position), 2)
-        style.length = length
-
-        that.updateDraggers()
+      if (!this.entity.attribute?.style) {
+        const error = new Error('实体的 attribute.style 不存在')
+        console.error('EditCylinder.bindDraggers:', error.message)
+        throw error
       }
-    })
-    draggerTop.index = index
-    this.draggers.push(draggerTop)
+
+      const positions = this.getPosition()
+      const style = this.entity.attribute.style
+
+      if (positions.length === 0) {
+        const error = new Error('位置数组为空')
+        console.error('EditCylinder.bindDraggers:', error.message)
+        throw error
+      }
+
+      // 中心点
+      let index = 0
+      const position = positions[index]
+
+      const dragger = draggerCtl.createDragger(this.dataSource, {
+        position: position,
+        onDrag: (_dragger: Cesium.Entity, position: Cesium.Cartesian3) => {
+          try {
+            const draggerEntity = _dragger as ExtendedEntity
+            if (!draggerEntity || draggerEntity.index === undefined) {
+              throw new Error('拖拽实体或索引无效')
+            }
+
+            if (!position || !(position instanceof Cesium.Cartesian3)) {
+              throw new Error('拖拽位置无效')
+            }
+
+            positions[draggerEntity.index] = position
+            this.updateDraggers()
+          } catch (error) {
+            console.error('EditCylinder.dragger.onDrag: 拖拽中心点失败', error)
+          }
+        }
+      })
+
+      if (!dragger) {
+        const error = new Error('中心拖拽点创建失败')
+        console.error('EditCylinder.bindDraggers:', error.message)
+        throw error
+      }
+
+      const draggerEntity = dragger as ExtendedEntity
+      draggerEntity.index = index
+      this.draggers.push(dragger)
+
+      // 获取圆（或椭圆）边线上的坐标点数组
+      const outerPositions = getEllipseOuterPositions({
+        position: position,
+        semiMajorAxis: style.bottomRadius || 100,
+        semiMinorAxis: style.bottomRadius || 100,
+        rotation: Cesium.Math.toRadians(Number(style.rotation || 0))
+      })
+
+      // 底部半径拖拽点
+      index = 1
+      const majorPos = outerPositions[0]
+      positions[index] = majorPos
+
+      const bottomRadiusDragger = draggerCtl.createDragger(this.dataSource, {
+        position: majorPos,
+        type: draggerCtl.PointType.EditAttr,
+        tooltip: defaultMessages.dragger.editRadius,
+        onDrag: (_dragger: Cesium.Entity, position: Cesium.Cartesian3) => {
+          try {
+            const draggerEntity = _dragger as ExtendedEntity
+            if (!draggerEntity || draggerEntity.index === undefined) {
+              throw new Error('拖拽实体或索引无效')
+            }
+
+            if (!position || !(position instanceof Cesium.Cartesian3)) {
+              throw new Error('拖拽位置无效')
+            }
+
+            positions[draggerEntity.index] = position
+
+            const radius = this.formatNum(Cesium.Cartesian3.distance(positions[0], position), 2)
+            style.bottomRadius = radius
+
+            this.updateDraggers()
+          } catch (error) {
+            console.error('EditCylinder.bottomRadiusDragger.onDrag: 拖拽底部半径失败', error)
+          }
+        }
+      })
+
+      if (!bottomRadiusDragger) {
+        const error = new Error('底部半径拖拽点创建失败')
+        console.error('EditCylinder.bindDraggers:', error.message)
+        throw error
+      }
+
+      const bottomRadiusDraggerEntity = bottomRadiusDragger as ExtendedEntity
+      bottomRadiusDraggerEntity.index = index
+      this.draggers.push(bottomRadiusDragger)
+
+      // 创建高度拖拽点
+      index = 2
+      const positionHeight = addPositionsHeight(positions[0], style.length || 100) as Cesium.Cartesian3
+      positions[index] = positionHeight
+
+      const draggerTop = draggerCtl.createDragger(this.dataSource, {
+        position: positionHeight,
+        type: draggerCtl.PointType.MoveHeight,
+        tooltip: defaultMessages.dragger.moveHeight,
+        onDrag: (_dragger: Cesium.Entity, position: Cesium.Cartesian3) => {
+          try {
+            const draggerEntity = _dragger as ExtendedEntity
+            if (!draggerEntity || draggerEntity.index === undefined) {
+              throw new Error('拖拽实体或索引无效')
+            }
+
+            if (!position || !(position instanceof Cesium.Cartesian3)) {
+              throw new Error('拖拽位置无效')
+            }
+
+            positions[draggerEntity.index] = position
+
+            const length = this.formatNum(Cesium.Cartesian3.distance(positions[0], position), 2)
+            style.length = length
+
+            this.updateDraggers()
+          } catch (error) {
+            console.error('EditCylinder.draggerTop.onDrag: 拖拽高度失败', error)
+          }
+        }
+      })
+
+      if (!draggerTop) {
+        const error = new Error('高度拖拽点创建失败')
+        console.error('EditCylinder.bindDraggers:', error.message)
+        throw error
+      }
+
+      const draggerTopEntity = draggerTop as ExtendedEntity
+      draggerTopEntity.index = index
+      this.draggers.push(draggerTop)
+    } catch (error) {
+      console.error('EditCylinder.bindDraggers: 绑定拖拽点失败', error)
+      throw error
+    }
   }
-})
+}

@@ -1,152 +1,299 @@
 import * as Cesium from 'cesium'
 import { EditPolygon } from './EditPolygon'
+import type { ExtendedEntity } from './EditBase'
 import * as draggerCtl from './Dragger'
-import { message } from '../core/Tooltip'
-
-/**
- * 设置坐标的高度
- */
-function setPositionsHeight(position: Cesium.Cartesian3, newHeight: number): Cesium.Cartesian3 {
-  const cartographic = Cesium.Cartographic.fromCartesian(position)
-  return Cesium.Cartesian3.fromRadians(cartographic.longitude, cartographic.latitude, newHeight)
-}
+import { defaultMessages } from '../../TooltipPlugin/messages'
+import { setPositionsHeight } from '@ktd-cesium/shared'
 
 /**
  * 计算中心点（质心）
  */
 function centerOfMass(positions: Cesium.Cartesian3[]): Cesium.Cartesian3 {
-  if (!positions || positions.length === 0) {
-    return new Cesium.Cartesian3()
+  try {
+    if (!positions || positions.length === 0) {
+      throw new Error('位置数组不能为空')
+    }
+
+    const center = new Cesium.Cartesian3()
+    for (const pos of positions) {
+      if (!pos || !(pos instanceof Cesium.Cartesian3)) {
+        throw new Error('位置必须是 Cesium.Cartesian3 类型')
+      }
+      Cesium.Cartesian3.add(center, pos, center)
+    }
+    Cesium.Cartesian3.divideByScalar(center, positions.length, center)
+    return center
+  } catch (error) {
+    console.error('centerOfMass: 计算质心失败', error)
+    // 返回第一个位置作为默认值
+    return positions[0] || new Cesium.Cartesian3()
   }
+}
 
-  let x = 0
-  let y = 0
-  let z = 0
-
-  for (const position of positions) {
-    x += position.x
-    y += position.y
-    z += position.z
+/**
+ * 扩展的 Entity 接口，包含 Rectangle 特有属性
+ */
+interface RectangleEntity {
+  _positions_draw?: Cesium.Cartesian3[]
+  rectangle?: Cesium.RectangleGraphics
+  attribute?: {
+    style?: {
+      clampToGround?: boolean
+      [key: string]: unknown
+    }
+    [key: string]: unknown
   }
-
-  x /= positions.length
-  y /= positions.length
-  z /= positions.length
-
-  return new Cesium.Cartesian3(x, y, z)
 }
 
 /**
  * 矩形编辑类
  * 继承自 EditPolygon
  */
-export const EditRectangle = EditPolygon.extend({
+export class EditRectangle extends EditPolygon {
+  declare entity: ExtendedEntity & RectangleEntity
+
   /**
    * 获取图形对象
+   * 返回 RectangleGraphics 对象
    */
-  getGraphic(this: any) {
-    return this.entity.rectangle
-  },
+  getGraphic(): Cesium.RectangleGraphics {
+    try {
+      if (!this.entity) {
+        throw new Error('实体对象不存在')
+      }
+
+      if (!this.entity.rectangle) {
+        throw new Error('实体的 rectangle 属性不存在')
+      }
+
+      return this.entity.rectangle
+    } catch (error) {
+      console.error('EditRectangle.getGraphic: 获取图形对象失败', error)
+      throw error
+    }
+  }
 
   /**
+   * 将位置转换为回调函数
    * 坐标改为回调属性
    */
-  changePositionsToCallback(this: any) {
-    this._positions_draw = this.entity._positions_draw
-  },
+  protected changePositionsToCallback(): void {
+    try {
+      if (!this.entity) {
+        throw new Error('实体对象不存在')
+      }
+
+      this._positions_draw = this.entity._positions_draw || null
+    } catch (error) {
+      console.error('EditRectangle.changePositionsToCallback: 转换位置失败', error)
+      throw error
+    }
+  }
 
   /**
-   * 编辑结束
+   * 图形编辑结束后调用
    */
-  finish(this: any) {
-    this.entity._positions_draw = this._positions_draw
-  },
+  protected finish(): void {
+    try {
+      if (!this.entity) {
+        console.warn('EditRectangle.finish: 实体对象不存在')
+        return
+      }
+
+      this.entity._positions_draw = this._positions_draw || undefined
+    } catch (error) {
+      console.error('EditRectangle.finish: 完成编辑失败', error)
+      // finish 方法的错误不向上抛出，避免影响编辑结束流程
+    }
+  }
 
   /**
    * 是否贴地
    */
-  isClampToGround(this: any): boolean {
-    return this.entity.attribute.style.clampToGround
-  },
+  isClampToGround(): boolean {
+    try {
+      return this.entity.attribute?.style?.clampToGround ?? false
+    } catch (error) {
+      console.error('EditRectangle.isClampToGround: 获取贴地状态失败', error)
+      return false
+    }
+  }
 
   /**
    * 绑定拖拽点
    */
-  bindDraggers(this: any) {
-    const that = this
-    const clampToGround = this.isClampToGround()
-    const positions = this.getPosition()
-
-    for (let i = 0, len = positions.length; i < len; i++) {
-      let position = positions[i]
-
-      if (this.getGraphic().height !== undefined) {
-        const newHeight = this.getGraphic().height.getValue(this.viewer.clock.currentTime)
-        position = setPositionsHeight(position, newHeight)
+  protected bindDraggers(): void {
+    try {
+      // 验证必要的属性
+      if (!this.entity) {
+        const error = new Error('实体对象不存在')
+        console.error('EditRectangle.bindDraggers:', error.message)
+        throw error
       }
 
-      // 各顶点拖拽点
-      const dragger = draggerCtl.createDragger(this.dataSource, {
-        position: position,
-        onDrag: function (dragger: any, position: Cesium.Cartesian3) {
-          const time = that.viewer.clock.currentTime
-          if (that.getGraphic().height !== undefined) {
-            const newHeight = that.getGraphic().height.getValue(time)
-            position = setPositionsHeight(position, newHeight)
-            dragger.position = position
-          }
+      if (!this.dataSource) {
+        const error = new Error('数据源对象不存在')
+        console.error('EditRectangle.bindDraggers:', error.message)
+        throw error
+      }
 
-          positions[dragger.index] = position
+      const positions = this.getPosition()
+      const graphic = this.getGraphic()
 
-          // ============高度调整拖拽点处理=============
-          if (that.heightDraggers && that.heightDraggers.length > 0) {
-            const extrudedHeight = that.getGraphic().extrudedHeight.getValue(time)
-            that.heightDraggers[dragger.index].position = setPositionsHeight(position, extrudedHeight)
-          }
+      if (!positions || positions.length === 0) {
+        const error = new Error('位置数组为空')
+        console.error('EditRectangle.bindDraggers:', error.message)
+        throw error
+      }
 
-          // ============整体平移移动点处理=============
-          let positionMove = centerOfMass(positions)
-          if (that.getGraphic().height !== undefined) {
-            const newHeight = that.getGraphic().height.getValue(time)
-            positionMove = setPositionsHeight(positionMove, newHeight)
-          }
-          draggerMove.position = positionMove
+      // 绑定顶点拖拽点
+      for (let i = 0, len = positions.length; i < len; i++) {
+        let position = positions[i]
+
+        if (!position || !(position instanceof Cesium.Cartesian3)) {
+          console.warn(`EditRectangle.bindDraggers: 位置[${i}]无效，跳过`)
+          continue
         }
-      })
-      dragger.index = i
-      this.draggers.push(dragger)
-    }
 
-    // 整体平移移动点
-    let positionMove = centerOfMass(positions)
-    if (this.getGraphic().height !== undefined) {
-      const newHeight = this.getGraphic().height.getValue(this.viewer.clock.currentTime)
-      positionMove = setPositionsHeight(positionMove, newHeight)
-    }
+        // 如果有 height 属性，设置高度
+        if (graphic.height !== undefined && graphic.height) {
+          const heightValue = (graphic.height as Cesium.Property).getValue(
+            this.viewer.clock.currentTime
+          ) as number
+          if (Number.isFinite(heightValue)) {
+            position = setPositionsHeight(position, heightValue) as Cesium.Cartesian3
+          }
+        }
 
-    const draggerMove = draggerCtl.createDragger(this.dataSource, {
-      position: positionMove,
-      type: draggerCtl.PointType.MoveAll,
-      tooltip: message.dragger.moveAll,
-      onDrag: function (dragger: any, position: Cesium.Cartesian3) {
-        // 记录差值
-        const diff = Cesium.Cartesian3.subtract(position, positionMove, new Cesium.Cartesian3())
-        positionMove = position
+        // 创建各顶点拖拽点
+        const dragger = draggerCtl.createDragger(this.dataSource, {
+          position: position,
+          onDrag: (_dragger: Cesium.Entity, dragPosition: Cesium.Cartesian3) => {
+            try {
+              if (!dragPosition || !(dragPosition instanceof Cesium.Cartesian3)) {
+                throw new Error('拖拽位置无效')
+              }
 
-        positions.forEach(function (pos: Cesium.Cartesian3, index: number) {
-          const newPos = Cesium.Cartesian3.add(pos, diff, new Cesium.Cartesian3())
-          positions[index] = newPos
+              const draggerEntity = _dragger as ExtendedEntity
+              if (draggerEntity.index === undefined) {
+                throw new Error('拖拽点索引不存在')
+              }
+
+              let updatedPosition = dragPosition
+              const time = this.viewer.clock.currentTime
+
+              // 如果有 height 属性，保持高度
+              if (graphic.height !== undefined && graphic.height) {
+                const newHeight = (graphic.height as Cesium.Property).getValue(time) as number
+                if (Number.isFinite(newHeight)) {
+                  updatedPosition = setPositionsHeight(updatedPosition, newHeight) as Cesium.Cartesian3
+                  draggerEntity.position = updatedPosition
+                }
+              }
+
+              positions[draggerEntity.index] = updatedPosition
+
+              // 高度调整拖拽点处理
+              if (this.heightDraggers && this.heightDraggers.length > 0 && graphic.extrudedHeight) {
+                const extrudedHeight = (graphic.extrudedHeight as Cesium.Property).getValue(time) as number
+                if (Number.isFinite(extrudedHeight) && this.heightDraggers[draggerEntity.index]) {
+                  const heightPos = setPositionsHeight(
+                    updatedPosition,
+                    extrudedHeight
+                  ) as Cesium.Cartesian3
+                  this.heightDraggers[draggerEntity.index].position = heightPos
+                }
+              }
+
+              // 整体平移移动点处理
+              if (draggerMove) {
+                let positionMove = centerOfMass(positions)
+                if (graphic.height !== undefined && graphic.height) {
+                  const newHeight = (graphic.height as Cesium.Property).getValue(time) as number
+                  if (Number.isFinite(newHeight)) {
+                    positionMove = setPositionsHeight(positionMove, newHeight) as Cesium.Cartesian3
+                  }
+                }
+                draggerMove.position = positionMove
+              }
+            } catch (error) {
+              console.error('EditRectangle.dragger.onDrag: 拖拽顶点失败', error)
+              // 拖拽过程中的错误不向上抛出，避免中断交互
+            }
+          }
         })
 
-        // =====全部更新==========
-        that.updateDraggers()
-      }
-    })
-    this.draggers.push(draggerMove)
+        if (!dragger) {
+          console.warn(`EditRectangle.bindDraggers: 创建拖拽点[${i}]失败`)
+          continue
+        }
 
-    // 创建高程拖拽点
-    if (this.getGraphic().extrudedHeight) {
-      this.bindHeightDraggers()
+        const draggerEntity = dragger as ExtendedEntity
+        draggerEntity.index = i
+        this.draggers.push(dragger)
+      }
+
+      // 整体平移移动点
+      let positionMove = centerOfMass(positions)
+      if (graphic.height !== undefined && graphic.height) {
+        const newHeight = (graphic.height as Cesium.Property).getValue(
+          this.viewer.clock.currentTime
+        ) as number
+        if (Number.isFinite(newHeight)) {
+          positionMove = setPositionsHeight(positionMove, newHeight) as Cesium.Cartesian3
+        }
+      }
+
+      const draggerMove = draggerCtl.createDragger(this.dataSource, {
+        position: positionMove,
+        type: draggerCtl.PointType.MoveAll,
+        tooltip: defaultMessages.dragger.moveAll,
+        onDrag: (_dragger: Cesium.Entity, dragPosition: Cesium.Cartesian3) => {
+          try {
+            if (!dragPosition || !(dragPosition instanceof Cesium.Cartesian3)) {
+              throw new Error('拖拽位置无效')
+            }
+
+            // 记录差值
+            const diff = Cesium.Cartesian3.subtract(
+              dragPosition,
+              positionMove,
+              new Cesium.Cartesian3()
+            )
+            positionMove = dragPosition
+
+            // 更新所有位置
+            positions.forEach((pos: Cesium.Cartesian3, index: number) => {
+              if (pos && pos instanceof Cesium.Cartesian3) {
+                const newPos = Cesium.Cartesian3.add(pos, diff, new Cesium.Cartesian3())
+                positions[index] = newPos
+              }
+            })
+
+            // 全部更新
+            this.updateDraggers()
+          } catch (error) {
+            console.error('EditRectangle.draggerMove.onDrag: 整体移动失败', error)
+            // 拖拽过程中的错误不向上抛出，避免中断交互
+          }
+        }
+      })
+
+      if (!draggerMove) {
+        const error = new Error('创建整体移动拖拽点失败')
+        console.error('EditRectangle.bindDraggers:', error.message)
+        throw error
+      }
+
+      this.draggers.push(draggerMove)
+
+      // 创建高程拖拽点
+      if (graphic.extrudedHeight) {
+        this.bindHeightDraggers()
+      }
+    } catch (error) {
+      console.error('EditRectangle.bindDraggers: 绑定拖拽点失败', error)
+      throw error
     }
   }
-})
+}
