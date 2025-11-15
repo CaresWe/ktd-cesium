@@ -24,15 +24,21 @@ interface ExtendedViewer extends Cesium.Viewer {
 }
 
 /**
+ * TooltipPlugin 接口
+ */
+interface TooltipPluginInterface {
+  showAt: (position: { x: number; y: number } | Cesium.Cartesian2 | null, content?: string) => void
+  setVisible: (visible: boolean) => void
+  enable: boolean
+}
+
+/**
  * 绘制配置
  */
 export interface DrawConfig {
   viewer: Cesium.Viewer
   dataSource?: Cesium.CustomDataSource
   primitives?: Cesium.PrimitiveCollection
-  tooltip?: {
-    setVisible: (visible: boolean) => void
-  }
 }
 
 /**
@@ -41,6 +47,7 @@ export interface DrawConfig {
 interface ExtendedEntity extends Cesium.Entity {
   attribute?: Record<string, unknown>
   inProgress?: boolean
+  editing?: unknown
 }
 
 /**
@@ -52,10 +59,10 @@ export class DrawBase {
   dataSource: Cesium.CustomDataSource | null = null
   primitives: Cesium.PrimitiveCollection | null = null
   viewer: Cesium.Viewer
-  tooltip: { setVisible: (visible: boolean) => void } | null = null
+  tooltip: TooltipPluginInterface | null = null
   entity: ExtendedEntity | null = null
   protected _enabled = false
-  protected _positions_draw: Cesium.Cartesian3[] | null = null
+  protected _positions_draw: Cesium.Cartesian3[] | Cesium.Cartesian3 | null = null
   protected drawOkCallback: ((entity: Cesium.Entity) => void) | null = null
   protected handler: Cesium.ScreenSpaceEventHandler | null = null
   protected editClass: unknown = null
@@ -63,6 +70,7 @@ export class DrawBase {
   protected _minPointNum: number | null = null
   protected _maxPointNum: number | null = null
   private eventPlugin: EventPluginInterface | null = null
+  protected _fire: ((type: string, data?: Record<string, unknown>, propagate?: boolean) => void) | null = null
 
   /**
    * 构造函数
@@ -77,12 +85,19 @@ export class DrawBase {
       this.viewer.dataSources.add(this.dataSource)
     }
 
-    this.tooltip = opts.tooltip || null
-
-    // 获取 EventPlugin
+    // 获取插件
     const extViewer = this.viewer as ExtendedViewer
     if (extViewer.getPlugin) {
+      // 获取 EventPlugin
       this.eventPlugin = extViewer.getPlugin<EventPluginInterface>('EventPlugin') || null
+
+      // 获取 TooltipPlugin
+      this.tooltip = extViewer.getPlugin<TooltipPluginInterface>('TooltipPlugin') || null
+    }
+
+    // 绑定 _fire 方法
+    if (this.eventPlugin) {
+      this._fire = this.eventPlugin.fire.bind(this.eventPlugin)
     }
   }
 
@@ -216,8 +231,9 @@ export class DrawBase {
   /**
    * 创建要素 (子类需要重写)
    */
-  protected createFeature(_attribute: Record<string, unknown>): void {
+  protected createFeature(_attribute: Record<string, unknown>): Cesium.Entity | null {
     // 子类实现
+    return null
   }
 
   /**
@@ -258,7 +274,7 @@ export class DrawBase {
   /**
    * 获取绘制位置
    */
-  getDrawPosition(): Cesium.Cartesian3[] | null {
+  getDrawPosition(): Cesium.Cartesian3[] | Cesium.Cartesian3 | null {
     return this._positions_draw
   }
 
@@ -275,13 +291,16 @@ export class DrawBase {
     ) => {
       _minPointNum?: number | null
       _maxPointNum?: number | null
-      tooltip?: { setVisible: (visible: boolean) => void } | null
+      _fire?: ((type: string, data?: Record<string, unknown>, propagate?: boolean) => void) | null
+      tooltip?: TooltipPluginInterface | null
     }
 
     const _edit = new EditClassConstructor(entity, this.viewer, this.dataSource!)
     if (this._minPointNum != null) _edit._minPointNum = this._minPointNum
     if (this._maxPointNum != null) _edit._maxPointNum = this._maxPointNum
 
+    // 传递 _fire 方法
+    _edit._fire = this._fire
     _edit.tooltip = this.tooltip
 
     return _edit
@@ -329,11 +348,11 @@ export class DrawBase {
    * 属性转 entity
    */
   attributeToEntity(attribute: Record<string, unknown>, positions: Cesium.Cartesian3[]): Cesium.Entity | null {
-    this.createFeature(attribute)
+    const entity = this.createFeature(attribute)
     this._positions_draw = positions
     this.updateAttrForDrawing(true)
     this.finish()
-    return this.entity
+    return entity || this.entity
   }
 
   /**
