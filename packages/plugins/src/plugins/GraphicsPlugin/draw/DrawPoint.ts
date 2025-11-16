@@ -1,9 +1,9 @@
 import * as Cesium from 'cesium'
 import { DrawBase } from './DrawBase'
-import { getCurrentMousePosition } from '../core/Util'
+import { getCurrentMousePosition } from '@ktd-cesium/shared'
 import * as attr from '../attr/AttrPoint'
-import { message } from '../core/Tooltip'
-import * as EventType from '../core/EventType'
+import { defaultMessages } from '../../TooltipPlugin/messages'
+import { GraphicsEventType } from '../../EventPlugin'
 import { style2Entity as labelStyle2Entity } from '../attr/AttrLabel'
 import { EditPoint } from '../edit/EditPoint'
 
@@ -100,11 +100,11 @@ export class DrawPoint extends DrawBase {
 
       // 显示 Tooltip 提示
       if (this.tooltip) {
-        this.tooltip.showAt(movement.endPosition, message.draw.point.start)
+        this.tooltip.showAt(movement.endPosition, defaultMessages.draw.point.start)
       }
 
       // 触发鼠标移动事件
-      this.fire(EventType.DrawMouseMove, {
+      this.fire(GraphicsEventType.DRAW_MOUSE_MOVE, {
         drawtype: this.type,
         entity: this.entity,
         position: point

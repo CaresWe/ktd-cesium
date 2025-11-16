@@ -147,6 +147,15 @@ export function resetLastId(): void {
 // ==================== 数字处理 ====================
 
 /**
+ * 检查是否是数字类型
+ * @param obj 要检查的值
+ * @returns 是否为数字类型
+ */
+export function isNumber(obj: unknown): obj is number {
+  return typeof obj === 'number' && obj.constructor === Number
+}
+
+/**
  * 将数字包装到指定范围内
  * @param x 数字
  * @param range 范围 [min, max]

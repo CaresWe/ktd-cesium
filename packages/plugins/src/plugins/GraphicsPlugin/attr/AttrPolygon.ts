@@ -1,5 +1,8 @@
 import * as Cesium from "cesium";
-import { cartesians2lonlats } from "@ktd-cesium/shared";
+import { cartesians2lonlats, cartesian2lonlat, lonlats2cartesians } from "@ktd-cesium/shared";
+import { bezierSpline } from "@turf/turf";
+import type { PolylineEntity } from "./AttrPolyline";
+import { LineFlowMaterial, CircleWaveMaterial } from "../../MaterialPlugin";
 
 // Type definitions
 interface StyleConfig {
@@ -49,12 +52,13 @@ interface EntityAttr {
   hierarchy?: any;
 }
 
-interface Entity {
+/**
+ * Polygon entity interface extending polyline entity
+ */
+export interface PolygonEntity extends PolylineEntity {
   polygon: {
     hierarchy: Cesium.Property;
   };
-  _positions_draw?: Cesium.Cartesian3[];
-  attribute?: any;
 }
 
 /**
@@ -179,22 +183,34 @@ function setFillMaterial(entityattr: EntityAttr, style: StyleConfig): EntityAttr
         break;
       case "animationLine": // Flow line
         if (style.animationImage) {
-          // Note: LineFlowMaterial needs to be implemented
-          console.warn(
-            "LineFlowMaterial is not implemented, using ColorMaterialProperty as fallback"
-          );
-          entityattr.material = new Cesium.ColorMaterialProperty(color);
+          entityattr.material = new LineFlowMaterial({
+            color: color,
+            duration: style.animationDuration ?? 2000,
+            url: style.animationImage,
+            repeat: new Cesium.Cartesian2(
+              style.animationRepeatX ?? 1,
+              style.animationRepeatY ?? 1
+            ),
+            axisY: style.animationAxisY,
+            bgUrl: style.bgUrl,
+            bgColor: style.bgColor
+              ? Cesium.Color.fromCssColorString(style.bgColor as string)
+              : undefined
+          });
         } else {
           // If no image, use default color material
           entityattr.material = new Cesium.ColorMaterialProperty(color);
         }
         break;
       case "animationCircle": // Dynamic circle
-        // Note: CircleWaveMaterial needs to be implemented
-        console.warn(
-          "CircleWaveMaterial is not implemented, using ColorMaterialProperty as fallback"
-        );
-        entityattr.material = new Cesium.ColorMaterialProperty(color);
+        entityattr.material = new CircleWaveMaterial({
+          duration: style.animationDuration ?? 2000,
+          color: Cesium.Color.fromCssColorString(
+            (style.color ?? "#FFFF00") as string
+          ).withAlpha(Number(style.opacity ?? 1.0)),
+          gradient: style.animationGradient ?? 0,
+          count: style.animationCount ?? 1
+        });
         break;
     }
   }
@@ -295,16 +311,21 @@ export function style2Entity(style?: StyleConfig, entityattr?: EntityAttr): Enti
 
 /**
  * Get entity coordinates
- * @param entity - Cesium entity object
+ * @param entity - Cesium entity object (with polygon property)
  * @param isShowPositions - Whether to get displayed positions (optional)
  * @returns Array of Cartesian3 positions
  */
-export function getPositions(entity: Entity, isShowPositions?: boolean): Cesium.Cartesian3[] {
+export function getPositions(entity: PolylineEntity, isShowPositions?: boolean): Cesium.Cartesian3[] {
   if (!isShowPositions && entity._positions_draw && entity._positions_draw.length > 0)
     return entity._positions_draw; // For arrow plotting, get bound data
 
+  const polygonEntity = entity as PolygonEntity;
+  if (!polygonEntity.polygon || !polygonEntity.polygon.hierarchy) {
+    return [];
+  }
+
   const time = Cesium.JulianDate.now();
-  const arr = entity.polygon.hierarchy.getValue(time);
+  const arr = polygonEntity.polygon.hierarchy.getValue(time);
   if (arr && arr instanceof Cesium.PolygonHierarchy) return arr.positions;
   return arr;
 }
@@ -314,22 +335,35 @@ export function getPositions(entity: Entity, isShowPositions?: boolean): Cesium.
  * @param entity - Cesium entity object
  * @returns Array of coordinate arrays [longitude, latitude, height]
  */
-export function getCoordinates(entity: Entity): number[][] {
+export function getCoordinates(entity: PolylineEntity): number[][] {
   const positions = getPositions(entity);
   const coordinates = cartesians2lonlats(positions);
   return coordinates;
 }
 
 /**
+ * GeoJSON Polygon Feature interface
+ */
+export interface GeoJSONPolygonFeature {
+  type: 'Feature';
+  properties: Record<string, unknown>;
+  geometry: {
+    type: 'Polygon';
+    coordinates: number[][][];
+  };
+}
+
+/**
  * Convert entity to GeoJSON format
  * @param entity - Cesium entity object
- * @param noAdd - Whether to skip adding the first point at the end (optional)
+ * @param _coordinates - Optional coordinates (unused, for compatibility with parent signature)
  * @returns GeoJSON feature object
  */
-export function toGeoJSON(entity: Entity, noAdd?: boolean): any {
+export function toGeoJSON(entity: PolylineEntity, _coordinates?: number[][]): GeoJSONPolygonFeature {
   const coordinates = getCoordinates(entity);
 
-  if (!noAdd && coordinates.length > 0) coordinates.push(coordinates[0]);
+  // Close the polygon by adding the first point at the end
+  if (coordinates.length > 0) coordinates.push(coordinates[0]);
 
   return {
     type: "Feature",
@@ -339,4 +373,36 @@ export function toGeoJSON(entity: Entity, noAdd?: boolean): any {
       coordinates: [coordinates],
     },
   };
+}
+
+/**
+ * Convert polygon to curve using bezierSpline algorithm
+ * @param _positions_draw - Array of Cartesian3 positions
+ * @param closure - Whether to create a closed curve (default: true for polygon)
+ * @returns Array of Cartesian3 positions for the curve
+ */
+export function line2curve(
+  _positions_draw: Cesium.Cartesian3[],
+  closure?: boolean
+): Cesium.Cartesian3[] {
+  const coordinates = _positions_draw.map((position) => cartesian2lonlat(position));
+
+  // For polygon, default to closed curve
+  if (closure !== false) {
+    coordinates.push(coordinates[0]);
+  }
+
+  const defHeight = coordinates[coordinates.length - 1][2];
+
+  const curved = bezierSpline({
+    type: "Feature",
+    properties: {},
+    geometry: {
+      type: "LineString",
+      coordinates: coordinates,
+    },
+  });
+
+  const _positions_show = lonlats2cartesians(curved.geometry.coordinates, defHeight);
+  return _positions_show;
 }
