@@ -9,7 +9,7 @@ import { clone } from './utils'
 // ==================== 类型定义 ====================
 
 export interface StyleConfig {
-  [key: string]: string | number | boolean | undefined
+  [key: string]: unknown
 }
 
 interface DefConfigStyle {

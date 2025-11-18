@@ -2,13 +2,13 @@
 export { BasePlugin } from './BasePlugin'
 
 // 导出所有插件
-export { CameraPlugin } from './plugins/CameraPlugin'
-export { EventPlugin } from './plugins/EventPlugin'
-export * from './plugins/EventPlugin/types'
-export { PopupPlugin } from './plugins/PopupPlugin'
-export * from './plugins/PopupPlugin/types'
-export { DataLayerPlugin } from './plugins/DataLayerPlugin'
-export * from './plugins/DataLayerPlugin/types'
+export { CameraPlugin } from './modules/CameraPlugin'
+export { EventPlugin } from './modules/EventPlugin'
+export * from './modules/EventPlugin/types'
+export { PopupPlugin } from './modules/PopupPlugin'
+export * from './modules/PopupPlugin/types'
+export { DataLayerPlugin } from './modules/DataLayerPlugin'
+export * from './modules/DataLayerPlugin/types'
 export {
   BaseLayerPlugin,
   CoordinateSystem,
@@ -53,4 +53,4 @@ export {
   wgs84ToBd09,
   bd09ToWgs84,
   transformCoordinate
-} from './plugins/BaseLayerPlugin'
+} from './modules/BaseLayerPlugin'
