@@ -1,54 +1,12 @@
 import * as Cesium from 'cesium'
-import { DrawBase, type AttrClass } from './DrawBase'
+import { DrawBase } from './DrawBase'
+import type { AttrClass, PolylineDrawAttribute, PolylineExtendedEntity } from '../types'
 import { getCurrentMousePosition, addPositionsHeight } from '@ktd-cesium/shared'
 import { GraphicsEventType } from '../../EventPlugin'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import * as attr from '../attr/AttrPolyline'
 import { EditPolyline } from '../edit/EditPolyline'
-import type { EditBase } from '../edit/EditBase'
-
-/**
- * 折线样式接口
- */
-interface PolylineStyle {
-  [key: string]: unknown
-}
-
-/**
- * 折线配置接口
- */
-interface PolylineConfig {
-  minPointNum?: number
-  maxPointNum?: number
-  addHeight?: number
-}
-
-/**
- * 折线属性接口
- */
-interface PolylineAttribute {
-  style?: PolylineStyle
-  config?: PolylineConfig
-  [key: string]: unknown
-}
-
-/**
- * 扩展的 Entity 类型（支持编辑和属性）
- */
-interface ExtendedEntity extends Cesium.Entity {
-  attribute?: PolylineAttribute
-  editing?: unknown
-  _positions_draw?: Cesium.Cartesian3[]
-}
-
-/**
- * 编辑类构造函数类型
- */
-type EditClassConstructor = new (
-  entity: Cesium.Entity,
-  viewer: Cesium.Viewer,
-  dataSource: Cesium.CustomDataSource
-) => EditBase
+import type { EditClassConstructor } from '../types'
 
 /**
  * 折线绘制类
@@ -70,7 +28,7 @@ export class DrawPolyline extends DrawBase {
   createFeature(attribute: Record<string, unknown>): Cesium.Entity {
     this._positions_draw = []
 
-    const polylineAttr = attribute as PolylineAttribute
+    const polylineAttr = attribute as PolylineDrawAttribute
 
     if (!this._minPointNum_def) this._minPointNum_def = this._minPointNum
     if (!this._maxPointNum_def) this._maxPointNum_def = this._maxPointNum
@@ -93,7 +51,7 @@ export class DrawPolyline extends DrawBase {
     }, false) as unknown as Cesium.PositionProperty
 
     this.entity = this.dataSource!.entities.add(addattr) // 创建要素对象
-    const extEntity = this.entity as ExtendedEntity
+    const extEntity = this.entity as PolylineExtendedEntity
     extEntity._positions_draw = this._positions_draw as Cesium.Cartesian3[]
     return this.entity
   }
@@ -127,7 +85,7 @@ export class DrawPolyline extends DrawBase {
         lastPointTemporary = false
 
         // 在绘制点基础自动增加高度
-        const extEntity = this.entity as ExtendedEntity
+        const extEntity = this.entity as PolylineExtendedEntity
         if (extEntity.attribute?.config?.addHeight) {
           point = addPositionsHeight(point, extEntity.attribute.config.addHeight) as Cesium.Cartesian3
         }
@@ -204,7 +162,7 @@ export class DrawPolyline extends DrawBase {
       }
     })
 
-    // 双击结束标绘（PC端），移动端通过 endDraw() 按钮结束
+    // 双击结束标绘（PC端专用，移动端通过 endDraw 按钮结束）移动端也支持长按结束
     this.bindDoubleClickEvent(() => {
       // 必要代码 消除双击带来的多余经纬度
       if (positions.length > this._minPointNum) {
@@ -224,7 +182,7 @@ export class DrawPolyline extends DrawBase {
   }
 
   /**
-   * 外部控制，完成绘制，比如手机端无法双击结束
+   * 外部控制，完成绘制（支持双击、长按或手动调用结束）
    */
   endDraw(): this {
     if (!this._enabled) {
@@ -250,7 +208,7 @@ export class DrawPolyline extends DrawBase {
    */
   finish(): void {
     const entity = this.entity!
-    const extEntity = entity as ExtendedEntity
+    const extEntity = entity as PolylineExtendedEntity
 
     extEntity.editing = this.getEditClass(entity) // 绑定编辑对象
 

@@ -2,33 +2,8 @@ import * as Cesium from 'cesium'
 import { DrawPolyline } from './DrawPolyline'
 import { EditCurve } from '../edit/EditCurve'
 import { line2curve } from '@ktd-cesium/shared'
+import type { EditClassConstructor, CurveExtendedEntity } from '../types'
 import type { EditBase } from '../edit/EditBase'
-
-/**
- * 扩展的 Entity 接口
- */
-interface ExtendedEntity extends Omit<Cesium.Entity, 'polyline'> {
-  polyline?: Cesium.PolylineGraphics
-  attribute?: {
-    style?: {
-      closure?: boolean
-      [key: string]: unknown
-    }
-    [key: string]: unknown
-  }
-  editing?: EditBase
-  _positions_draw?: Cesium.Cartesian3[]
-  _positions_show?: Cesium.Cartesian3[] | null
-}
-
-/**
- * 编辑类构造函数类型
- */
-type EditClassConstructor = new (
-  entity: Cesium.Entity,
-  viewer: Cesium.Viewer,
-  dataSource: Cesium.CustomDataSource
-) => EditBase
 
 /**
  * 曲线绘制类
@@ -59,7 +34,7 @@ export class DrawCurve extends DrawPolyline {
     }
 
     // 将折线转换为曲线
-    const extEntity = this.entity as ExtendedEntity | null
+    const extEntity = this.entity as CurveExtendedEntity | null
     const closure = extEntity?.attribute?.style?.closure || false
     this._positions_show = line2curve(positions, closure)
   }
@@ -68,7 +43,7 @@ export class DrawCurve extends DrawPolyline {
    * 图形绘制结束后调用
    */
   override finish(): void {
-    const entity = this.entity as ExtendedEntity | null
+    const entity = this.entity as CurveExtendedEntity | null
     if (!entity) return
 
     entity.editing = this.getEditClass(entity as Cesium.Entity) as EditBase

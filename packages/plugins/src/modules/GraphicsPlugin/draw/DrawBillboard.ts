@@ -1,31 +1,8 @@
 import * as Cesium from 'cesium'
 import { DrawPoint } from './DrawPoint'
-import type { AttrClass } from './DrawBase'
+import type { AttrClass, BillboardDrawAttribute, BillboardExtendedEntity } from '../types'
 import * as attr from '../attr/AttrBillboard'
 import { style2Entity as labelStyle2Entity } from '../attr/AttrLabel'
-
-// Type definitions
-/**
- * Billboard 属性接口
- */
-interface BillboardAttribute {
-  style: attr.BillboardStyleConfig & {
-    label?: Record<string, unknown>
-  }
-  [key: string]: unknown
-}
-
-/**
- * 扩展的 Entity 接口
- */
-interface ExtendedEntity {
-  billboard?: Cesium.BillboardGraphics
-  label?: Cesium.LabelGraphics
-  attribute?: BillboardAttribute
-  editing?: unknown
-  show?: boolean
-  position?: Cesium.PositionProperty | Cesium.Cartesian3 | null
-}
 
 /**
  * Billboard 图标标绘类
@@ -45,10 +22,10 @@ export class DrawBillboard extends DrawPoint {
   createFeature(attribute: Record<string, unknown>): Cesium.Entity {
     this._positions_draw = null
 
-    const billboardAttr = attribute as BillboardAttribute
+    const billboardAttr = attribute as BillboardDrawAttribute
     const that = this
 
-    const addattr: Cesium.Entity.ConstructorOptions & { attribute: BillboardAttribute } = {
+    const addattr: Cesium.Entity.ConstructorOptions & { attribute: BillboardDrawAttribute } = {
       show: false,
       position: new Cesium.CallbackProperty((_time?: Cesium.JulianDate) => {
         return that.getDrawPosition()
@@ -71,8 +48,8 @@ export class DrawBillboard extends DrawPoint {
    * 样式转 Entity
    */
   protected style2Entity(style: Record<string, unknown>, entity: Cesium.Entity): void {
-    const billboardStyle = style as BillboardAttribute['style']
-    const extEntity = entity as Cesium.Entity & ExtendedEntity
+    const billboardStyle = style as BillboardDrawAttribute['style']
+    const extEntity = entity as Cesium.Entity & BillboardExtendedEntity
 
     // setTimeout 是为了优化效率
     if (this.updateTimer) {
@@ -101,7 +78,7 @@ export class DrawBillboard extends DrawPoint {
     if (this.updateTimer) {
       clearTimeout(this.updateTimer)
     }
-    const entity = this.entity as (Cesium.Entity & ExtendedEntity) | null
+    const entity = this.entity as (Cesium.Entity & BillboardExtendedEntity) | null
     this.updateTimer = setTimeout(() => {
       delete this.updateTimer
       if (!entity || !entity.attribute) return
@@ -112,7 +89,7 @@ export class DrawBillboard extends DrawPoint {
   /**
    * 更新图标，子类可重写
    */
-  protected updateImg(_style: BillboardAttribute['style'], _entity: Cesium.Entity): void {
+  protected updateImg(_style: BillboardDrawAttribute['style'], _entity: Cesium.Entity): void {
     // 子类可以重写此方法来更新图标
   }
 
@@ -120,7 +97,7 @@ export class DrawBillboard extends DrawPoint {
    * 图形绘制结束，更新属性
    */
   finish(): void {
-    const entity = this.entity as (Cesium.Entity & ExtendedEntity) | null
+    const entity = this.entity as (Cesium.Entity & BillboardExtendedEntity) | null
     if (!entity) return
 
     if (this.updateTimer) {

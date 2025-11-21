@@ -1,25 +1,7 @@
 import * as Cesium from 'cesium'
 import { DrawPoint } from './DrawPoint'
-import type { AttrClass } from './DrawBase'
+import type { AttrClass, LabelDrawAttribute, LabelExtendedEntity } from '../types'
 import * as attr from '../attr/AttrLabel'
-
-// Type definitions
-/**
- * Label 属性接口
- */
-interface LabelAttribute {
-  style: attr.LabelStyleConfig
-  [key: string]: unknown
-}
-
-/**
- * 扩展的 Entity 接口
- */
-interface ExtendedEntity {
-  label?: Cesium.LabelGraphics
-  attribute?: LabelAttribute
-  show?: boolean
-}
 
 /**
  * Label 文字标注类
@@ -37,10 +19,10 @@ export class DrawLabel extends DrawPoint {
   createFeature(attribute: Record<string, unknown>): Cesium.Entity {
     this._positions_draw = null
 
-    const labelAttr = attribute as LabelAttribute
+    const labelAttr = attribute as LabelDrawAttribute
     const that = this
 
-    const addattr: Cesium.Entity.ConstructorOptions & { attribute: LabelAttribute } = {
+    const addattr: Cesium.Entity.ConstructorOptions & { attribute: LabelDrawAttribute } = {
       show: false,
       position: new Cesium.CallbackProperty((_time?: Cesium.JulianDate) => {
         return that.getDrawPosition()
@@ -58,7 +40,7 @@ export class DrawLabel extends DrawPoint {
    */
   protected style2Entity(style: Record<string, unknown>, entity: Cesium.Entity): void {
     const labelStyle = style as attr.LabelStyleConfig
-    const extEntity = entity as Cesium.Entity & ExtendedEntity
+    const extEntity = entity as Cesium.Entity & LabelExtendedEntity
 
     if (extEntity.label) {
       attr.style2Entity(labelStyle, extEntity.label)

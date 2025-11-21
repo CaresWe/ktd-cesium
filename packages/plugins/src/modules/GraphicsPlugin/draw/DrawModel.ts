@@ -1,32 +1,8 @@
 import * as Cesium from 'cesium'
 import { DrawPoint } from './DrawPoint'
-import type { AttrClass } from './DrawBase'
+import type { AttrClass, ModelDrawAttribute, ModelExtendedEntity, ModelStyleConfig } from '../types'
 import * as attr from '../attr/AttrModel'
 import { style2Entity as labelStyle2Entity } from '../attr/AttrLabel'
-
-/**
- * 模型样式接口
- */
-interface ModelStyle extends Record<string, unknown> {
-  label?: Record<string, unknown>
-  heading?: number
-  pitch?: number
-  roll?: number
-}
-
-/**
- * 模型属性接口
- */
-interface ModelAttribute extends Record<string, unknown> {
-  style?: ModelStyle
-}
-
-/**
- * 扩展的 Entity 类型（支持模型属性）
- */
-interface ExtendedEntity extends Cesium.Entity {
-  attribute?: ModelAttribute
-}
 
 /**
  * 3D模型绘制类
@@ -41,7 +17,7 @@ export class DrawModel extends DrawPoint {
   createFeature(attribute: Record<string, unknown>): Cesium.Entity {
     this._positions_draw = null
 
-    const modelAttr = attribute as ModelAttribute
+    const modelAttr = attribute as ModelDrawAttribute
 
     const addattr: Cesium.Entity.ConstructorOptions & { attribute: Record<string, unknown> } = {
       position: new Cesium.CallbackProperty(() => {
@@ -64,7 +40,7 @@ export class DrawModel extends DrawPoint {
    * 样式转 entity
    */
   protected style2Entity(style: Record<string, unknown>, entity: Cesium.Entity): attr.ModelEntityAttr {
-    const modelStyle = style as ModelStyle
+    const modelStyle = style as ModelStyleConfig
     this.updateOrientation(modelStyle, entity)
     if (modelStyle.label && entity.label) {
       labelStyle2Entity(modelStyle.label, entity.label)
@@ -77,7 +53,7 @@ export class DrawModel extends DrawPoint {
    */
   updateAttrForDrawing(): void {
     if (this.entity) {
-      const extEntity = this.entity as ExtendedEntity
+      const extEntity = this.entity as ModelExtendedEntity
       if (extEntity.attribute?.style) {
         this.updateOrientation(extEntity.attribute.style, this.entity)
       }
@@ -87,7 +63,7 @@ export class DrawModel extends DrawPoint {
   /**
    * 角度更新
    */
-  updateOrientation(style: ModelStyle, entity: Cesium.Entity): void {
+  updateOrientation(style: ModelStyleConfig, entity: Cesium.Entity): void {
     const positionProperty = entity.position
     if (!positionProperty) return
 

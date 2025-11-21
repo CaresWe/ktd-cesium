@@ -1,36 +1,13 @@
 import * as Cesium from 'cesium'
 import { getCurrentMousePosition, formatNum as utilFormatNum } from '@ktd-cesium/shared'
-import { GraphicsEventType, type EventEmitter } from '../../EventPlugin'
+import { GraphicsEventType } from '../../EventPlugin'
 import * as draggerCtl from './Dragger'
-
-/**
- * Plugin 接口
- */
-interface EnableablePlugin {
-  enable: boolean
-}
-
-/**
- * EventPlugin 接口
- */
-interface EventPluginInterface extends EventEmitter {
-  // EventEmitter 的方法
-}
-
-/**
- * TooltipPlugin 接口
- */
-interface TooltipPluginInterface {
-  setVisible: (visible: boolean) => void
-  showAt: (position: Cesium.Cartesian2, text: string) => void
-}
-
-/**
- * 扩展的 Viewer 类型（支持 KtdViewer 的插件系统）
- */
-interface ExtendedViewer extends Cesium.Viewer {
-  getPlugin?: <T = unknown>(name: string) => T | undefined
-}
+import type {
+  EnableablePlugin,
+  EventPluginInterface,
+  TooltipPluginInterface,
+  ExtendedViewer
+} from '../types'
 
 /**
  * 扩展的 Entity 类型

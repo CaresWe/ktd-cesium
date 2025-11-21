@@ -1,5 +1,5 @@
 import * as Cesium from 'cesium'
-import { cartesian2lonlat } from '@ktd-cesium/shared'
+import { cartesian2lonlat, isNumber } from '@ktd-cesium/shared'
 import * as globe from './globe'
 
 /**
@@ -55,7 +55,7 @@ export function style2Entity(style: Record<string, unknown>, entityattr?: Cesium
         break
       case 'height':
         entityattr.height = Number(value)
-        if (style.extrudedHeight && isNumber(style.extrudedHeight)) {
+        if (style.extrudedHeight && (style.extrudedHeight)) {
           entityattr.extrudedHeight = Number(style.extrudedHeight) + Number(value)
         }
         break
@@ -78,14 +78,6 @@ export function style2Entity(style: Record<string, unknown>, entityattr?: Cesium
 
   return entityattr
 }
-
-/**
- * 判断是否为数字
- */
-function isNumber(obj: unknown): boolean {
-  return typeof obj === 'number' && obj.constructor === Number
-}
-
 /**
  * 获取 entity 的坐标
  */

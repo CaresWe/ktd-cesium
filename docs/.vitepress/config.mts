@@ -58,6 +58,7 @@ export default defineConfig({
             { text: 'CameraPlugin', link: '/packages/plugins/camera' },
             { text: 'DataLayerPlugin', link: '/packages/plugins/data-layer' },
             { text: 'EventPlugin', link: '/packages/plugins/event' },
+            { text: 'GraphicsPlugin', link: '/packages/plugins/graphics' },
             { text: 'PopupPlugin', link: '/packages/plugins/popup' },
           ]
         }

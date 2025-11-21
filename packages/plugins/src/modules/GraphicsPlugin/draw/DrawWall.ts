@@ -2,62 +2,8 @@ import * as Cesium from 'cesium'
 import { DrawPolyline } from './DrawPolyline'
 import * as attr from '../attr/AttrWall'
 import { EditWall } from '../edit/EditWall'
+import type { EditClassConstructor, AttrClass, WallDrawAttribute, WallExtendedEntity } from '../types'
 import type { EditBase } from '../edit/EditBase'
-import type { AttrClass } from './DrawBase'
-/**
- * 墙体配置接口
- */
-interface WallConfig {
-  minPointNum?: number
-  maxPointNum?: number
-}
-
-/**
- * 墙体样式接口
- */
-interface WallStyle extends Record<string, unknown> {
-  extrudedHeight?: number
-  [key: string]: unknown
-}
-
-/**
- * 墙体属性接口
- */
-interface WallAttribute extends Record<string, unknown> {
-  style?: WallStyle
-  config?: WallConfig
-}
-
-/**
- * 扩展的 Wall 类型
- */
-interface ExtendedWallGraphics {
-  positions?: Cesium.Property
-  minimumHeights?: Cesium.Property | number[]
-  maximumHeights?: Cesium.Property | number[]
-  [key: string]: unknown
-}
-
-/**
- * 扩展的 Entity 类型（支持墙体属性）
- */
-interface ExtendedEntity extends Omit<Cesium.Entity, 'wall'> {
-  attribute?: WallAttribute
-  editing?: EditBase
-  _positions_draw?: Cesium.Cartesian3[]
-  _minimumHeights?: number[]
-  _maximumHeights?: number[]
-  wall?: ExtendedWallGraphics
-}
-
-/**
- * 编辑类构造函数类型
- */
-type EditClassConstructor = new (
-  entity: Cesium.Entity,
-  viewer: Cesium.Viewer,
-  dataSource: Cesium.CustomDataSource
-) => EditBase
 
 /**
  * 墙体绘制类
@@ -88,7 +34,7 @@ export class DrawWall extends DrawPolyline {
   createFeature(attribute: Record<string, unknown>): Cesium.Entity {
     this._positions_draw = []
 
-    const wallAttr = attribute as WallAttribute
+    const wallAttr = attribute as WallDrawAttribute
 
     if (!this._minPointNum_def) {
       this._minPointNum_def = this._minPointNum
@@ -114,18 +60,19 @@ export class DrawWall extends DrawPolyline {
       attribute: attribute
     }
 
-    const wallGraphics = addattr.wall as ExtendedWallGraphics
-    wallGraphics.positions = new Cesium.CallbackProperty(() => {
-      return this.getDrawPosition()
-    }, false) as unknown as Cesium.Property
+    if (addattr.wall) {
+      (addattr.wall as any).positions = new Cesium.CallbackProperty(() => {
+        return this.getDrawPosition()
+      }, false) as unknown as Cesium.Property
 
-    wallGraphics.minimumHeights = new Cesium.CallbackProperty(() => {
-      return this.getMinimumHeights()
-    }, false) as unknown as Cesium.Property
+      (addattr.wall as any).minimumHeights = new Cesium.CallbackProperty(() => {
+        return this.getMinimumHeights()
+      }, false) as unknown as Cesium.Property
 
-    wallGraphics.maximumHeights = new Cesium.CallbackProperty(() => {
-      return this.getMaximumHeights()
-    }, false) as unknown as Cesium.Property
+      (addattr.wall as any).maximumHeights = new Cesium.CallbackProperty(() => {
+        return this.getMaximumHeights()
+      }, false) as unknown as Cesium.Property
+    }
 
     this.entity = this.dataSource!.entities.add(addattr) // 创建要素对象
     return this.entity
@@ -135,8 +82,8 @@ export class DrawWall extends DrawPolyline {
    * 样式转 Entity
    */
   protected style2Entity(style: Record<string, unknown>, entity: Cesium.Entity): attr.WallEntityAttr {
-    const extEntity = entity as ExtendedEntity
-    return attr.style2Entity(style as attr.WallStyleConfig, extEntity.wall as unknown as attr.WallEntityAttr)
+    const extEntity = entity as WallExtendedEntity
+    return attr.style2Entity(style as attr.WallStyleConfig, (extEntity.wall as any) as attr.WallEntityAttr)
   }
 
   /**
@@ -159,7 +106,7 @@ export class DrawWall extends DrawPolyline {
   updateAttrForDrawing(): void {
     if (!this._positions_draw || !this.entity) return
 
-    const extEntity = this.entity as ExtendedEntity
+    const extEntity = this.entity as WallExtendedEntity
     const attribute = extEntity.attribute
     if (!attribute) return
 
@@ -185,14 +132,14 @@ export class DrawWall extends DrawPolyline {
    * 获取外部 entity 的坐标到 _positions_draw
    */
   setDrawPositionByEntity(entity: Cesium.Entity): void {
-    const extEntity = entity as ExtendedEntity
+    const extEntity = entity as WallExtendedEntity
     const positions = this.getPositions(entity)
     this._positions_draw = positions
 
     const time = this.viewer!.clock.currentTime
 
-    const minHeights = extEntity.wall?.minimumHeights
-    const maxHeights = extEntity.wall?.maximumHeights
+    const minHeights = (extEntity.wall as any)?.minimumHeights
+    const maxHeights = (extEntity.wall as any)?.maximumHeights
 
     let minimumHeights: number[] | undefined
     let maximumHeights: number[] | undefined
@@ -231,7 +178,7 @@ export class DrawWall extends DrawPolyline {
    */
   finish(): void {
     const entity = this.entity!
-    const extEntity = entity as ExtendedEntity
+    const extEntity = entity as WallExtendedEntity
 
     extEntity.editing = this.getEditClass(entity) as EditBase // 绑定编辑对象
 
@@ -241,21 +188,21 @@ export class DrawWall extends DrawPolyline {
     }
 
     if (extEntity.wall) {
-      extEntity.wall.positions = new Cesium.CallbackProperty(() => {
+      (extEntity.wall as any).positions = new Cesium.CallbackProperty(() => {
         return extEntity._positions_draw
       }, false) as unknown as Cesium.Property
     }
 
     extEntity._minimumHeights = this.getMinimumHeights()
     if (extEntity.wall) {
-      extEntity.wall.minimumHeights = new Cesium.CallbackProperty(() => {
+      (extEntity.wall as any).minimumHeights = new Cesium.CallbackProperty(() => {
         return extEntity._minimumHeights
       }, false) as unknown as Cesium.Property
     }
 
     extEntity._maximumHeights = this.getMaximumHeights()
     if (extEntity.wall) {
-      extEntity.wall.maximumHeights = new Cesium.CallbackProperty(() => {
+      (extEntity.wall as any).maximumHeights = new Cesium.CallbackProperty(() => {
         return extEntity._maximumHeights
       }, false) as unknown as Cesium.Property
     }

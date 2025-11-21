@@ -1,48 +1,12 @@
 import * as Cesium from 'cesium'
 import { DrawPolyline } from './DrawPolyline'
-import type { AttrClass } from './DrawBase'
+import type { AttrClass, CylinderDrawAttribute, CylinderExtendedEntity } from '../types'
 import * as attr from '../attr/AttrCylinder'
 import { EditCylinder } from '../edit/EditCylinder'
 import { addPositionsHeight } from '@ktd-cesium/shared'
 import { getEllipseOuterPositions } from '../attr/AttrCircle'
+import type { EditClassConstructor } from '../types'
 import type { EditBase } from '../edit/EditBase'
-
-/**
- * 圆柱体样式配置接口
- */
-interface CylinderStyleConfig {
-  topRadius?: number
-  bottomRadius?: number
-  length?: number
-  [key: string]: unknown
-}
-
-/**
- * 圆柱体属性接口
- */
-interface CylinderAttribute {
-  style: CylinderStyleConfig
-  [key: string]: unknown
-}
-
-/**
- * 扩展的 Entity 接口
- */
-interface ExtendedEntity extends Omit<Cesium.Entity, 'cylinder'> {
-  cylinder?: Cesium.CylinderGraphics
-  attribute?: CylinderAttribute
-  editing?: EditBase
-  _positions_draw?: Cesium.Cartesian3[]
-}
-
-/**
- * 编辑类构造函数类型
- */
-type EditClassConstructor = new (
-  entity: Cesium.Entity,
-  viewer: Cesium.Viewer,
-  dataSource: Cesium.CustomDataSource
-) => EditBase
 
 /**
  * 圆柱体绘制类
@@ -65,7 +29,7 @@ export class DrawCylinder extends DrawPolyline {
    */
   getShowPosition(time?: Cesium.JulianDate): Cesium.Cartesian3 | null {
     const positions = this._positions_draw as Cesium.Cartesian3[] | null
-    const extEntity = this.entity as ExtendedEntity | null
+    const extEntity = this.entity as CylinderExtendedEntity | null
 
     if (positions && positions.length > 1 && extEntity?.cylinder) {
       const lengthProp = extEntity.cylinder.length
@@ -87,10 +51,10 @@ export class DrawCylinder extends DrawPolyline {
   override createFeature(attribute: Record<string, unknown>): Cesium.Entity {
     this._positions_draw = []
 
-    const cylinderAttr = attribute as CylinderAttribute
+    const cylinderAttr = attribute as CylinderDrawAttribute
     const that = this
 
-    const addattr: Cesium.Entity.ConstructorOptions & { attribute: CylinderAttribute } = {
+    const addattr: Cesium.Entity.ConstructorOptions & { attribute: CylinderDrawAttribute } = {
       position: new Cesium.CallbackProperty((time?: Cesium.JulianDate) => {
         return that.getShowPosition(time)
       }, false) as unknown as Cesium.PositionProperty,
@@ -106,7 +70,7 @@ export class DrawCylinder extends DrawPolyline {
    * 样式转 Entity
    */
   protected override style2Entity(style: Record<string, unknown>, entity: Cesium.Entity): Cesium.CylinderGraphics.ConstructorOptions {
-    const extEntity = entity as ExtendedEntity
+    const extEntity = entity as CylinderExtendedEntity
     return attr.style2Entity(style, extEntity.cylinder)
   }
 
@@ -117,7 +81,7 @@ export class DrawCylinder extends DrawPolyline {
     const positions = this._positions_draw as Cesium.Cartesian3[] | null
     if (!positions) return
 
-    const extEntity = this.entity as ExtendedEntity | null
+    const extEntity = this.entity as CylinderExtendedEntity | null
     if (!extEntity || !extEntity.attribute) return
 
     if (isLoad) {
@@ -156,7 +120,7 @@ export class DrawCylinder extends DrawPolyline {
    * 根据半径添加坐标点
    */
   addPositionsForRadius(position: Cesium.Cartesian3): void {
-    const extEntity = this.entity as ExtendedEntity | null
+    const extEntity = this.entity as CylinderExtendedEntity | null
     if (!extEntity || !extEntity.attribute) return
 
     const style = extEntity.attribute.style
@@ -177,7 +141,7 @@ export class DrawCylinder extends DrawPolyline {
    * 图形绘制结束后调用
    */
   override finish(): void {
-    const entity = this.entity as ExtendedEntity | null
+    const entity = this.entity as CylinderExtendedEntity | null
     if (!entity) return
 
     entity.editing = this.getEditClass(entity as Cesium.Entity) as EditBase // 绑定编辑对象

@@ -1,41 +1,9 @@
 import * as Cesium from 'cesium'
 import { DrawPoint } from './DrawPoint'
-import type { AttrClass } from './DrawBase'
+import type { AttrClass, PlaneDrawAttribute, PlaneExtendedEntity } from '../types'
 import * as attr from '../attr/AttrPlane'
 import { EditPlane } from '../edit/EditPlane'
-import type { EditBase } from '../edit/EditBase'
-
-/**
- * 平面样式接口
- */
-interface PlaneStyle extends Record<string, unknown> {
-  [key: string]: unknown
-}
-
-/**
- * 平面属性接口
- */
-interface PlaneAttribute extends Record<string, unknown> {
-  style?: PlaneStyle
-}
-
-/**
- * 扩展的 Entity 类型（支持平面属性）
- */
-interface ExtendedEntity extends Cesium.Entity {
-  attribute?: PlaneAttribute
-  editing?: unknown
-  _positions_draw?: Cesium.Cartesian3 | Cesium.Cartesian3[] | null
-}
-
-/**
- * 编辑类构造函数类型
- */
-type EditClassConstructor = new (
-  entity: Cesium.Entity,
-  viewer: Cesium.Viewer,
-  dataSource: Cesium.CustomDataSource
-) => EditBase
+import type { EditClassConstructor } from '../types'
 
 /**
  * 平面绘制类
@@ -51,7 +19,7 @@ export class DrawPlane extends DrawPoint {
   createFeature(attribute: Record<string, unknown>): Cesium.Entity {
     this._positions_draw = null
 
-    const planeAttr = attribute as PlaneAttribute
+    const planeAttr = attribute as PlaneDrawAttribute
 
     const addattr: Cesium.Entity.ConstructorOptions & { attribute: Record<string, unknown> } = {
       position: new Cesium.CallbackProperty(() => {
@@ -77,7 +45,7 @@ export class DrawPlane extends DrawPoint {
    */
   finish(): void {
     const entity = this.entity!
-    const extEntity = entity as ExtendedEntity
+    const extEntity = entity as PlaneExtendedEntity
 
     extEntity.editing = this.getEditClass(entity)
 

@@ -1,94 +1,12 @@
 import * as Cesium from 'cesium'
 import { DrawPolyline } from './DrawPolyline'
-import type { AttrClass } from './DrawBase'
+import type { AttrClass, PolygonDrawAttribute, PolygonExtendedEntity } from '../types'
 import { getMaxHeight, isNumber, getCurrentMousePosition, addPositionsHeight } from '@ktd-cesium/shared'
 import { GraphicsEventType } from '../../EventPlugin'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import * as attr from '../attr/AttrPolygon'
 import { EditPolygon } from '../edit/EditPolygon'
-
-/**
- * 多边形样式接口
- */
-interface PolygonStyle {
-  clampToGround?: boolean
-  extrudedHeight?: number | Cesium.Property
-  outline?: boolean
-  outlineWidth?: number
-  outlineColor?: string
-  color?: string
-  opacity?: number
-  outlineOpacity?: number
-  fillType?: 'color' | 'image' | 'grid' | 'checkerboard' | 'stripe' | 'animationLine' | 'animationCircle'
-  material?: Cesium.MaterialProperty | Cesium.Color
-  // Grid 相关属性
-  grid_lineCount?: number
-  grid_lineThickness?: number
-  grid_cellAlpha?: number
-  // Checkerboard 相关属性
-  checkerboard_repeat?: number
-  checkerboard_oddcolor?: string
-  // Stripe 相关属性
-  stripe_oddcolor?: string
-  stripe_repeat?: number
-  // Animation 相关属性
-  animationDuration?: number
-  animationImage?: string
-  animationRepeatX?: number
-  animationRepeatY?: number
-  animationAxisY?: boolean
-  animationGradient?: number
-  animationCount?: number
-  // 其他属性
-  randomColor?: boolean
-  image?: string
-  bgUrl?: string
-  bgColor?: string
-  minimumRed?: number
-  maximumRed?: number
-  minimumGreen?: number
-  maximumGreen?: number
-  minimumBlue?: number
-  maximumBlue?: number
-  stRotation?: number
-  // 保留索引签名用于扩展属性，但标记为只读更安全
-  readonly [key: string]: unknown
-}
-
-/**
- * 多边形配置接口
- */
-interface PolygonConfig {
-  minPointNum?: number
-  maxPointNum?: number
-  addHeight?: number
-}
-
-/**
- * 多边形属性接口
- */
-interface PolygonAttribute {
-  style: PolygonStyle
-  config?: PolygonConfig
-  // 保留索引签名用于扩展属性
-  readonly [key: string]: unknown
-}
-
-/**
- * 编辑类接口
- */
-interface EditClass {
-  new(entity: Cesium.Entity, ...args: unknown[]): unknown
-}
-
-/**
- * 扩展的 Entity 类型（支持编辑和属性）
- */
-interface ExtendedEntity extends Cesium.Entity {
-  attribute: PolygonAttribute
-  editing?: EditClass
-  _positions_draw?: Cesium.Cartesian3[]
-}
+import type { EditClassConstructor } from '../types'
 
 /**
  * 多边形绘制类
@@ -99,7 +17,7 @@ export class DrawPolygon extends DrawPolyline {
   override _minPointNum = 3 // 至少需要点的个数
   override _maxPointNum = 9999 // 最多允许点的个数
 
-  override editClass = EditPolygon
+  override editClass = EditPolygon as EditClassConstructor
   override attrClass = attr as unknown as AttrClass
 
   /**
@@ -113,7 +31,7 @@ export class DrawPolygon extends DrawPolyline {
       throw new Error('DrawPolygon.createFeature: attribute 必须是对象')
     }
 
-    const polygonAttr = attribute as PolygonAttribute
+    const polygonAttr = attribute as PolygonDrawAttribute
     if (!polygonAttr.style || typeof polygonAttr.style !== 'object') {
       throw new Error('DrawPolygon.createFeature: attribute.style 不能为空且必须是对象')
     }
@@ -134,7 +52,7 @@ export class DrawPolygon extends DrawPolyline {
       // 转换样式为 Entity 属性
       const polygonGraphics = attr.style2Entity(polygonAttr.style)
 
-      const addattr: Cesium.Entity.ConstructorOptions & { attribute: PolygonAttribute } = {
+      const addattr: Cesium.Entity.ConstructorOptions & { attribute: PolygonDrawAttribute } = {
         polygon: polygonGraphics,
         attribute: polygonAttr
       }
@@ -200,7 +118,7 @@ export class DrawPolygon extends DrawPolyline {
       return
     }
 
-    const extEntity = entity as ExtendedEntity
+    const extEntity = entity as PolygonExtendedEntity
 
     // 是否显示：绘制时前2点时 或 边线宽度大于1时
     entity.polyline.show = new Cesium.CallbackProperty((time?: Cesium.JulianDate) => {
@@ -321,7 +239,7 @@ export class DrawPolygon extends DrawPolyline {
         lastPointTemporary = false
 
         // 在绘制点基础自动增加高度
-        const extEntity = this.entity as ExtendedEntity
+        const extEntity = this.entity as PolygonExtendedEntity
         if (extEntity.attribute?.config?.addHeight) {
           point = addPositionsHeight(point, extEntity.attribute.config.addHeight) as Cesium.Cartesian3
         }
@@ -441,7 +359,7 @@ export class DrawPolygon extends DrawPolyline {
       return
     }
 
-    const extEntity = this.entity as ExtendedEntity
+    const extEntity = this.entity as PolygonExtendedEntity
     if (!extEntity.attribute || !extEntity.attribute.style) {
       console.warn('DrawPolygon.updateAttrForDrawing: attribute 或 style 不存在')
       return
@@ -482,13 +400,13 @@ export class DrawPolygon extends DrawPolyline {
     }
 
     const entity = this.entity
-    const extEntity = entity as ExtendedEntity
+    const extEntity = entity as PolygonExtendedEntity
 
     try {
       // 绑定编辑对象
       const editInstance = this.getEditClass(entity)
       if (editInstance) {
-        extEntity.editing = editInstance as EditClass
+        extEntity.editing = editInstance
       }
 
       const positions = this.getDrawPosition()

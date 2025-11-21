@@ -34,6 +34,7 @@ import { DrawModel } from './draw/DrawModel'
 import { DrawPolylineVolume } from './draw/DrawPolylineVolume'
 import { DrawPolygonEx } from './draw/DrawPolygonEx'
 import { DrawPModel } from './draw/DrawPModel'
+import { TransformPlugin, TransformMode, TransformSpace } from '../TransformPlugin'
 
 /**
  * 绘制配置接口
@@ -73,6 +74,29 @@ export interface GraphicsPluginOptions {
   hasDel?: (entity: Entity) => boolean
   /** 是否移除默认的屏幕空间事件 */
   removeScreenSpaceEvent?: boolean
+  /** 聚合配置 */
+  clustering?: import('./types').ClusterOptions
+  /** 变换控制器配置 */
+  transform?: {
+    /** 是否启用变换控制器 */
+    enabled?: boolean
+    /** 默认变换模式 */
+    mode?: TransformMode
+    /** 默认坐标空间 */
+    space?: TransformSpace
+    /** 是否显示辅助轴 */
+    showGizmo?: boolean
+    /** 辅助轴大小 */
+    gizmoSize?: number
+    /** 是否启用吸附 */
+    snap?: boolean
+    /** 平移吸附值 */
+    translateSnap?: number
+    /** 旋转吸附值（度） */
+    rotateSnap?: number
+    /** 缩放吸附值 */
+    scaleSnap?: number
+  }
 }
 
 /**
@@ -138,6 +162,18 @@ export class GraphicsPlugin extends BasePlugin {
   /** 提示框定时器 */
   private tiptimeTik: ReturnType<typeof setTimeout> | null = null
 
+  /** 聚合配置 */
+  private clusterOptions: import('./types').ClusterOptions | null = null
+
+  /** Primitive聚合数据源（用于billboard聚合显示） */
+  private clusterDataSource: CustomDataSource | null = null
+
+  /** 变换控制器插件 */
+  private transformPlugin: TransformPlugin | null = null
+
+  /** 变换控制器是否启用 */
+  private transformEnabled = false
+
   protected onInstall(viewer: KtdViewer, options?: GraphicsPluginOptions): void {
     this.options = options || {}
 
@@ -152,6 +188,32 @@ export class GraphicsPlugin extends BasePlugin {
     this.primitives = this.cesiumViewer.scene.primitives.add(
       new Cesium.PrimitiveCollection()
     ) as PrimitiveCollection
+
+    // 初始化聚合数据源（用于Primitive聚合显示）
+    this.clusterDataSource = new Cesium.CustomDataSource('GraphicsPlugin-ClusterDataSource')
+    this.cesiumViewer.dataSources.add(this.clusterDataSource)
+
+    // 设置聚合配置
+    if (options?.clustering) {
+      this.setClusterOptions(options.clustering)
+    }
+
+    // 初始化变换控制器
+    if (options?.transform?.enabled !== false) {
+      const transformPlugin = new TransformPlugin({
+        mode: options?.transform?.mode || TransformMode.TRANSLATE,
+        space: options?.transform?.space || TransformSpace.WORLD,
+        showGizmo: options?.transform?.showGizmo !== false,
+        gizmoSize: options?.transform?.gizmoSize || 1.0,
+        snap: options?.transform?.snap || false,
+        translateSnap: options?.transform?.translateSnap || 0.1,
+        rotateSnap: options?.transform?.rotateSnap || 5,
+        scaleSnap: options?.transform?.scaleSnap || 0.1
+      })
+      transformPlugin.install(viewer as unknown as Parameters<TransformPlugin['install']>[0])
+      this.transformPlugin = transformPlugin
+      this.transformEnabled = true
+    }
 
     // 移除默认的双击事件
     if (this.options.removeScreenSpaceEvent !== false) {
@@ -432,29 +494,40 @@ export class GraphicsPlugin extends BasePlugin {
     if (!this.eventPlugin) return
 
     // 处理实体选择的通用逻辑
-    const handleEntityPick = (pickInfo: PickInfo): Entity | null => {
+    const handleEntityPick = (pickInfo: PickInfo): Entity | Cesium.Primitive | null => {
       if (!pickInfo.pickedObject) return null
 
       const picked = pickInfo.pickedObject as Cesium.Cesium3DTileFeature & {
         id?: Entity
         primitive?: { id?: Entity } & Cesium.Primitive
       }
-      return picked.id || picked.primitive?.id || (picked.primitive as unknown as Entity)
+
+      // 优先返回 Entity
+      if (picked.id) return picked.id
+      if (picked.primitive?.id) return picked.primitive.id
+
+      // 返回 Primitive（用于 Primitive 模式的变换支持）
+      if (picked.primitive) return picked.primitive
+
+      return null
     }
 
     // 左键点击选中（PC端）
     const leftClickId = this.eventPlugin.onLeftClick((info: PickInfo) => {
-      const entity = handleEntityPick(info)
+      const target = handleEntityPick(info)
 
-      if (entity && this.isMyEntity(entity)) {
+      if (target && this.isMyEntity(target)) {
         if (this.hasDrawing()) return // 还在绘制中时，跳出
-        if (this.currEditFeature && this.currEditFeature === entity) return // 重复单击了跳出
+        if (this.currEditFeature && this.currEditFeature === target) return // 重复单击了跳出
 
-        const entityExt = entity as Entity & { hasEdit?: boolean; inProgress?: boolean }
-        if (entityExt.hasEdit === false) return // 如果设置了不可编辑跳出
-        if (entityExt.inProgress === true) return // 正在绘制中跳出
+        // 对于 Entity，检查编辑标志
+        if (target instanceof Cesium.Entity) {
+          const entityExt = target as Entity & { hasEdit?: boolean; inProgress?: boolean }
+          if (entityExt.hasEdit === false) return // 如果设置了不可编辑跳出
+          if (entityExt.inProgress === true) return // 正在绘制中跳出
+        }
 
-        this.startEditing(entity)
+        this.startEditing(target)
         return
       }
       this.stopEditing()
@@ -463,17 +536,20 @@ export class GraphicsPlugin extends BasePlugin {
 
     // 触摸开始（移动端）
     const touchStartId = this.eventPlugin.onTouchStart((info: PickInfo) => {
-      const entity = handleEntityPick(info)
+      const target = handleEntityPick(info)
 
-      if (entity && this.isMyEntity(entity)) {
+      if (target && this.isMyEntity(target)) {
         if (this.hasDrawing()) return
-        if (this.currEditFeature && this.currEditFeature === entity) return
+        if (this.currEditFeature && this.currEditFeature === target) return
 
-        const entityExt = entity as Entity & { hasEdit?: boolean; inProgress?: boolean }
-        if (entityExt.hasEdit === false) return
-        if (entityExt.inProgress === true) return
+        // 对于 Entity，检查编辑标志
+        if (target instanceof Cesium.Entity) {
+          const entityExt = target as Entity & { hasEdit?: boolean; inProgress?: boolean }
+          if (entityExt.hasEdit === false) return
+          if (entityExt.inProgress === true) return
+        }
 
-        this.startEditing(entity)
+        this.startEditing(target)
         return
       }
       this.stopEditing()
@@ -569,30 +645,65 @@ export class GraphicsPlugin extends BasePlugin {
 
   /**
    * 判断实体是否属于本插件
-   * @param entity 实体对象
+   * @param entity 实体对象或 Primitive
    */
-  private isMyEntity(entity: Entity): boolean {
-    if (this.dataSource?.entities.contains(entity)) return true
-    if (this.primitives?.contains(entity as unknown as Cesium.Primitive)) return true
+  private isMyEntity(entity: Entity | Cesium.Primitive): boolean {
+    if (entity instanceof Cesium.Entity) {
+      if (this.dataSource?.entities.contains(entity)) return true
+    }
+    if (this.primitives?.contains(entity as Cesium.Primitive)) return true
     return false
   }
 
   /**
    * 开始编辑
-   * @param entity 要素对象
+   * @param entity 要素对象或 Primitive
    */
-  startEditing(entity: Entity): void {
+  startEditing(entity: Entity | Cesium.Primitive): void {
     this.stopEditing()
 
     if (!entity || !this._hasEdit) return
 
-    const entityExt = entity as Entity & EntityExtension
-    const editing = entityExt.editing
-    if (editing?.activate) {
-      editing.activate()
+    // 检查是否是 Primitive
+    const isPrimitive = !(entity instanceof Cesium.Entity)
+
+    if (!isPrimitive) {
+      const entityExt = entity as Entity & EntityExtension
+      const editing = entityExt.editing
+      if (editing?.activate) {
+        editing.activate()
+      }
     }
 
-    this.currEditFeature = entity
+    this.currEditFeature = entity as Entity
+
+    // 如果启用了变换控制器，且目标支持变换
+    if (this.transformEnabled && this.transformPlugin && this._canTransform(entity)) {
+      // 延迟附加，避免与编辑控制器冲突
+      setTimeout(() => {
+        if (this.transformPlugin && this.currEditFeature === entity) {
+          this.transformPlugin.attach(entity as Cesium.Entity)
+        }
+      }, 100)
+    }
+  }
+
+  /**
+   * 判断实体是否可以进行变换
+   */
+  private _canTransform(entity: Entity | Cesium.Primitive): boolean {
+    // Entity: 所有具有 position 属性的实体都支持变换
+    if ('position' in entity && entity.position) {
+      return true
+    }
+
+    // Primitive: 检查是否有 modelMatrix 或自定义的 position 属性
+    const primitive = entity as unknown as Record<string, unknown>
+    if (primitive.modelMatrix || primitive._positions_draw || primitive.position) {
+      return true
+    }
+
+    return false
   }
 
   /**
@@ -609,6 +720,11 @@ export class GraphicsPlugin extends BasePlugin {
       if (editing?.disable) {
         editing.disable()
       }
+    }
+
+    // 分离变换控制器
+    if (this.transformPlugin) {
+      this.transformPlugin.detach()
     }
 
     this.currEditFeature = null
@@ -1056,6 +1172,416 @@ export class GraphicsPlugin extends BasePlugin {
     if (this.primitives) {
       this.primitives.show = visible
     }
+
+    if (this.clusterDataSource) {
+      this.clusterDataSource.show = visible
+    }
+  }
+
+  /**
+   * 启用变换控制器
+   */
+  enableTransform(): void {
+    if (!this.transformPlugin) {
+      console.warn('Transform plugin is not initialized')
+      return
+    }
+    this.transformEnabled = true
+
+    // 如果当前有选中的实体，自动附加
+    if (this.currEditFeature && this._canTransform(this.currEditFeature)) {
+      this.transformPlugin.attach(this.currEditFeature)
+    }
+  }
+
+  /**
+   * 禁用变换控制器
+   */
+  disableTransform(): void {
+    this.transformEnabled = false
+    if (this.transformPlugin) {
+      this.transformPlugin.detach()
+    }
+  }
+
+  /**
+   * 设置变换模式
+   * @param mode 变换模式
+   */
+  setTransformMode(mode: TransformMode): void {
+    if (!this.transformPlugin) {
+      console.warn('Transform plugin is not initialized')
+      return
+    }
+    this.transformPlugin.setMode(mode)
+  }
+
+  /**
+   * 设置变换坐标空间
+   * @param space 坐标空间
+   */
+  setTransformSpace(space: TransformSpace): void {
+    if (!this.transformPlugin) {
+      console.warn('Transform plugin is not initialized')
+      return
+    }
+    this.transformPlugin.setSpace(space)
+  }
+
+  /**
+   * 获取变换控制器实例
+   */
+  getTransformPlugin(): TransformPlugin | null {
+    return this.transformPlugin
+  }
+
+  /**
+   * 设置聚合配置
+   * @param options 聚合配置选项
+   */
+  setClusterOptions(options: import('./types').ClusterOptions): void {
+    this.clusterOptions = {
+      enabled: options.enabled !== false,
+      pixelRange: options.pixelRange || 80,
+      minimumClusterSize: options.minimumClusterSize || 2,
+      showLabel: options.showLabel !== false,
+      clusterStyle: {
+        color: options.clusterStyle?.color || '#ff6b6b',
+        pixelSize: options.clusterStyle?.pixelSize || 40,
+        outlineColor: options.clusterStyle?.outlineColor || '#ffffff',
+        outlineWidth: options.clusterStyle?.outlineWidth || 2,
+        font: options.clusterStyle?.font || 'bold 16px sans-serif',
+        labelColor: options.clusterStyle?.labelColor || '#ffffff',
+        labelOutlineColor: options.clusterStyle?.labelOutlineColor || '#000000',
+        labelOutlineWidth: options.clusterStyle?.labelOutlineWidth || 2
+      },
+      clusterEvent: options.clusterEvent
+    }
+
+    this._applyEntityClustering()
+    this._applyPrimitiveClustering()
+  }
+
+  /**
+   * 启用聚合
+   */
+  enableClustering(): void {
+    if (!this.clusterOptions) {
+      this.setClusterOptions({ enabled: true })
+    } else {
+      this.clusterOptions.enabled = true
+      this._applyEntityClustering()
+      this._applyPrimitiveClustering()
+    }
+  }
+
+  /**
+   * 禁用聚合
+   */
+  disableClustering(): void {
+    if (this.clusterOptions) {
+      this.clusterOptions.enabled = false
+    }
+
+    // 禁用Entity聚合
+    if (this.dataSource?.clustering) {
+      this.dataSource.clustering.enabled = false
+    }
+
+    // 清理Primitive聚合显示
+    if (this.clusterDataSource) {
+      this.clusterDataSource.entities.removeAll()
+    }
+  }
+
+  /**
+   * 应用Entity聚合
+   */
+  private _applyEntityClustering(): void {
+    if (!this.dataSource || !this.clusterOptions) return
+
+    const clustering = this.dataSource.clustering
+    const opts = this.clusterOptions
+
+    clustering.enabled = opts.enabled || false
+    clustering.pixelRange = opts.pixelRange || 80
+    clustering.minimumClusterSize = opts.minimumClusterSize || 2
+
+    if (opts.enabled) {
+      // 自定义聚合样式
+      clustering.clusterEvent.addEventListener((clusteredEntities: Entity[], cluster: { billboard: Cesium.Billboard; label: Cesium.Label }) => {
+        cluster.billboard.show = true
+        cluster.label.show = opts.showLabel !== false
+
+        const count = clusteredEntities.length
+        const style = opts.clusterStyle || {}
+
+        // 设置聚合billboard样式
+        cluster.billboard.verticalOrigin = Cesium.VerticalOrigin.BOTTOM
+        cluster.billboard.scale = 1.0
+
+        // 根据数量调整大小和颜色
+        let size = style.pixelSize || 40
+        let color = Cesium.Color.fromCssColorString(style.color || '#ff6b6b')
+
+        if (count >= 100) {
+          size = 60
+          color = Cesium.Color.RED
+        } else if (count >= 50) {
+          size = 50
+          color = Cesium.Color.ORANGE
+        } else if (count >= 10) {
+          size = 45
+          color = Cesium.Color.YELLOW
+        }
+
+        // 创建聚合图标
+        cluster.billboard.image = this._createClusterIcon(count, size, color, style)
+
+        // 设置聚合标签
+        if (opts.showLabel !== false) {
+          cluster.label.text = count.toString()
+          cluster.label.font = style.font || 'bold 16px sans-serif'
+          cluster.label.fillColor = Cesium.Color.fromCssColorString(style.labelColor || '#ffffff')
+          cluster.label.outlineColor = Cesium.Color.fromCssColorString(style.labelOutlineColor || '#000000')
+          cluster.label.outlineWidth = style.labelOutlineWidth || 2
+          cluster.label.pixelOffset = new Cesium.Cartesian2(0, -size / 2)
+        }
+
+        // 调用自定义聚合事件
+        if (opts.clusterEvent) {
+          opts.clusterEvent(clusteredEntities, cluster)
+        }
+      })
+    }
+  }
+
+  /**
+   * 应用Primitive聚合
+   * Primitive不支持原生聚合，需要手动实现
+   */
+  private _applyPrimitiveClustering(): void {
+    if (!this.primitives || !this.clusterDataSource || !this.clusterOptions) return
+
+    const opts = this.clusterOptions
+
+    if (!opts.enabled) {
+      this.clusterDataSource.entities.removeAll()
+      return
+    }
+
+    // 监听场景渲染后事件，动态聚合Primitive
+    this.cesiumViewer.scene.postRender.addEventListener(this._clusterPrimitives.bind(this))
+  }
+
+  /**
+   * 聚合Primitive对象
+   */
+  private _clusterPrimitives(): void {
+    if (!this.primitives || !this.clusterDataSource || !this.clusterOptions?.enabled) return
+
+    // 清空聚合数据源
+    this.clusterDataSource.entities.removeAll()
+
+    // 收集所有可聚合的Primitive（Billboard, Point, Label）
+    const clusterableItems: Array<{
+      position: Cesium.Cartesian3
+      primitive: unknown
+    }> = []
+
+    // 遍历primitives收集位置
+    const primitivesList = (this.primitives as PrimitiveCollection & { _primitives?: unknown[] })?._primitives || []
+    for (const primitive of primitivesList) {
+      const primitiveCast = primitive as {
+        _billboards?: Cesium.BillboardCollection
+        _points?: Cesium.PointPrimitiveCollection
+        _labels?: Cesium.LabelCollection
+      } & { position?: Cesium.Cartesian3 }
+
+      // Billboard Collection
+      if (primitiveCast._billboards) {
+        const billboards = primitiveCast._billboards
+        for (let i = 0; i < billboards.length; i++) {
+          const billboard = billboards.get(i)
+          if (billboard.show && billboard.position) {
+            clusterableItems.push({ position: billboard.position, primitive: billboard })
+          }
+        }
+      }
+
+      // Point Collection
+      if (primitiveCast._points) {
+        const points = primitiveCast._points
+        for (let i = 0; i < points.length; i++) {
+          const point = points.get(i)
+          if (point.show && point.position) {
+            clusterableItems.push({ position: point.position, primitive: point })
+          }
+        }
+      }
+
+      // Label Collection
+      if (primitiveCast._labels) {
+        const labels = primitiveCast._labels
+        for (let i = 0; i < labels.length; i++) {
+          const label = labels.get(i)
+          if (label.show && label.position) {
+            clusterableItems.push({ position: label.position, primitive: label })
+          }
+        }
+      }
+    }
+
+    // 执行聚合算法
+    const clusters = this._performClustering(clusterableItems)
+
+    // 创建聚合显示
+    const style = this.clusterOptions.clusterStyle || {}
+    for (const cluster of clusters) {
+      if (cluster.items.length >= (this.clusterOptions.minimumClusterSize || 2)) {
+        // 创建聚合点
+        const count = cluster.items.length
+        let size = style.pixelSize || 40
+        let color = Cesium.Color.fromCssColorString(style.color || '#ff6b6b')
+
+        if (count >= 100) {
+          size = 60
+          color = Cesium.Color.RED
+        } else if (count >= 50) {
+          size = 50
+          color = Cesium.Color.ORANGE
+        } else if (count >= 10) {
+          size = 45
+          color = Cesium.Color.YELLOW
+        }
+
+        this.clusterDataSource.entities.add({
+          position: cluster.center,
+          billboard: {
+            image: this._createClusterIcon(count, size, color, style),
+            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+            scale: 1.0
+          },
+          label: this.clusterOptions.showLabel !== false
+            ? {
+                text: count.toString(),
+                font: style.font || 'bold 16px sans-serif',
+                fillColor: Cesium.Color.fromCssColorString(style.labelColor || '#ffffff'),
+                outlineColor: Cesium.Color.fromCssColorString(style.labelOutlineColor || '#000000'),
+                outlineWidth: style.labelOutlineWidth || 2,
+                pixelOffset: new Cesium.Cartesian2(0, -size / 2)
+              }
+            : undefined
+        })
+
+        // 隐藏被聚合的原始对象
+        for (const item of cluster.items) {
+          const prim = item.primitive as { show?: boolean }
+          if (prim.show !== undefined) {
+            prim.show = false
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * 执行聚合算法
+   */
+  private _performClustering(
+    items: Array<{ position: Cesium.Cartesian3; primitive: unknown }>
+  ): Array<{ center: Cesium.Cartesian3; items: typeof items }> {
+    const pixelRange = this.clusterOptions?.pixelRange || 80
+    const clusters: Array<{ center: Cesium.Cartesian3; items: typeof items }> = []
+    const processed = new Set<number>()
+
+    for (let i = 0; i < items.length; i++) {
+      if (processed.has(i)) continue
+
+      const item = items[i]
+      const screenPos = Cesium.SceneTransforms.worldToWindowCoordinates(
+        this.cesiumViewer.scene,
+        item.position
+      )
+
+      if (!screenPos) continue
+
+      const cluster: { center: Cesium.Cartesian3; items: typeof items } = {
+        center: item.position,
+        items: [item]
+      }
+
+      processed.add(i)
+
+      // 查找附近的点
+      for (let j = i + 1; j < items.length; j++) {
+        if (processed.has(j)) continue
+
+        const otherItem = items[j]
+        const otherScreenPos = Cesium.SceneTransforms.worldToWindowCoordinates(
+          this.cesiumViewer.scene,
+          otherItem.position
+        )
+
+        if (!otherScreenPos) continue
+
+        const distance = Cesium.Cartesian2.distance(screenPos, otherScreenPos)
+        if (distance <= pixelRange) {
+          cluster.items.push(otherItem)
+          processed.add(j)
+        }
+      }
+
+      // 计算聚合中心
+      if (cluster.items.length > 1) {
+        const positions = cluster.items.map((item) => item.position)
+        cluster.center = Cesium.BoundingSphere.fromPoints(positions).center
+      }
+
+      clusters.push(cluster)
+    }
+
+    return clusters
+  }
+
+  /**
+   * 创建聚合图标
+   */
+  private _createClusterIcon(
+    count: number,
+    size: number,
+    color: Cesium.Color,
+    style: Record<string, unknown>
+  ): string {
+    const canvas = document.createElement('canvas')
+    canvas.width = size
+    canvas.height = size
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return canvas.toDataURL()
+
+    // 绘制圆形背景
+    ctx.beginPath()
+    ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2)
+    ctx.fillStyle = `rgba(${color.red * 255}, ${color.green * 255}, ${color.blue * 255}, ${color.alpha})`
+    ctx.fill()
+
+    // 绘制轮廓
+    const outlineWidth = (style.outlineWidth as number) || 2
+    const outlineColor = (style.outlineColor as string) || '#ffffff'
+    ctx.strokeStyle = outlineColor
+    ctx.lineWidth = outlineWidth
+    ctx.stroke()
+
+    // 绘制数字
+    ctx.fillStyle = (style.labelColor as string) || '#ffffff'
+    ctx.font = `bold ${size / 2}px sans-serif`
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(count.toString(), size / 2, size / 2)
+
+    // 返回DataURL格式的图片
+    return canvas.toDataURL()
   }
 
   /**
@@ -1109,6 +1635,15 @@ export class GraphicsPlugin extends BasePlugin {
     // 销毁选择事件
     this.destroySelectEvent()
 
+    // 禁用聚合
+    this.disableClustering()
+
+    // 销毁变换控制器
+    if (this.transformPlugin) {
+      this.transformPlugin.destroy()
+      this.transformPlugin = null
+    }
+
     if (this.tooltip) {
       this.tooltip.destroy()
       this.tooltip = null
@@ -1123,13 +1658,22 @@ export class GraphicsPlugin extends BasePlugin {
       this.cesiumViewer.dataSources.remove(this.dataSource, true)
     }
 
+    if (this.clusterDataSource && this.cesiumViewer.dataSources.contains(this.clusterDataSource)) {
+      this.cesiumViewer.dataSources.remove(this.clusterDataSource, true)
+    }
+
     if (this.primitives && this.cesiumViewer.scene.primitives.contains(this.primitives)) {
       this.cesiumViewer.scene.primitives.remove(this.primitives)
     }
 
+    // 移除场景渲染事件监听
+    this.cesiumViewer.scene.postRender.removeEventListener(this._clusterPrimitives.bind(this))
+
     this.dataSource = null
+    this.clusterDataSource = null
     this.primitives = null
     this.eventPlugin = null
+    this.clusterOptions = null
     this.listeners.clear()
 
     console.log('Graphics plugin destroyed')
@@ -1138,3 +1682,4 @@ export class GraphicsPlugin extends BasePlugin {
 
 // 导出类型
 export * from './types'
+export { TransformMode, TransformSpace } from '../TransformPlugin'

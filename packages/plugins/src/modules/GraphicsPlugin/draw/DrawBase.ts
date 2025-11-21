@@ -1,64 +1,17 @@
 import * as Cesium from 'cesium'
 import { getPositionByGeoJSON, type GeoJSONFeature, type GeoJSONGeometry } from '@ktd-cesium/shared'
-import { GraphicsEventType, type EventEmitter } from '../../EventPlugin'
+import { GraphicsEventType } from '../../EventPlugin'
 import type { EventPlugin, PickInfo } from '../../EventPlugin'
-
-/**
- * Plugin 接口
- */
-interface EnableablePlugin {
-  enable: boolean
-}
-
-/**
- * EventPlugin 接口
- */
-interface EventPluginInterface extends EventEmitter {
-  // EventEmitter 的方法
-}
-
-/**
- * 扩展的 Viewer 类型（支持 KtdViewer 的插件系统）
- */
-interface ExtendedViewer extends Cesium.Viewer {
-  getPlugin?: <T = unknown>(name: string) => T | undefined
-}
-
-/**
- * TooltipPlugin 接口
- */
-interface TooltipPluginInterface {
-  showAt: (position: { x: number; y: number } | Cesium.Cartesian2 | null, content?: string) => void
-  setVisible: (visible: boolean) => void
-  enable?: boolean
-}
-
-/**
- * 绘制配置
- */
-export interface DrawConfig {
-  viewer: Cesium.Viewer
-  dataSource?: Cesium.CustomDataSource
-  primitives?: Cesium.PrimitiveCollection
-}
-
-/**
- * 扩展的 Entity 类型
- */
-interface ExtendedEntity extends Cesium.Entity {
-  attribute?: Record<string, unknown>
-  inProgress?: boolean
-  editing?: unknown
-}
-
-/**
- * Attr 类接口
- */
-export interface AttrClass {
-  toGeoJSON?: (entity: Cesium.Entity) => GeoJSONFeature | Record<string, unknown>
-  getCoordinates?: (entity: Cesium.Entity) => number[][] | null
-  getPositions?: (entity: Cesium.Entity) => Cesium.Cartesian3[] | null
-}
+import type {
+  EditClassConstructor,
+  DrawConfig,
+  AttrClass,
+  TooltipPluginInterface,
+  EnableablePlugin,
+  EventPluginInterface,
+  ExtendedViewer,
+  ExtendedEntity
+} from '../types'
 
 /**
  * 绘制基类
@@ -70,12 +23,12 @@ export class DrawBase {
   primitives: Cesium.PrimitiveCollection | null = null
   viewer: Cesium.Viewer
   tooltip: TooltipPluginInterface | null = null
-  entity: ExtendedEntity | null = null
+  entity: Cesium.Entity | null = null
   protected _enabled = false
   protected _positions_draw: Cesium.Cartesian3[] | Cesium.Cartesian3 | null = null
   protected drawOkCallback: ((entity: Cesium.Entity) => void) | null = null
   protected handler: Cesium.ScreenSpaceEventHandler | null = null
-  protected editClass: unknown = null
+  protected editClass: EditClassConstructor | null = null
   attrClass: AttrClass | null = null
   protected _minPointNum: number | null = null
   protected _maxPointNum: number | null = null
@@ -207,7 +160,7 @@ export class DrawBase {
 
     this.createFeature(attribute)
     if (this.entity) {
-      this.entity.inProgress = true
+      (this.entity as ExtendedEntity).inProgress = true
     }
 
     this.setCursor(true)
@@ -232,7 +185,7 @@ export class DrawBase {
     this.setCursor(false)
     this.enableControl(true)
 
-    if (hasWB && this.entity?.inProgress) {
+    if (hasWB && this.entity && (this.entity as ExtendedEntity).inProgress) {
       // 外部释放时，尚未结束的标绘移除
       if (this.dataSource && this.dataSource.entities.contains(this.entity)) {
         this.dataSource.entities.remove(this.entity)
@@ -242,7 +195,7 @@ export class DrawBase {
         this.primitives.remove(this.entity as unknown as Cesium.Primitive)
       }
     } else if (this.entity) {
-      this.entity.inProgress = false
+      (this.entity as ExtendedEntity).inProgress = false
       this.finish()
 
       if (this.drawOkCallback) {
@@ -371,16 +324,62 @@ export class DrawBase {
   }
 
   /**
-   * 绑定双击事件（PC端专用，移动端通过 endDraw 按钮结束）
+   * 绑定双击事件（PC端）和长按事件（移动端）
+   * PC端：双击结束绘制
+   * 移动端：长按（800ms）结束绘制，或通过 endDraw 按钮结束
    * @param callback 回调函数
    */
   protected bindDoubleClickEvent(callback: () => void): void {
     if (this.eventPluginInstance) {
+      // PC端：双击事件
       const doubleClickId = this.eventPluginInstance.onLeftDoubleClick((_info: PickInfo) => {
         callback()
       })
       this.eventListenerIds.push(doubleClickId)
+
+      // 移动端：长按事件实现
+      let longPressTimer: ReturnType<typeof setTimeout> | null = null
+      let longPressTriggered = false
+      let touchStartPosition: Cesium.Cartesian2 | null = null
+
+      // 触摸开始 - 启动长按定时器
+      const touchStartId = this.eventPluginInstance.onTouchStart((info: PickInfo) => {
+        longPressTriggered = false
+        touchStartPosition = info.position || null
+        longPressTimer = setTimeout(() => {
+          longPressTriggered = true
+          callback()
+        }, 800) // 长按800毫秒触发
+      })
+      this.eventListenerIds.push(touchStartId)
+
+      // 触摸结束 - 清除定时器
+      const touchEndId = this.eventPluginInstance.onTouchEnd((_info: PickInfo) => {
+        if (longPressTimer) {
+          clearTimeout(longPressTimer)
+          longPressTimer = null
+        }
+        touchStartPosition = null
+      })
+      this.eventListenerIds.push(touchEndId)
+
+      // 触摸移动 - 如果移动距离超过阈值，取消长按
+      const touchMoveId = this.eventPluginInstance.onTouchMove((info: PickInfo) => {
+        if (longPressTimer && !longPressTriggered && touchStartPosition && info.position) {
+          // 计算移动距离，超过10像素则取消长按
+          const dx = info.position.x - touchStartPosition.x
+          const dy = info.position.y - touchStartPosition.y
+          const distance = Math.sqrt(dx * dx + dy * dy)
+
+          if (distance > 10) {
+            clearTimeout(longPressTimer)
+            longPressTimer = null
+          }
+        }
+      })
+      this.eventListenerIds.push(touchMoveId)
     } else {
+      // 回退到传统 ScreenSpaceEventHandler（仅支持双击）
       this.getHandler().setInputAction(() => {
         callback()
       }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK)
@@ -519,8 +518,8 @@ export class DrawBase {
    * 绑定外部 entity 到标绘
    */
   bindExtraEntity(entity: Cesium.Entity, attribute: Record<string, unknown>): Cesium.Entity {
-    this.entity = entity as ExtendedEntity
-    this.entity.attribute = attribute
+    this.entity = entity
+    ;(this.entity as ExtendedEntity).attribute = attribute
 
     if (attribute.style) {
       this.style2Entity(attribute.style as Record<string, unknown>, entity)

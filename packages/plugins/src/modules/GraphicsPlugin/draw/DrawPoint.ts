@@ -1,51 +1,13 @@
 import * as Cesium from 'cesium'
-import { DrawBase, type AttrClass } from './DrawBase'
+import { DrawBase } from './DrawBase'
+import type { AttrClass, PointDrawAttribute, PointExtendedEntity, PointStyleConfig } from '../types'
 import { getCurrentMousePosition } from '@ktd-cesium/shared'
 import * as attr from '../attr/AttrPoint'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { GraphicsEventType } from '../../EventPlugin'
 import { style2Entity as labelStyle2Entity } from '../attr/AttrLabel'
 import { EditPoint } from '../edit/EditPoint'
-import type { EditBase } from '../edit/EditBase'
-
-/**
- * 标签样式接口
- */
-interface LabelStyle {
-  [key: string]: unknown
-}
-
-/**
- * 点样式接口
- */
-interface PointStyle {
-  label?: LabelStyle
-  [key: string]: unknown
-}
-
-/**
- * 点属性接口
- */
-interface PointAttribute {
-  style?: PointStyle
-  [key: string]: unknown
-}
-
-/**
- * 扩展的 Entity 类型（支持编辑功能）
- */
-interface EditableEntity extends Cesium.Entity {
-  editing?: unknown
-}
-
-/**
- * 编辑类构造函数类型
- */
-type EditClassConstructor = new (
-  entity: Cesium.Entity,
-  viewer: Cesium.Viewer,
-  dataSource: Cesium.CustomDataSource
-) => EditBase
+import type { EditClassConstructor } from '../types'
 
 /**
  * 点绘制类
@@ -61,7 +23,7 @@ export class DrawPoint extends DrawBase {
   createFeature(attribute: Record<string, unknown>): Cesium.Entity {
     this._positions_draw = null
 
-    const pointAttr = attribute as PointAttribute
+    const pointAttr = attribute as PointDrawAttribute
 
     const addattr: Cesium.Entity.ConstructorOptions & { attribute: Record<string, unknown> } = {
       show: false,
@@ -85,7 +47,7 @@ export class DrawPoint extends DrawBase {
    * 样式转 entity
    */
   protected style2Entity(style: Record<string, unknown>, entity: Cesium.Entity): void {
-    const pointStyle = style as PointStyle
+    const pointStyle = style as PointStyleConfig
     if (pointStyle.label && entity.label) {
       // 同时加文字
       labelStyle2Entity(pointStyle.label, entity.label as any)
@@ -148,7 +110,7 @@ export class DrawPoint extends DrawBase {
     this.entity.show = true
 
     // 绑定编辑对象
-    const editableEntity = this.entity as EditableEntity
+    const editableEntity = this.entity as PointExtendedEntity
     editableEntity.editing = this.getEditClass(this.entity)
 
     // 设置最终位置

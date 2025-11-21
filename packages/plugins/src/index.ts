@@ -54,3 +54,5 @@ export {
   bd09ToWgs84,
   transformCoordinate
 } from './modules/BaseLayerPlugin'
+export { TransformPlugin } from './modules/TransformPlugin'
+export * from './modules/TransformPlugin/types'

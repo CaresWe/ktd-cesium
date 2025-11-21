@@ -1,60 +1,10 @@
 import * as Cesium from 'cesium'
+import { isNumber } from '@ktd-cesium/shared'
 import { DrawPolyline } from './DrawPolyline'
-import type { AttrClass } from './DrawBase'
+import type { AttrClass, EditClassConstructor, CircleDrawAttribute, CircleExtendedEntity } from '../types'
 import * as attr from '../attr/AttrCircle'
 import { EditCircle } from '../edit/EditCircle'
 import type { EditBase } from '../edit/EditBase'
-
-/**
- * 判断是否为数字
- */
-function isNumber(obj: unknown): boolean {
-  return typeof obj === 'number' && obj.constructor === Number
-}
-
-/**
- * 圆形样式配置接口
- */
-interface CircleStyleConfig {
-  clampToGround?: boolean
-  height?: number
-  extrudedHeight?: number
-  radius?: number
-  semiMinorAxis?: number
-  semiMajorAxis?: number
-  rotation?: number
-  [key: string]: unknown
-}
-
-/**
- * 圆形属性接口
- */
-interface CircleAttribute {
-  type?: string
-  style: CircleStyleConfig
-  [key: string]: unknown
-}
-
-/**
- * 扩展的 Entity 接口
- */
-interface ExtendedEntity extends Omit<Cesium.Entity, 'ellipse' | 'polyline'> {
-  ellipse?: Cesium.EllipseGraphics
-  polyline?: Cesium.PolylineGraphics
-  attribute?: CircleAttribute
-  editing?: EditBase
-  _positions_draw?: Cesium.Cartesian3[]
-}
-
-/**
- * 编辑类构造函数类型
- */
-type EditClassConstructor = new (
-  entity: Cesium.Entity,
-  viewer: Cesium.Viewer,
-  dataSource: Cesium.CustomDataSource
-) => EditBase
-
 /**
  * 圆/椭圆绘制类
  *
@@ -88,7 +38,7 @@ export class DrawCircle extends DrawPolyline {
   override createFeature(attribute: Record<string, unknown>): Cesium.Entity {
     this._positions_draw = []
 
-    const circleAttr = attribute as CircleAttribute
+    const circleAttr = attribute as CircleDrawAttribute
 
     // 椭圆需要3个点,圆需要2个点
     if (circleAttr.type === 'ellipse') {
@@ -98,7 +48,7 @@ export class DrawCircle extends DrawPolyline {
     }
 
     const that = this
-    const addattr: Cesium.Entity.ConstructorOptions & { attribute: CircleAttribute } = {
+    const addattr: Cesium.Entity.ConstructorOptions & { attribute: CircleDrawAttribute } = {
       position: new Cesium.CallbackProperty(() => {
         return that.getShowPosition()
       }, false) as unknown as Cesium.PositionProperty,
@@ -122,7 +72,7 @@ export class DrawCircle extends DrawPolyline {
    * 样式转entity
    */
   protected override style2Entity(style: Record<string, unknown>, entity: Cesium.Entity): Cesium.EllipseGraphics.ConstructorOptions {
-    const extEntity = entity as ExtendedEntity
+    const extEntity = entity as CircleExtendedEntity
     return attr.style2Entity(style, extEntity.ellipse)
   }
 
@@ -130,7 +80,7 @@ export class DrawCircle extends DrawPolyline {
    * 绑定边线
    */
   bindOutline(entity: Cesium.Entity): void {
-    const extEntity = entity as ExtendedEntity
+    const extEntity = entity as CircleExtendedEntity
 
     if (!extEntity.polyline || !extEntity.ellipse) {
       return
@@ -194,7 +144,7 @@ export class DrawCircle extends DrawPolyline {
     const positions = this._positions_draw as Cesium.Cartesian3[] | null
     if (!positions) return
 
-    const extEntity = this.entity as ExtendedEntity | null
+    const extEntity = this.entity as CircleExtendedEntity | null
     if (!extEntity || !extEntity.attribute) return
 
     if (isLoad) {
@@ -260,7 +210,7 @@ export class DrawCircle extends DrawPolyline {
    * 根据半径添加坐标点
    */
   addPositionsForRadius(position: Cesium.Cartesian3): void {
-    const extEntity = this.entity as ExtendedEntity | null
+    const extEntity = this.entity as CircleExtendedEntity | null
     if (!extEntity || !extEntity.attribute || !extEntity.ellipse) return
 
     const style = extEntity.attribute.style
@@ -302,7 +252,7 @@ export class DrawCircle extends DrawPolyline {
    * 图形绘制结束后调用
    */
   override finish(): void {
-    const entity = this.entity as ExtendedEntity | null
+    const entity = this.entity as CircleExtendedEntity | null
     if (!entity) return
 
     entity.editing = this.getEditClass(entity as Cesium.Entity) as EditBase // 绑定编辑对象

@@ -1,45 +1,9 @@
 import * as Cesium from 'cesium'
 import { DrawPolyline } from './DrawPolyline'
-import type { AttrClass } from './DrawBase'
+import type { AttrClass, EditClassConstructor, EllipsoidStyleConfig, EllipsoidDrawAttribute, EllipsoidExtendedEntity } from '../types'
 import * as attr from '../attr/AttrEllipsoid'
 import { EditEllipsoid } from '../edit/EditEllipsoid'
 import { getEllipseOuterPositions } from '../attr/AttrCircle'
-import type { EditBase } from '../edit/EditBase'
-
-/**
- * 椭球体样式接口
- */
-interface EllipsoidStyle extends Record<string, unknown> {
-  extentRadii?: number
-  widthRadii?: number
-  heightRadii?: number
-  rotation?: number
-}
-
-/**
- * 椭球体属性接口
- */
-interface EllipsoidAttribute extends Record<string, unknown> {
-  style?: EllipsoidStyle
-}
-
-/**
- * 扩展的 Entity 类型（支持椭球体属性）
- */
-interface ExtendedEntity extends Cesium.Entity {
-  attribute?: EllipsoidAttribute
-  editing?: unknown
-  _positions_draw?: Cesium.Cartesian3 | Cesium.Cartesian3[] | null
-}
-
-/**
- * 编辑类构造函数类型
- */
-type EditClassConstructor = new (
-  entity: Cesium.Entity,
-  viewer: Cesium.Viewer,
-  dataSource: Cesium.CustomDataSource
-) => EditBase
 
 /**
  * 椭球体绘制类
@@ -70,14 +34,14 @@ export class DrawEllipsoid extends DrawPolyline {
   createFeature(attribute: Record<string, unknown>): Cesium.Entity {
     this._positions_draw = []
 
-    const ellipsoidAttr = attribute as EllipsoidAttribute
+    const ellipsoidAttr = attribute as EllipsoidDrawAttribute
 
-    const addattr: Cesium.Entity.ConstructorOptions & { attribute: Record<string, unknown> } = {
+    const addattr: Cesium.Entity.ConstructorOptions & { attribute: EllipsoidDrawAttribute } = {
       position: new Cesium.CallbackProperty(() => {
         return this.getShowPosition()
       }, false) as unknown as Cesium.PositionProperty,
       ellipsoid: attr.style2Entity(ellipsoidAttr.style),
-      attribute: attribute
+      attribute: ellipsoidAttr
     }
 
     this.entity = this.dataSource!.entities.add(addattr) // 创建要素对象
@@ -108,7 +72,7 @@ export class DrawEllipsoid extends DrawPolyline {
 
     if (positions.length < 2) return
 
-    const extEntity = this.entity as ExtendedEntity
+    const extEntity = this.entity as EllipsoidExtendedEntity
     const style = extEntity.attribute?.style
 
     if (!style) return
@@ -133,7 +97,7 @@ export class DrawEllipsoid extends DrawPolyline {
   /**
    * 更新椭球体半径
    */
-  updateRadii(style: EllipsoidStyle): void {
+  updateRadii(style: EllipsoidStyleConfig): void {
     if (!this.entity?.ellipsoid) return
 
     const extentRadii = style.extentRadii || 100
@@ -148,7 +112,7 @@ export class DrawEllipsoid extends DrawPolyline {
    * 根据半径添加位置点
    */
   addPositionsForRadius(position: Cesium.Cartesian3): void {
-    const extEntity = this.entity as ExtendedEntity
+    const extEntity = this.entity as EllipsoidExtendedEntity
     const style = extEntity.attribute?.style
 
     if (!style) return
@@ -175,7 +139,7 @@ export class DrawEllipsoid extends DrawPolyline {
    */
   finish(): void {
     const entity = this.entity!
-    const extEntity = entity as ExtendedEntity
+    const extEntity = entity as EllipsoidExtendedEntity
 
     extEntity.editing = this.getEditClass(entity) // 绑定编辑对象
 

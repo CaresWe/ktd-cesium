@@ -62,20 +62,41 @@ export interface TooltipReactNode {
 export type TooltipContent = string | TooltipVNode | TooltipReactNode
 
 /**
+ * 绘制提示消息接口（点类型）
+ */
+export interface DrawPointMessages {
+  start: string
+}
+
+/**
+ * 绘制提示消息接口（多点类型）
+ */
+export interface DrawMultiPointMessages {
+  start: string
+  cont: string
+  end: string
+  end2: string
+}
+
+/**
+ * 绘制提示消息接口（圆形/矩形等两点类型）
+ */
+export interface DrawTwoPointMessages {
+  start: string
+  end: string
+}
+
+/**
  * 默认提示消息配置
  */
 export interface TooltipMessages {
   draw: {
-    point: {
-      start: string
-    }
-    polyline: {
-      start: string
-      cont: string
-      end: string
-      end2: string
-    }
-    [key: string]: unknown
+    point: DrawPointMessages
+    polyline: DrawMultiPointMessages
+    polygon: DrawMultiPointMessages
+    circle: DrawTwoPointMessages
+    rectangle: DrawTwoPointMessages
+    [key: string]: DrawPointMessages | DrawMultiPointMessages | DrawTwoPointMessages | unknown
   }
   edit: {
     start: string

@@ -458,12 +458,262 @@ onBeforeUnmount(() => {
 </script>
 ```
 
+### 场景 8：与 DataLayerPlugin 配合使用
+
+```typescript
+import { DataLayerPlugin, PopupPlugin } from '@ktd-cesium/plugins'
+
+const dataLayer = viewer.use(DataLayerPlugin)
+const popup = viewer.use(PopupPlugin)
+
+// 创建图层时配置弹窗
+const layerId = dataLayer.createLayer({
+  name: 'poi',
+  type: 'entity',
+  popup: {
+    enabled: true,
+    title: item => item.data?.name || '兴趣点',
+    fields: [
+      { field: 'address', label: '地址' },
+      { field: 'phone', label: '电话' },
+      { field: 'rating', label: '评分', formatter: v => `${v} 星` }
+    ]
+  }
+})
+
+// 或者使用自定义 Vue 组件
+const layerId2 = dataLayer.createLayer({
+  name: 'buildings',
+  type: 'entity',
+  popup: {
+    enabled: true,
+    vueComponent: (item) => ({
+      component: BuildingPopup,
+      props: { building: item.data }
+    })
+  }
+})
+```
+
+### 场景 9：响应式弹窗内容
+
+```typescript
+// 创建可更新的弹窗
+const popupId = await popup.createHTML(
+  '<div id="status">等待数据...</div>',
+  [116.4, 39.9, 0]
+)
+
+// 模拟数据加载
+async function loadData() {
+  popup.updateContent(popupId, '<div id="status">加载中...</div>')
+  
+  const data = await fetch('/api/data').then(r => r.json())
+  
+  popup.updateContent(
+    popupId,
+    `<div>
+      <h3>数据详情</h3>
+      <p>名称: ${data.name}</p>
+      <p>值: ${data.value}</p>
+    </div>`
+  )
+}
+
+loadData()
+```
+
+### 场景 10：弹窗实例操作
+
+```typescript
+const popupId = await popup.createHTML(
+  '<div>内容</div>',
+  [116.4, 39.9, 0]
+)
+
+const instance = popup.get(popupId)
+if (instance) {
+  // 显示/隐藏
+  instance.hide()
+  setTimeout(() => instance.show(), 1000)
+  
+  // 更新位置
+  instance.updatePosition([116.5, 40.0, 0])
+  
+  // 更新内容
+  await instance.updateContent('<div>新内容</div>')
+  
+  // 销毁
+  instance.destroy()
+}
+```
+
+### 场景 11：弹窗生命周期管理
+
+```typescript
+// 创建带关闭回调的弹窗
+const popupId = await popup.createHTML(
+  '<div>重要提示</div>',
+  [116.4, 39.9, 0],
+  {
+    closeOnClickOutside: true,
+    onClose: () => {
+      console.log('弹窗已关闭')
+      // 可以执行清理操作
+      cleanup()
+    }
+  }
+)
+
+// 手动关闭
+popup.remove(popupId)  // 会触发 onClose 回调
+```
+
+### 场景 12：批量管理弹窗
+
+```typescript
+// 获取所有弹窗
+const allIds = popup.getAllIds()
+console.log(`当前有 ${allIds.length} 个弹窗`)
+
+// 获取弹窗数量
+const count = popup.getCount()
+
+// 移除所有弹窗
+popup.removeAll()
+```
+
+### 场景 13：自定义样式弹窗
+
+```typescript
+const popupId = await popup.createHTML(
+  '<div class="custom-popup">自定义样式内容</div>',
+  [116.4, 39.9, 0],
+  {
+    className: 'my-custom-popup',
+    alignment: PopupAlignment.TOP_CENTER,
+    offset: [0, -30]
+  }
+)
+
+// 在 CSS 中定义样式
+// .my-custom-popup {
+//   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+//   color: white;
+//   border-radius: 12px;
+//   padding: 20px;
+//   box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+// }
+```
+
+### 场景 14：在 React 中使用（完整示例）
+
+```tsx
+'use client'
+
+import { useEffect, useRef } from 'react'
+import { KtdViewer } from '@ktd-cesium/core'
+import { EventPlugin, PopupPlugin, PopupAlignment } from '@ktd-cesium/plugins'
+import * as Cesium from 'cesium'
+import PopupContent from './PopupContent'
+
+export function MapWithPopup() {
+  const containerRef = useRef<HTMLDivElement>(null)
+  
+  useEffect(() => {
+    if (!containerRef.current) return
+    
+    const cesiumViewer = new Cesium.Viewer(containerRef.current)
+    const viewer = new KtdViewer(cesiumViewer)
+    const events = viewer.use(EventPlugin)
+    const popup = viewer.use(PopupPlugin)
+    
+    // 注册 React 渲染器（如果使用 React 组件弹窗）
+    popup.registerReactRenderer()
+    
+    const clickId = events.onLeftClick(async (info) => {
+      if (info.coordinates) {
+        await popup.createReact(
+          {
+            component: PopupContent,
+            props: {
+              title: '点击位置',
+              coordinates: info.coordinates
+            }
+          },
+          [info.coordinates.longitude, info.coordinates.latitude, info.coordinates.height],
+          {
+            alignment: PopupAlignment.BOTTOM_CENTER,
+            offset: [0, 30],
+            closeOnClickOutside: true
+          }
+        )
+      }
+    })
+    
+    return () => {
+      events.off(clickId)
+      viewer.destroy()
+    }
+  }, [])
+  
+  return <div ref={containerRef} className="map-container" />
+}
+```
+
+## PopupInstance API
+
+弹窗实例提供以下方法：
+
+| 方法 | 说明 |
+| --- | --- |
+| `show()` | 显示弹窗 |
+| `hide()` | 隐藏弹窗 |
+| `updatePosition(position)` | 更新位置（支持世界坐标或屏幕坐标） |
+| `updateContent(content)` | 更新内容（异步方法） |
+| `destroy()` | 销毁弹窗 |
+
 ## 注意事项
 
-1. **Vue/React 组件弹窗**需要安装对应的依赖（vue 或 react + react-dom）
-2. **屏幕坐标**使用两个元素的数组 `[x, y]`，**世界坐标**使用三个元素 `[lon, lat, height]`
-3. **autoUpdate** 选项控制世界坐标弹窗是否自动跟随相机移动（默认 true）
-4. **draggable** 拖拽功能仅适用于屏幕坐标弹窗
-5. 弹窗内容中的事件处理需要注意 this 绑定
-6. 使用 `remove()` 而不是直接操作 DOM 来清理弹窗，确保资源正确释放
-7. Vue/React 组件卸载时会自动清理
+1. **Vue/React 依赖**：
+   - Vue 组件弹窗需要安装 `vue`（Vue 3）
+   - React 组件弹窗需要安装 `react` 和 `react-dom`（React 18+）
+   - 使用 React 组件前需要调用 `popup.registerReactRenderer()`
+
+2. **坐标类型**：
+   - **屏幕坐标**：使用两个元素的数组 `[x, y]`（像素）
+   - **世界坐标**：使用三个元素 `[lon, lat, height]` 或 `Cartesian3` 对象
+   - 插件会根据数组长度自动判断类型（2 个元素 = 屏幕坐标，3 个元素 = 世界坐标）
+
+3. **自动更新**：
+   - 世界坐标弹窗默认会跟随相机移动自动更新位置
+   - 可以通过 `autoUpdate: false` 禁用自动更新
+   - 屏幕坐标弹窗不会自动更新
+
+4. **拖拽功能**：
+   - `draggable: true` 启用拖拽，仅适用于屏幕坐标弹窗
+   - 拖拽时弹窗会从固定位置变为可移动
+
+5. **点击外部关闭**：
+   - `closeOnClickOutside: true` 启用点击外部关闭
+   - 点击弹窗外部区域会自动调用 `remove()`
+
+6. **资源清理**：
+   - 使用 `remove()` 或 `removeAll()` 清理弹窗，确保 Vue/React 组件正确卸载
+   - 不要直接操作 DOM 删除弹窗元素
+   - 组件卸载时会自动清理所有弹窗
+
+7. **性能考虑**：
+   - 避免创建过多弹窗（建议 < 10 个）
+   - 世界坐标弹窗会在每帧更新位置，数量过多可能影响性能
+   - 可以使用 `hide()` 暂时隐藏弹窗而不是删除
+
+8. **对齐方式**：
+   - 对齐方式基于弹窗的 `transform-origin` 设置
+   - `TOP_CENTER` 表示弹窗顶部中心点对齐到目标位置
+   - 结合 `offset` 可以精确控制弹窗位置
+
+9. **内容更新**：
+   - `updateContent()` 是异步方法，需要 `await`
+   - 更新 Vue/React 组件内容时会先卸载旧组件再挂载新组件
+   - HTML 内容更新会直接替换 innerHTML

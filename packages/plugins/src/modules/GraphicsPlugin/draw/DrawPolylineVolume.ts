@@ -1,43 +1,9 @@
 import * as Cesium from 'cesium'
 import { DrawPolyline } from './DrawPolyline'
-import type { AttrClass } from './DrawBase'
+import type { AttrClass, PolylineVolumeDrawAttribute, PolylineVolumeExtendedEntity } from '../types'
 import * as attr from '../attr/AttrPolylineVolume'
 import { EditPolylineVolume } from '../edit/EditPolylineVolume'
-import type { EditBase } from '../edit/EditBase'
-
-/**
- * 管道体配置接口
- */
-interface PolylineVolumeConfig {
-  minPointNum?: number
-  maxPointNum?: number
-}
-
-/**
- * 管道体属性接口
- */
-interface PolylineVolumeAttribute extends Record<string, unknown> {
-  style?: attr.PolylineVolumeStyleConfig
-  config?: PolylineVolumeConfig
-}
-
-/**
- * 扩展的 Entity 类型（支持管道体属性）
- */
-interface ExtendedEntity extends Cesium.Entity {
-  attribute?: PolylineVolumeAttribute
-  editing?: unknown
-  _positions_draw?: Cesium.Cartesian3[]
-}
-
-/**
- * 编辑类构造函数类型
- */
-type EditClassConstructor = new (
-  entity: Cesium.Entity,
-  viewer: Cesium.Viewer,
-  dataSource: Cesium.CustomDataSource
-) => EditBase
+import type { EditClassConstructor } from '../types'
 
 /**
  * 管道体绘制类
@@ -58,7 +24,7 @@ export class DrawPolylineVolume extends DrawPolyline {
   createFeature(attribute: Record<string, unknown>): Cesium.Entity {
     this._positions_draw = []
 
-    const polylineVolumeAttr = attribute as PolylineVolumeAttribute
+    const polylineVolumeAttr = attribute as PolylineVolumeDrawAttribute
 
     if (!this._minPointNum_def) this._minPointNum_def = this._minPointNum
     if (!this._maxPointNum_def) this._maxPointNum_def = this._maxPointNum
@@ -82,7 +48,7 @@ export class DrawPolylineVolume extends DrawPolyline {
     }, false) as unknown as Cesium.PositionProperty
 
     this.entity = this.dataSource!.entities.add(addattr)
-    const extEntity = this.entity as ExtendedEntity
+    const extEntity = this.entity as PolylineVolumeExtendedEntity
     extEntity._positions_draw = this._positions_draw as Cesium.Cartesian3[]
 
     return this.entity
@@ -110,7 +76,7 @@ export class DrawPolylineVolume extends DrawPolyline {
    */
   finish(): void {
     const entity = this.entity!
-    const extEntity = entity as ExtendedEntity
+    const extEntity = entity as PolylineVolumeExtendedEntity
 
     extEntity.editing = this.getEditClass(entity)
 

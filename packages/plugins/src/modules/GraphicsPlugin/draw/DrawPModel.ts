@@ -1,58 +1,19 @@
 import * as Cesium from 'cesium'
-import { DrawBase, type AttrClass } from './DrawBase'
+import { DrawBase } from './DrawBase'
+import type { AttrClass, EditClassConstructor, ModelPrimitiveConfig, ModelPrimitiveStyle, ModelPrimitiveAttribute } from '../types'
 import { getCurrentMousePosition } from '@ktd-cesium/shared'
 import * as attr from '../attr/AttrModel'
 import { defaultMessages } from '../../TooltipPlugin/messages'
+import { GraphicsEventType } from '../../EventPlugin'
 import { EditPModel } from '../edit/EditPModel'
-
-/**
- * 模型配置接口
- */
-interface ModelConfig {
-  modelUrl?: string
-  heading?: number
-  pitch?: number
-  roll?: number
-  scale?: number
-  minimumPixelSize?: number
-}
-
-/**
- * 模型样式接口
- */
-interface ModelStyle extends ModelConfig {
-  [key: string]: unknown
-}
-
-/**
- * 模型属性接口
- */
-interface ModelAttribute {
-  style: ModelStyle
-  [key: string]: unknown
-}
 
 /**
  * 扩展的 Model Primitive 类型
  */
 interface ExtendedModelPrimitive extends Cesium.Model {
-  attribute?: ModelAttribute
+  attribute?: ModelPrimitiveAttribute
   editing?: unknown
   position?: Cesium.Cartesian3
-}
-
-/**
- * 鼠标移动事件参数接口
- */
-interface MouseMoveEvent {
-  endPosition: Cesium.Cartesian2
-}
-
-/**
- * 鼠标点击事件参数接口
- */
-interface MouseClickEvent {
-  position: Cesium.Cartesian2
 }
 
 /**
@@ -61,7 +22,7 @@ interface MouseClickEvent {
  */
 export class DrawPModel extends DrawBase {
   type = 'model-p'
-  editClass = EditPModel as unknown
+  editClass = EditPModel as unknown as EditClassConstructor
   attrClass = attr as AttrClass
   // entity 在此类中实际是 Model Primitive，但保持基类类型以兼容
 
@@ -71,7 +32,7 @@ export class DrawPModel extends DrawBase {
   createFeature(attribute: Record<string, unknown>): Cesium.Entity {
     this._positions_draw = Cesium.Cartesian3.ZERO
 
-    const modelAttr = attribute as ModelAttribute
+    const modelAttr = attribute as ModelPrimitiveAttribute
     const style = modelAttr.style
 
     // 使用异步方式创建模型
@@ -96,7 +57,7 @@ export class DrawPModel extends DrawBase {
   /**
    * 获取模型的变换矩阵
    */
-  getModelMatrix(cfg: ModelConfig, position?: Cesium.Cartesian3): Cesium.Matrix4 {
+  getModelMatrix(cfg: ModelPrimitiveConfig, position?: Cesium.Cartesian3): Cesium.Matrix4 {
     const hpRoll = new Cesium.HeadingPitchRoll(
       Cesium.Math.toRadians(cfg.heading || 0),
       Cesium.Math.toRadians(cfg.pitch || 0),
@@ -117,18 +78,19 @@ export class DrawPModel extends DrawBase {
    * 样式转Entity属性
    */
   protected style2Entity(style: Record<string, unknown>, entity: Cesium.Entity): void {
-    const modelStyle = style as ModelStyle
+    const modelStyle = style as ModelPrimitiveStyle
     const extModel = entity as unknown as ExtendedModelPrimitive
     extModel.modelMatrix = this.getModelMatrix(modelStyle, extModel.position)
     attr.style2Entity(modelStyle, extModel as unknown as attr.ModelEntityAttr)
   }
 
   /**
-   * 绑定鼠标事件
+   * 绑定鼠标事件（支持PC端和移动端）
    */
-  bindEvent(): void {
-    this.getHandler().setInputAction((event: MouseMoveEvent) => {
-      const point = getCurrentMousePosition(this.viewer!.scene, event.endPosition, this.entity)
+  override bindEvent(): void {
+    // 鼠标移动或触摸移动
+    this.bindMoveEvent((position: Cesium.Cartesian2) => {
+      const point = getCurrentMousePosition(this.viewer.scene, position, this.entity)
       if (point) {
         this._positions_draw = point
         const extModel = this.entity as unknown as ExtendedModelPrimitive
@@ -136,16 +98,28 @@ export class DrawPModel extends DrawBase {
           extModel.modelMatrix = this.getModelMatrix(extModel.attribute.style)
         }
       }
-      this.tooltip!.showAt(event.endPosition, defaultMessages.draw.point.start)
-    }, Cesium.ScreenSpaceEventType.MOUSE_MOVE)
 
-    this.getHandler().setInputAction((event: MouseClickEvent) => {
-      const point = getCurrentMousePosition(this.viewer!.scene, event.position, this.entity)
+      // 显示 Tooltip 提示
+      if (this.tooltip) {
+        this.tooltip.showAt(position, defaultMessages.draw.point.start)
+      }
+
+      // 触发鼠标移动事件
+      this.fire(GraphicsEventType.DRAW_MOUSE_MOVE, {
+        drawtype: this.type,
+        entity: this.entity,
+        position: point
+      })
+    })
+
+    // 左键点击或触摸
+    this.bindClickEvent((position: Cesium.Cartesian2) => {
+      const point = getCurrentMousePosition(this.viewer.scene, position, this.entity)
       if (point) {
         this._positions_draw = point
         this.disable()
       }
-    }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
+    })
   }
 
   /**
