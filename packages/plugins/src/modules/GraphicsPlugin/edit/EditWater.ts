@@ -1,26 +1,7 @@
 import * as Cesium from 'cesium'
 import { EditBase, type ExtendedEntity } from './EditBase'
 import * as draggerCtl from './Dragger'
-import type { EditController } from '../types'
-
-/**
- * 水面 Primitive 扩展接口
- */
-interface WaterPrimitive {
-  _positions_draw?: Cesium.Cartesian3[]
-  _waterAttribute?: {
-    style?: Record<string, unknown>
-    config?: Record<string, unknown>
-  }
-  show?: boolean
-}
-
-/**
- * 扩展的 Entity，包含 Primitive 引用
- */
-interface WaterEditEntity extends ExtendedEntity {
-  _bindedPrimitive?: WaterPrimitive
-}
+import type { EditController, WaterEditPrimitive, WaterEditEntity } from '../types'
 
 /**
  * 水面编辑类
@@ -32,10 +13,10 @@ interface WaterEditEntity extends ExtendedEntity {
  */
 export class EditWater extends EditBase implements EditController {
   /** 绑定的 Primitive */
-  private bindedPrimitive: WaterPrimitive | null = null
+  protected bindedPrimitive: WaterEditPrimitive | null = null
 
   /** 更新几何体的回调 */
-  private updateGeometryCallback: (() => void) | null = null
+  protected updateGeometryCallback: (() => void) | null = null
 
   /**
    * 构造函数
@@ -56,7 +37,7 @@ export class EditWater extends EditBase implements EditController {
     })
     super(virtualEntity, viewer, dataSource)
 
-    this.bindedPrimitive = primitive as WaterPrimitive
+    this.bindedPrimitive = primitive as WaterEditPrimitive
     this.updateGeometryCallback = updateCallback || null
 
     // 将 primitive 引用存储在 entity 上
@@ -176,7 +157,7 @@ export class EditWater extends EditBase implements EditController {
   private createMidDragger(position: Cesium.Cartesian3, afterIndex: number): void {
     const dragger = draggerCtl.createDragger(this.dataSource, {
       position: position,
-      type: draggerCtl.PointType.AddMid,
+      type: draggerCtl.PointType.AddMidPoint,
       tooltip: '拖拽添加点',
       onDrag: (dragger: ExtendedEntity, newPosition: Cesium.Cartesian3) => {
         this.onDragMidPoint(dragger, newPosition, afterIndex)
@@ -249,7 +230,7 @@ export class EditWater extends EditBase implements EditController {
   /**
    * 更新编辑属性
    */
-  protected override updateAttrForEditing(): void {
+  updateAttrForEditing(): void {
     this.updateGeometry()
   }
 

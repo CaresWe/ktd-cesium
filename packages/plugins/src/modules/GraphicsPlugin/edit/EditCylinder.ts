@@ -5,40 +5,14 @@ import { defaultMessages } from '../../TooltipPlugin/messages'
 import { addPositionsHeight } from '@ktd-cesium/shared'
 import { getEllipseOuterPositions } from '../attr/AttrCircle'
 import type { ExtendedEntity } from './EditBase'
-
-/**
- * Cylinder 样式接口
- */
-interface CylinderStyle {
-  topRadius?: number
-  bottomRadius?: number
-  length?: number
-  rotation?: number
-  [key: string]: unknown
-}
-
-/**
- * 扩展的 Entity 接口，包含 Cylinder 特有属性
- */
-interface CylinderEntity {
-  _positions_draw?: Cesium.Cartesian3[]
-  attribute?: {
-    style: CylinderStyle
-    [key: string]: unknown
-  }
-  cylinder?: Cesium.CylinderGraphics & {
-    topRadius?: Cesium.Property
-    bottomRadius?: Cesium.Property
-    length?: Cesium.Property
-  }
-}
+import type { CylinderEditEntity } from '../types'
 
 /**
  * 圆柱体编辑类
  * 继承自 EditPolygon
  */
 export class EditCylinder extends EditPolygon {
-  declare entity: ExtendedEntity & CylinderEntity
+  declare entity: ExtendedEntity & CylinderEditEntity
 
   /**
    * 获取图形对象

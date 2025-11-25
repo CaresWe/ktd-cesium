@@ -1,33 +1,10 @@
 import * as Cesium from 'cesium'
+import {isNumber,getMaxHeight} from '@ktd-cesium/shared'
 import { DrawPolyline } from './DrawPolyline'
 import * as attr from '../attr/AttrRectangle'
 import { EditRectangle } from '../edit/EditRectangle'
 import type { EditClassConstructor, AttrClass, RectangleDrawAttribute, RectangleExtendedEntity } from '../types'
 import type { EditBase } from '../edit/EditBase'
-
-/**
- * 判断是否是数字
- */
-function isNumber(obj: unknown): boolean {
-  return typeof obj === 'number' && obj.constructor === Number
-}
-
-/**
- * 获取坐标数组中的最大高度
- */
-function getMaxHeight(positions: Cesium.Cartesian3[]): number {
-  if (!positions || positions.length === 0) return 0
-
-  let maxHeight = 0
-  for (const position of positions) {
-    const cartographic = Cesium.Cartographic.fromCartesian(position)
-    if (cartographic.height > maxHeight) {
-      maxHeight = cartographic.height
-    }
-  }
-  return maxHeight
-}
-
 /**
  * 矩形绘制类
  *

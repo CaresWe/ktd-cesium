@@ -3,34 +3,7 @@ import { DrawPPolyline } from './DrawPPolyline'
 import { getCurrentMousePosition } from '@ktd-cesium/shared'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { GraphicsEventType } from '../../EventPlugin'
-
-/**
- * 管道体样式接口
- */
-interface PolylineVolumePrimitiveStyle {
-  shape?: Cesium.Cartesian2[]
-  color?: string | Cesium.Color
-  show?: boolean
-  [key: string]: unknown
-}
-
-/**
- * 管道体配置接口
- */
-interface PolylineVolumePrimitiveConfig {
-  minPointNum?: number
-  maxPointNum?: number
-  [key: string]: unknown
-}
-
-/**
- * 管道体属性接口
- */
-interface PolylineVolumePrimitiveAttribute {
-  style: PolylineVolumePrimitiveStyle
-  config?: PolylineVolumePrimitiveConfig
-  [key: string]: unknown
-}
+import type {  PolylineVolumePrimitiveAttribute } from '../types'
 
 /**
  * Primitive 方式的管道体绘制类

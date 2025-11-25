@@ -6,31 +6,13 @@ import type {
   EnableablePlugin,
   EventPluginInterface,
   TooltipPluginInterface,
-  ExtendedViewer
-} from '../types'
+  ExtendedViewer,
+  EditExtendedEntity,
+  ExtendedScreenSpaceEventHandler
+} from '../types/index'
 
-/**
- * 扩展的 Entity 类型
- */
-export interface ExtendedEntity extends Omit<Cesium.Entity, 'position'> {
-  position?: Cesium.PositionProperty | Cesium.Cartesian3
-  attribute?: Record<string, unknown>
-  inProgress?: boolean
-  _isDragger?: boolean
-  _pointType?: draggerCtl.PointType
-  draw_tooltip?: string
-  index?: number
-  onDragStart?: (dragger: ExtendedEntity, position: Cesium.Cartesian3) => void
-  onDrag?: (dragger: ExtendedEntity, position: Cesium.Cartesian3, oldPosition?: Cesium.Cartesian3) => void
-  onDragEnd?: (dragger: ExtendedEntity, position: Cesium.Cartesian3) => void
-}
-
-/**
- * 扩展的 ScreenSpaceEventHandler 类型
- */
-interface ExtendedScreenSpaceEventHandler extends Cesium.ScreenSpaceEventHandler {
-  dragger?: ExtendedEntity | null
-}
+// 使用 types 中定义的 EditExtendedEntity 作为 ExtendedEntity
+export type ExtendedEntity = EditExtendedEntity
 
 /**
  * Tooltip 消息
@@ -465,7 +447,7 @@ export class EditBase {
   /**
    * 更新编辑属性 (子类需要重写)
    */
-  protected updateAttrForEditing(): void {
+  updateAttrForEditing(): void {
     // 子类实现
   }
 

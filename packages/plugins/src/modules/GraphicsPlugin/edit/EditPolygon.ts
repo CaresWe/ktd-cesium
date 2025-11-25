@@ -1,27 +1,14 @@
 import * as Cesium from 'cesium'
 import { EditPolyline } from './EditPolyline'
 import type { ExtendedEntity } from './EditBase'
-
-/**
- * 扩展的 Entity 接口，包含 Polygon 特有属性
- */
-interface PolygonEntity {
-  _positions_draw?: Cesium.Cartesian3[]
-  attribute?: {
-    type?: string
-    [key: string]: unknown
-  }
-  polygon?: Cesium.PolygonGraphics & {
-    hierarchy?: Cesium.Property | Cesium.PolygonHierarchy
-  }
-}
+import type { PolygonEditEntity } from '../types'
 
 /**
  * 多边形编辑类
  * 继承自 EditPolyline，主要区别是 hasClosure=true（闭合）
  */
 export class EditPolygon extends EditPolyline {
-  declare entity: ExtendedEntity & PolygonEntity
+  declare entity: ExtendedEntity & PolygonEditEntity
   protected hasClosure = true // 是否闭合
 
   /**
@@ -77,7 +64,7 @@ export class EditPolygon extends EditPolyline {
   /**
    * 更新编辑属性
    */
-  protected updateAttrForEditing(): void {
+  updateAttrForEditing(): void {
     try {
       if (!this.entity) {
         console.warn('EditPolygon.updateAttrForEditing: 实体对象不存在')

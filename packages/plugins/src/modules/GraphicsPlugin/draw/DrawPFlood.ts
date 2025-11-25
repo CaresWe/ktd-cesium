@@ -27,7 +27,7 @@ export class DrawPFlood extends DrawPWater {
   /**
    * 创建洪水 Primitive
    */
-  protected override createPrimitive(attribute: Record<string, unknown>): Cesium.Primitive | null {
+  protected override createPrimitive(attribute: Record<string, unknown>): Cesium.Primitive | Cesium.GroundPrimitive | null {
     const floodAttr = attribute as FloodPrimitiveAttribute
     const style = floodAttr.style
 

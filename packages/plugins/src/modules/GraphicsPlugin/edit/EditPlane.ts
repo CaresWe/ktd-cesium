@@ -4,38 +4,14 @@ import type { ExtendedEntity } from './EditBase'
 import * as draggerCtl from './Dragger'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { setPositionsHeight, getPositionTranslation } from '@ktd-cesium/shared'
-
-/**
- * Plane 样式接口
- */
-interface PlaneStyle {
-  dimensionsX?: number
-  dimensionsY?: number
-  plane_normal?: string
-  plane_distance?: number
-  [key: string]: unknown
-}
-
-/**
- * 扩展的 Entity 接口，包含 Plane 特有属性
- */
-interface PlaneEntity {
-  _positions_draw?: Cesium.Cartesian3
-  attribute?: {
-    style: PlaneStyle
-    [key: string]: unknown
-  }
-  plane?: Cesium.PlaneGraphics & {
-    dimensions?: Cesium.ConstantProperty
-  }
-}
+import type { PlaneEditStyle, PlaneEditEntity } from '../types'
 
 /**
  * 平面编辑类
  * 继承自 EditBase
  */
 export class EditPlane extends EditBase {
-  declare entity: ExtendedEntity & PlaneEntity
+  declare entity: ExtendedEntity & PlaneEditEntity
 
   /**
    * 图形编辑结束后调用
@@ -52,7 +28,7 @@ export class EditPlane extends EditBase {
   /**
    * 更新 Plane 的尺寸
    */
-  updatePlane(style: PlaneStyle): void {
+  updatePlane(style: PlaneEditStyle): void {
     try {
       // 验证 style 参数
       if (!style) {

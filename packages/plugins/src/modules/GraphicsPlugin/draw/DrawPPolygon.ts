@@ -3,34 +3,7 @@ import { DrawPPolyline } from './DrawPPolyline'
 import { getCurrentMousePosition, addPositionsHeight } from '@ktd-cesium/shared'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { GraphicsEventType } from '../../EventPlugin'
-
-/**
- * 多边形样式接口
- */
-interface PolygonPrimitiveStyle {
-  color?: string | Cesium.Color
-  show?: boolean
-  classificationType?: Cesium.ClassificationType
-  [key: string]: unknown
-}
-
-/**
- * 多边形配置接口
- */
-interface PolygonPrimitiveConfig {
-  minPointNum?: number
-  maxPointNum?: number
-  addHeight?: number
-}
-
-/**
- * 多边形属性接口
- */
-interface PolygonPrimitiveAttribute {
-  style: PolygonPrimitiveStyle
-  config?: PolygonPrimitiveConfig
-  [key: string]: unknown
-}
+import type { PolygonPrimitiveAttribute } from '../types'
 
 /**
  * Primitive 方式的多边形绘制类
@@ -55,7 +28,7 @@ export class DrawPPolygon extends DrawPPolyline {
   /**
    * 创建 GroundPrimitive
    */
-  protected override createPrimitive(attribute: Record<string, unknown>): Cesium.GroundPrimitive | null {
+  protected override createPrimitive(attribute: Record<string, unknown>): Cesium.Primitive | Cesium.GroundPrimitive | null {
     this._positions_draw = []
 
     const polygonAttr = attribute as PolygonPrimitiveAttribute

@@ -1,20 +1,14 @@
 import * as Cesium from 'cesium'
 import { EditPolyline } from './EditPolyline'
 import type { ExtendedEntity } from './EditBase'
-
-/**
- * 扩展的 Entity 接口，包含 Wall 特有属性
- */
-interface WallEntity {
-  wall?: Cesium.WallGraphics
-}
+import type { WallEditEntity } from '../types'
 
 /**
  * 墙体编辑类
  * 继承自 EditPolyline
  */
 export class EditWall extends EditPolyline {
-  declare entity: ExtendedEntity & WallEntity
+  declare entity: ExtendedEntity & WallEditEntity
 
   /**
    * 获取图形对象

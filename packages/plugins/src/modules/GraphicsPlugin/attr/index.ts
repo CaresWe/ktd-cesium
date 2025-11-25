@@ -4,6 +4,7 @@
  */
 
 import * as Cesium from 'cesium'
+import type { GeoJSONFeature } from '../types'
 
 // 导入所有 Attr 模块
 import * as AttrBillboard from './AttrBillboard'
@@ -50,7 +51,7 @@ export const AttrEllipse = AttrCircle
 interface AttrModule {
   getCoordinates: (entity: Cesium.Entity) => number[][] | null
   getPositions: (entity: Cesium.Entity) => Cesium.Cartesian3[] | null
-  toGeoJSON: (entity: Cesium.Entity) => Record<string, unknown>
+  toGeoJSON: (entity: Cesium.Entity) => GeoJSONFeature
   style2Entity: (style: Record<string, unknown>, entityattr?: Record<string, unknown>) => Record<string, unknown>
 }
 
@@ -118,7 +119,11 @@ function getAttrClass(entity: Cesium.Entity): AttrModule {
   return {
     getCoordinates: (_entity: Cesium.Entity): null => null,
     getPositions: (_entity: Cesium.Entity): null => null,
-    toGeoJSON: (_entity: Cesium.Entity): Record<string, unknown> => ({}),
+    toGeoJSON: (_entity: Cesium.Entity): GeoJSONFeature => ({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [] },
+      properties: {}
+    }),
     style2Entity: (_style: Record<string, unknown>, _entityattr?: Record<string, unknown>): Record<string, unknown> => ({}),
   }
 }
@@ -170,7 +175,7 @@ export function getCenterPosition(entity: Cesium.Entity): Cesium.Cartesian3 | nu
 /**
  * 实体转 GeoJSON
  */
-export function toGeoJSON(entity: Cesium.Entity): Record<string, unknown> {
+export function toGeoJSON(entity: Cesium.Entity): GeoJSONFeature {
   return getAttrClass(entity).toGeoJSON(entity)
 }
 

@@ -2,22 +2,14 @@ import * as Cesium from 'cesium'
 import { EditPolygonEx } from './EditPolygonEx'
 import { computeGatheringPlacePositions } from '@ktd-cesium/shared'
 import type { ExtendedEntity } from './EditBase'
-
-/**
- * 扩展的 Entity 接口，包含集结地特有属性
- */
-interface GatheringPlaceEntity {
-  _positions_draw?: Cesium.Cartesian3[]
-  _positions_show?: Cesium.Cartesian3[]
-  attribute?: Record<string, unknown>
-}
+import type { GatheringPlaceEditEntity } from '../types/index'
 
 /**
  * 集结地编辑类
  * 用于编辑由3个点确定的集结地
  */
 export class EditGatheringPlace extends EditPolygonEx {
-  declare entity: ExtendedEntity & GatheringPlaceEntity
+  declare entity: ExtendedEntity & GatheringPlaceEditEntity
   protected override _minPointNum = 3
   protected override _maxPointNum = 3
   protected override _hasMidPoint = false // 不可以添加中间点

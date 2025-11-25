@@ -1,15 +1,7 @@
 import * as Cesium from 'cesium'
 import { EditPolygon } from './EditPolygon'
 import type { ExtendedEntity } from './EditBase'
-
-/**
- * 扩展的 Entity 接口，包含扩展面特有属性
- */
-interface PolygonExEntity {
-  _positions_draw?: Cesium.Cartesian3[]
-  _positions_show?: Cesium.Cartesian3[]
-  attribute?: Record<string, unknown>
-}
+import type { PolygonExEditEntity } from '../types'
 
 /**
  * 扩展面编辑类
@@ -17,7 +9,7 @@ interface PolygonExEntity {
  * 子类需要重写 getShowPositions 方法
  */
 export class EditPolygonEx extends EditPolygon {
-  declare entity: ExtendedEntity & PolygonExEntity
+  declare entity: ExtendedEntity & PolygonExEditEntity
   protected _hasMidPoint = false // 不显示中间点
   protected _positions_show: Cesium.Cartesian3[] | null = null // 显示的位置点
 
@@ -45,7 +37,7 @@ export class EditPolygonEx extends EditPolygon {
   /**
    * 坐标位置相关
    */
-  protected updateAttrForEditing(): void {
+  updateAttrForEditing(): void {
     try {
       if (!this.entity) {
         console.warn('EditPolygonEx.updateAttrForEditing: 实体对象不存在')

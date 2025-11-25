@@ -2,25 +2,7 @@ import * as Cesium from 'cesium'
 import { EditPolyline } from './EditPolyline'
 import { line2curve } from '@ktd-cesium/shared'
 import type { ExtendedEntity } from './EditBase'
-
-/**
- * 扩展的 Entity 接口，包含 Curve 特有属性
- */
-interface CurveEntity {
-  _positions_draw?: Cesium.Cartesian3[]
-  _positions_show?: Cesium.Cartesian3[]
-  attribute?: {
-    type?: string
-    style?: {
-      closure?: boolean
-      [key: string]: unknown
-    }
-    [key: string]: unknown
-  }
-  polyline?: Cesium.PolylineGraphics & {
-    positions?: Cesium.Property
-  }
-}
+import type { CurveEditEntity } from '../types'
 
 /**
  * 曲线编辑类
@@ -28,7 +10,7 @@ interface CurveEntity {
  * 继承自 EditPolyline
  */
 export class EditCurve extends EditPolyline {
-  declare entity: ExtendedEntity & CurveEntity
+  declare entity: ExtendedEntity & CurveEditEntity
   protected _positions_show: Cesium.Cartesian3[] | null = null
 
   /**
@@ -71,7 +53,7 @@ export class EditCurve extends EditPolyline {
    * 坐标位置相关
    * 根据控制点重新生成平滑曲线
    */
-  protected updateAttrForEditing(): void {
+  updateAttrForEditing(): void {
     try {
       if (!this._positions_draw || this._positions_draw.length < 3) {
         this._positions_show = this._positions_draw

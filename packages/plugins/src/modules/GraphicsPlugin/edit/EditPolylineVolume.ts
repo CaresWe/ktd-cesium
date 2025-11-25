@@ -1,21 +1,14 @@
 import * as Cesium from 'cesium'
 import { EditPolyline } from './EditPolyline'
 import type { ExtendedEntity } from './EditBase'
-
-/**
- * 扩展的 Entity 接口，包含 PolylineVolume 特有属性
- */
-interface PolylineVolumeEntity {
-  _positions_draw?: Cesium.Cartesian3[]
-  polylineVolume?: Cesium.PolylineVolumeGraphics
-}
+import type { PolylineVolumeEditEntity } from '../types'
 
 /**
  * 管道体编辑类
  * 继承自 EditPolyline
  */
 export class EditPolylineVolume extends EditPolyline {
-  declare entity: ExtendedEntity & PolylineVolumeEntity
+  declare entity: ExtendedEntity & PolylineVolumeEditEntity
 
   /**
    * 获取图形对象

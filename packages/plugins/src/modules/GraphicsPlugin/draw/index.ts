@@ -118,6 +118,8 @@ export type {
   VideoPlaybackState,
   VideoEditPointType,
   VideoEditControlPoint,
-  VideoFusionEventData
+  VideoFusionEventData,
+  // Primitive 相关类型
+  DrawPrimitiveConfig,
+  PrimitiveObject
 } from '../types'
-export type { DrawPrimitiveConfig, PrimitiveObject } from './DrawPrimitiveBase'

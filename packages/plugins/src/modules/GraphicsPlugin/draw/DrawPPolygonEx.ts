@@ -35,7 +35,9 @@ export class DrawPPolygonEx extends DrawPPolygon {
     }
 
     // 生成显示坐标
-    this._positions_show = this.getShowPositions(positions, (this.currentGroundPrimitive as unknown as Record<string, unknown>)?.attribute)
+    const primitiveObj = this.currentGroundPrimitive as unknown as Record<string, unknown>
+    const attribute = primitiveObj?.attribute as Record<string, unknown> | undefined
+    this._positions_show = this.getShowPositions(positions, attribute)
 
     // 调用父类方法更新几何体，但使用 _positions_show
     if (!this.currentGroundPrimitive || !this._positions_show || this._positions_show.length < 2) return

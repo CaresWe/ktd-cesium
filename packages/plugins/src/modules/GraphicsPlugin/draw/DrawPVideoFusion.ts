@@ -1,79 +1,26 @@
 import * as Cesium from 'cesium'
-import { DrawPrimitiveBase, type PrimitiveObject } from './DrawPrimitiveBase'
+import { DrawPrimitiveBase } from './DrawPrimitiveBase'
 import { getCurrentMousePosition } from '@ktd-cesium/shared'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { GraphicsEventType } from '../../EventPlugin'
+import { createVideoMaterial } from '../../MaterialPlugin'
 import type {
   VideoFusionPrimitiveStyle,
   VideoFusionPrimitiveAttribute,
   VideoPlaybackState,
   VideoSourceType,
-  VideoProjectionMode,
-  VideoProjectionCamera
+  VideoProjectionCamera,
+  PrimitiveObject,
+  HlsStatic,
+  HlsInstance,
+  HlsErrorData,
+  FlvStatic,
+  FlvInstance
 } from '../types'
 
-// HLS.js 和 flv.js 类型声明
-declare const Hls: any
-declare const flvjs: any
-
-/**
- * 视频材质着色器
- */
-const VideoMaterialSource = `
-  uniform sampler2D videoTexture;
-  uniform float opacity;
-  uniform float brightness;
-  uniform float contrast;
-  uniform float saturation;
-  uniform float hue;
-
-  // 色相旋转矩阵
-  vec3 adjustHue(vec3 color, float hueShift) {
-    float angle = hueShift * 3.14159265 / 180.0;
-    float s = sin(angle);
-    float c = cos(angle);
-    vec3 weights = vec3(0.299, 0.587, 0.114);
-    vec3 axis = normalize(vec3(1.0, 1.0, 1.0));
-    mat3 rotation = mat3(
-      c + (1.0 - c) * axis.x * axis.x,
-      (1.0 - c) * axis.x * axis.y - s * axis.z,
-      (1.0 - c) * axis.x * axis.z + s * axis.y,
-      (1.0 - c) * axis.y * axis.x + s * axis.z,
-      c + (1.0 - c) * axis.y * axis.y,
-      (1.0 - c) * axis.y * axis.z - s * axis.x,
-      (1.0 - c) * axis.z * axis.x - s * axis.y,
-      (1.0 - c) * axis.z * axis.y + s * axis.x,
-      c + (1.0 - c) * axis.z * axis.z
-    );
-    return rotation * color;
-  }
-
-  czm_material czm_getMaterial(czm_materialInput materialInput) {
-    czm_material material = czm_getDefaultMaterial(materialInput);
-
-    vec4 videoColor = texture(videoTexture, materialInput.st);
-
-    // 亮度调整
-    vec3 color = videoColor.rgb * brightness;
-
-    // 对比度调整
-    color = (color - 0.5) * contrast + 0.5;
-
-    // 饱和度调整
-    float gray = dot(color, vec3(0.299, 0.587, 0.114));
-    color = mix(vec3(gray), color, saturation);
-
-    // 色相调整
-    if (abs(hue) > 0.001) {
-      color = adjustHue(color, hue);
-    }
-
-    material.diffuse = color;
-    material.alpha = videoColor.a * opacity;
-
-    return material;
-  }
-`
+// HLS.js 和 flv.js 全局声明
+declare const Hls: HlsStatic | undefined
+declare const flvjs: FlvStatic | undefined
 
 /**
  * 扩展的视频Primitive接口
@@ -109,10 +56,10 @@ export class DrawPVideoFusion extends DrawPrimitiveBase {
   protected videoMaterial: Cesium.Material | null = null
 
   /** HLS 实例 */
-  protected hlsInstance: any = null
+  protected hlsInstance: HlsInstance | null = null
 
   /** FLV 实例 */
-  protected flvInstance: any = null
+  protected flvInstance: FlvInstance | null = null
 
   /** 播放状态 */
   protected playbackState: VideoPlaybackState = {
@@ -241,7 +188,7 @@ export class DrawPVideoFusion extends DrawPrimitiveBase {
         this.playbackState.loading = false
       })
 
-      this.hlsInstance.on(Hls.Events.ERROR, (_event: unknown, data: any) => {
+      this.hlsInstance.on(Hls.Events.ERROR, (_event: unknown, data: HlsErrorData) => {
         if (data.fatal) {
           this.playbackState.error = data.details
           this.fire(GraphicsEventType.DRAW_MOUSE_MOVE, {
@@ -327,27 +274,17 @@ export class DrawPVideoFusion extends DrawPrimitiveBase {
    * 创建视频材质
    */
   protected createVideoMaterial(style: VideoFusionPrimitiveStyle): Cesium.Material {
-    const materialType = 'VideoFusion_' + Date.now()
+    if (!this.videoElement) {
+      throw new Error('Video element not created')
+    }
 
-    Cesium.Material._materialCache.addMaterial(materialType, {
-      fabric: {
-        type: materialType,
-        uniforms: {
-          videoTexture: this.videoElement,
-          opacity: style.opacity ?? 1.0,
-          brightness: style.brightness ?? 1.0,
-          contrast: style.contrast ?? 1.0,
-          saturation: style.saturation ?? 1.0,
-          hue: style.hue ?? 0
-        },
-        source: VideoMaterialSource
-      }
-    })
-
-    return new Cesium.Material({
-      fabric: {
-        type: materialType
-      }
+    return createVideoMaterial({
+      videoSource: this.videoElement,
+      opacity: style.opacity,
+      brightness: style.brightness,
+      contrast: style.contrast,
+      saturation: style.saturation,
+      hue: style.hue
     })
   }
 
@@ -764,10 +701,10 @@ export class DrawPVideoFusion extends DrawPrimitiveBase {
     // 创建视锥体线条
     const frustumColor = this.parseColor(style.frustumColor) || Cesium.Color.YELLOW
 
-    // 计算视锥体的四个角点
-    const halfFov = camera.fov / 2
-    const halfHeight = Math.tan(halfFov) * camera.far
-    const halfWidth = halfHeight * camera.aspectRatio
+    // 计算视锥体的四个角点（用于未来扩展）
+    // const halfFov = camera.fov / 2
+    // const halfHeight = Math.tan(halfFov) * camera.far
+    // const halfWidth = halfHeight * camera.aspectRatio
 
     // 这里简化处理，只显示视锥体轮廓线
     this.frustumEntity = this.dataSource.entities.add({

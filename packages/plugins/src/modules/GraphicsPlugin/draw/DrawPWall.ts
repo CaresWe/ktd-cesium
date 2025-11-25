@@ -3,34 +3,7 @@ import { DrawPPolyline } from './DrawPPolyline'
 import { getCurrentMousePosition } from '@ktd-cesium/shared'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { GraphicsEventType } from '../../EventPlugin'
-
-/**
- * 墙体样式接口
- */
-interface WallPrimitiveStyle {
-  color?: string | Cesium.Color
-  extrudedHeight?: number
-  show?: boolean
-  [key: string]: unknown
-}
-
-/**
- * 墙体配置接口
- */
-interface WallPrimitiveConfig {
-  minPointNum?: number
-  maxPointNum?: number
-  [key: string]: unknown
-}
-
-/**
- * 墙体属性接口
- */
-interface WallPrimitiveAttribute {
-  style: WallPrimitiveStyle
-  config?: WallPrimitiveConfig
-  [key: string]: unknown
-}
+import type { WallPrimitiveAttribute } from '../types'
 
 /**
  * Primitive 方式的墙体绘制类

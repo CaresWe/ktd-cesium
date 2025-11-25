@@ -1,6 +1,7 @@
 import * as Cesium from 'cesium'
 import { cartesian2lonlat } from '@ktd-cesium/shared'
 import * as globe from './globe'
+import type { GeoJSONFeature } from '../types'
 
 /**
  * 样式赋值到 Entity
@@ -92,7 +93,7 @@ export function getCoordinates(entity: Cesium.Entity): number[][] | null {
 /**
  * entity 转 geojson
  */
-export function toGeoJSON(entity: Cesium.Entity): Record<string, unknown> {
+export function toGeoJSON(entity: Cesium.Entity): GeoJSONFeature {
   const coordinates = getCoordinates(entity)
   const entityExt = entity as Cesium.Entity & { attribute?: Record<string, unknown> }
   return {
@@ -100,7 +101,7 @@ export function toGeoJSON(entity: Cesium.Entity): Record<string, unknown> {
     properties: entityExt.attribute || {},
     geometry: {
       type: 'LineString',
-      coordinates: coordinates
+      coordinates: coordinates || []
     }
   }
 }

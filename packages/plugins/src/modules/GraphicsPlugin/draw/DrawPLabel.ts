@@ -1,9 +1,9 @@
 import * as Cesium from 'cesium'
-import { DrawPrimitiveBase, type PrimitiveObject } from './DrawPrimitiveBase'
+import { DrawPrimitiveBase } from './DrawPrimitiveBase'
 import { getCurrentMousePosition } from '@ktd-cesium/shared'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { GraphicsEventType } from '../../EventPlugin'
-import type { LabelPrimitiveStyle, LabelPrimitiveAttribute } from '../types'
+import type { LabelPrimitiveStyle, LabelPrimitiveAttribute, PrimitiveObject } from '../types'
 
 /**
  * 扩展的 Label 接口

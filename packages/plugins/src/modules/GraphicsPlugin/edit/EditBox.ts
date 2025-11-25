@@ -4,37 +4,14 @@ import type { ExtendedEntity } from './EditBase'
 import * as draggerCtl from './Dragger'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { setPositionsHeight, getPositionTranslation } from '@ktd-cesium/shared'
-
-/**
- * Box 样式接口
- */
-interface BoxStyle {
-  dimensionsX?: number
-  dimensionsY?: number
-  dimensionsZ?: number
-  [key: string]: unknown
-}
-
-/**
- * 扩展的 Entity 接口，包含 Box 特有属性
- */
-interface BoxEntity {
-  _positions_draw?: Cesium.Cartesian3
-  attribute?: {
-    style: BoxStyle
-    [key: string]: unknown
-  }
-  box?: Cesium.BoxGraphics & {
-    dimensions: Cesium.ConstantProperty
-  }
-}
+import type { BoxEditStyle, BoxEditEntity } from '../types'
 
 /**
  * 立方体编辑类
  * 继承自 EditBase
  */
 export class EditBox extends EditBase {
-  declare entity: ExtendedEntity & BoxEntity
+  declare entity: ExtendedEntity & BoxEditEntity
 
   /**
    * 图形编辑结束后调用
@@ -55,7 +32,7 @@ export class EditBox extends EditBase {
   /**
    * 更新Box的尺寸
    */
-  updateBox(style: BoxStyle): void {
+  updateBox(style: BoxEditStyle): void {
     try {
       // 验证 style 参数
       if (!style) {

@@ -2,28 +2,14 @@ import * as Cesium from 'cesium'
 import { EditPolyline } from './EditPolyline'
 import { setPositionsHeight } from '@ktd-cesium/shared'
 import type { ExtendedEntity } from './EditBase'
-
-/**
- * 扩展的 Entity 接口，包含 Corridor 特有属性
- */
-interface CorridorEntity {
-  _positions_draw?: Cesium.Cartesian3[]
-  attribute?: {
-    type?: string
-    [key: string]: unknown
-  }
-  corridor?: Cesium.CorridorGraphics & {
-    positions?: Cesium.Property
-    height?: Cesium.Property
-  }
-}
+import type { CorridorEditEntity } from '../types'
 
 /**
  * 走廊编辑类
  * 继承自 EditPolyline
  */
 export class EditCorridor extends EditPolyline {
-  declare entity: ExtendedEntity & CorridorEntity
+  declare entity: ExtendedEntity & CorridorEditEntity
 
   /**
    * 获取图形对象

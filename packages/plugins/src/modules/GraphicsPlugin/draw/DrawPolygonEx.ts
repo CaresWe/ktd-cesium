@@ -2,17 +2,7 @@ import * as Cesium from 'cesium'
 import { DrawPolygon } from './DrawPolygon'
 import { PolylineEntity } from '../attr/AttrPolyline'
 import type { GeoJSONFeature } from '@ktd-cesium/shared'
-
-/**
- * 扩展的 Entity 接口，包含额外的位置属性
- */
-interface ExtendedEntityEx {
-  _positions_draw?: Cesium.Cartesian3[]
-  _positions_show?: Cesium.Cartesian3[] | null
-  polygon?: Cesium.PolygonGraphics
-  editing?: unknown
-  attribute?: Record<string, unknown>
-}
+import type { PolygonExExtendedEntity } from '../types'
 
 /**
  * 扩展面绘制类
@@ -36,7 +26,8 @@ export class DrawPolygonEx extends DrawPolygon {
       return
     }
 
-    this._positions_show = this.getShowPositions(this._positions_draw, this.entity?.attribute)
+    const extEntity = this.entity as PolygonExExtendedEntity | undefined
+    this._positions_show = this.getShowPositions(this._positions_draw, extEntity?.attribute)
   }
 
   /**
@@ -54,9 +45,9 @@ export class DrawPolygonEx extends DrawPolygon {
 
   finish(): void {
     const entity = this.entity!
-    const extEntity = entity as Cesium.Entity & ExtendedEntityEx
+    const extEntity = entity as Cesium.Entity & PolygonExExtendedEntity
 
-    entity.editing = this.getEditClass(entity)
+    extEntity.editing = this.getEditClass(entity)
 
     // 抛弃多余的无效绘制点
     if (Array.isArray(this._positions_draw) && this._positions_draw.length > this._maxPointNum) {

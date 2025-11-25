@@ -3,17 +3,7 @@ import { DrawPWater } from './DrawPWater'
 import { getCurrentMousePosition, line2curve } from '@ktd-cesium/shared'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { GraphicsEventType } from '../../EventPlugin'
-import type { RiverPrimitiveStyle, RiverPrimitiveAttribute, RiverCrossSection } from '../types'
-
-/**
- * 河流动画状态
- */
-interface RiverAnimationState {
-  isAnimating: boolean
-  startTime: number
-  currentWaterLevel: number
-  baseWaterLevel: number
-}
+import type { RiverPrimitiveAttribute, RiverCrossSection, RiverAnimationState, RiverPrimitiveObject } from '../types'
 
 /**
  * 动态河流 Primitive 绘制类
@@ -25,9 +15,6 @@ export class DrawPRiver extends DrawPWater {
   // 河流至少需要2个点
   protected override _minPointNum = 2
   protected override _maxPointNum = 9999
-
-  /** 河流路径点（中心线） */
-  private riverPath: Cesium.Cartesian3[] = []
 
   /** 河流断面数据 */
   private crossSections: RiverCrossSection[] = []
@@ -49,9 +36,8 @@ export class DrawPRiver extends DrawPWater {
   /**
    * 创建河流 Primitive
    */
-  protected override createPrimitive(attribute: Record<string, unknown>): Cesium.Primitive | null {
+  protected override createPrimitive(attribute: Record<string, unknown>): Cesium.Primitive | Cesium.GroundPrimitive | null {
     this._positions_draw = []
-    this.riverPath = []
 
     const riverAttr = attribute as RiverPrimitiveAttribute
     const style = riverAttr.style
@@ -73,7 +59,8 @@ export class DrawPRiver extends DrawPWater {
     const primitive = super.createPrimitive(attribute)
 
     if (primitive) {
-      ;(primitive as any)._riverAttribute = riverAttr
+      const riverPrimitiveObj = primitive as unknown as RiverPrimitiveObject
+      riverPrimitiveObj._riverAttribute = riverAttr
     }
 
     // 如果启用动态水位，开始动画
@@ -143,7 +130,8 @@ export class DrawPRiver extends DrawPWater {
     // 平滑河流路径
     this.smoothPath = path.length >= 3 ? line2curve(path, false) : path
 
-    const riverAttr = (this.waterPrimitive as any)?._riverAttribute as RiverPrimitiveAttribute | undefined
+    const riverPrimitiveObj = this.waterPrimitive as unknown as RiverPrimitiveObject | null
+    const riverAttr = riverPrimitiveObj?._riverAttribute
     const style = riverAttr?.style || {}
     const width = style.width ?? 50
 
@@ -175,8 +163,9 @@ export class DrawPRiver extends DrawPWater {
       show: style.show !== false
     })
 
-    ;(this.waterPrimitive as any)._riverAttribute = riverAttr
-    ;(this.waterPrimitive as any)._positions_draw = path
+    const newRiverPrimitiveObj = this.waterPrimitive as unknown as RiverPrimitiveObject
+    newRiverPrimitiveObj._riverAttribute = riverAttr
+    newRiverPrimitiveObj._positions_draw = path
 
     this.primitives!.add(this.waterPrimitive)
     this.primitive = this.waterPrimitive
@@ -297,7 +286,8 @@ export class DrawPRiver extends DrawPWater {
     this.riverState.isAnimating = true
     this.riverState.startTime = Date.now()
 
-    const riverAttr = (this.waterPrimitive as any)?._riverAttribute as RiverPrimitiveAttribute | undefined
+    const riverPrimitiveObj = this.waterPrimitive as unknown as RiverPrimitiveObject | null
+    const riverAttr = riverPrimitiveObj?._riverAttribute
     const style = riverAttr?.style || {}
     const period = (style.waterLevelPeriod ?? 10) * 1000 // 周期，毫秒
     const amplitude = style.waterLevelAmplitude ?? 5 // 振幅
@@ -339,7 +329,8 @@ export class DrawPRiver extends DrawPWater {
    * 设置河流宽度
    */
   setRiverWidth(width: number): void {
-    const riverAttr = (this.waterPrimitive as any)?._riverAttribute as RiverPrimitiveAttribute | undefined
+    const riverPrimitiveObj = this.waterPrimitive as unknown as RiverPrimitiveObject | null
+    const riverAttr = riverPrimitiveObj?._riverAttribute
     if (riverAttr?.style) {
       riverAttr.style.width = width
       this.updatePolygonGeometry()

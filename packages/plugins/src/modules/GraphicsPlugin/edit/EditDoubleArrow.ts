@@ -2,22 +2,14 @@ import * as Cesium from 'cesium'
 import { EditPolygonEx } from './EditPolygonEx'
 import { computeDoubleArrowPositions } from '@ktd-cesium/shared'
 import type { ExtendedEntity } from './EditBase'
-
-/**
- * 扩展的 Entity 接口，包含双箭头特有属性
- */
-interface DoubleArrowEntity {
-  _positions_draw?: Cesium.Cartesian3[]
-  _positions_show?: Cesium.Cartesian3[]
-  attribute?: Record<string, unknown>
-}
+import type { DoubleArrowEditEntity } from '../types/index'
 
 /**
  * 双箭头（钳击）编辑类
  * 用于编辑由3-5个点确定的双箭头
  */
 export class EditDoubleArrow extends EditPolygonEx {
-  declare entity: ExtendedEntity & DoubleArrowEntity
+  declare entity: ExtendedEntity & DoubleArrowEditEntity
   protected override _minPointNum = 3
   protected override _maxPointNum = 5
   protected override _hasMidPoint = false // 不可以添加中间点

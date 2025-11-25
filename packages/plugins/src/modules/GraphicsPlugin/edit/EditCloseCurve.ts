@@ -2,22 +2,14 @@ import * as Cesium from 'cesium'
 import { EditPolygonEx } from './EditPolygonEx'
 import { computeCloseCurvePositions } from '@ktd-cesium/shared'
 import type { ExtendedEntity } from './EditBase'
-
-/**
- * 扩展的 Entity 接口，包含闭合曲面特有属性
- */
-interface CloseCurveEntity {
-  _positions_draw?: Cesium.Cartesian3[]
-  _positions_show?: Cesium.Cartesian3[]
-  attribute?: Record<string, unknown>
-}
+import type { CloseCurveEditEntity } from '../types/index'
 
 /**
  * 闭合曲面编辑类
  * 用于编辑由多个点确定的闭合曲面
  */
 export class EditCloseCurve extends EditPolygonEx {
-  declare entity: ExtendedEntity & CloseCurveEntity
+  declare entity: ExtendedEntity & CloseCurveEditEntity
   protected override _minPointNum = 3
   protected override _maxPointNum = 999
   protected override _hasMidPoint = true // 可以添加中间点

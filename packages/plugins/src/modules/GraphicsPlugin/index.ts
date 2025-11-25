@@ -978,7 +978,9 @@ export class GraphicsPlugin extends BasePlugin {
     // 如果在编辑状态，更新绑定的拖拽点
     const editing = entityExt.editing
     if (editing) {
-      if (editing.updateAttrForEditing) editing.updateAttrForEditing()
+      // updateAttrForEditing 是内部方法，需要类型断言
+      const editingWithUpdate = editing as EditController & { updateAttrForEditing?(): void }
+      if (editingWithUpdate.updateAttrForEditing) editingWithUpdate.updateAttrForEditing()
       if (editing.updateDraggers) editing.updateDraggers()
     }
 

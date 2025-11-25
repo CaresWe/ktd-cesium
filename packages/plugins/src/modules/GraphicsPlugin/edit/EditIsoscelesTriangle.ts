@@ -2,22 +2,14 @@ import * as Cesium from 'cesium'
 import { EditPolygonEx } from './EditPolygonEx'
 import { computeIsoscelesTrianglePositions } from '@ktd-cesium/shared'
 import type { ExtendedEntity } from './EditBase'
-
-/**
- * 扩展的 Entity 接口，包含等腰三角形特有属性
- */
-interface IsoscelesTriangleEntity {
-  _positions_draw?: Cesium.Cartesian3[]
-  _positions_show?: Cesium.Cartesian3[]
-  attribute?: Record<string, unknown>
-}
+import type { IsoscelesTriangleEditEntity } from '../types/index'
 
 /**
  * 等腰三角形编辑类
  * 用于编辑由3个点确定的等腰三角形
  */
 export class EditIsoscelesTriangle extends EditPolygonEx {
-  declare entity: ExtendedEntity & IsoscelesTriangleEntity
+  declare entity: ExtendedEntity & IsoscelesTriangleEditEntity
   protected override _minPointNum = 3
   protected override _maxPointNum = 3
 

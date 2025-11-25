@@ -239,6 +239,33 @@ function computeOffsetPoint(
 }
 
 /**
+ * 计算质心（中心点）
+ * @param positions 位置数组
+ * @returns 质心位置
+ */
+export function centerOfMass(positions: Cesium.Cartesian3[]): Cesium.Cartesian3 {
+  try {
+    if (!positions || positions.length === 0) {
+      throw new Error('位置数组不能为空')
+    }
+
+    const center = new Cesium.Cartesian3()
+    for (const pos of positions) {
+      if (!pos || !(pos instanceof Cesium.Cartesian3)) {
+        throw new Error('位置必须是 Cesium.Cartesian3 类型')
+      }
+      Cesium.Cartesian3.add(center, pos, center)
+    }
+    Cesium.Cartesian3.divideByScalar(center, positions.length, center)
+    return center
+  } catch (error) {
+    console.error('centerOfMass: 计算质心失败', error)
+    // 返回第一个位置作为默认值
+    return positions[0] || new Cesium.Cartesian3()
+  }
+}
+
+/**
  * 计算两点的中点
  * @param p1 点1
  * @param p2 点2

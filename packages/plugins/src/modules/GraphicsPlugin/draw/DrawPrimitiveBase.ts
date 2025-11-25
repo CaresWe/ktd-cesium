@@ -1,22 +1,6 @@
 import * as Cesium from 'cesium'
-import { DrawBase, type DrawConfig } from './DrawBase'
-
-/**
- * Primitive 绘制配置
- */
-export interface DrawPrimitiveConfig extends DrawConfig {
-  primitives: Cesium.PrimitiveCollection
-}
-
-/**
- * Primitive 对象接口（扩展属性）
- */
-export interface PrimitiveObject {
-  attribute?: Record<string, unknown>
-  editing?: unknown
-  inProgress?: boolean
-  _positions_draw?: Cesium.Cartesian3[] | Cesium.Cartesian3 | null
-}
+import { DrawBase } from './DrawBase'
+import type { DrawPrimitiveConfig, PrimitiveObject } from '../types'
 
 /**
  * Primitive 绘制基类

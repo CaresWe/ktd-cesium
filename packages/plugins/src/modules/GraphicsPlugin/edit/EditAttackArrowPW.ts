@@ -2,22 +2,14 @@ import * as Cesium from 'cesium'
 import { EditPolygonEx } from './EditPolygonEx'
 import { computeAttackArrowPWPositions } from '@ktd-cesium/shared'
 import type { ExtendedEntity } from './EditBase'
-
-/**
- * 扩展的 Entity 接口，包含攻击箭头(平尾)特有属性
- */
-interface AttackArrowPWEntity {
-  _positions_draw?: Cesium.Cartesian3[]
-  _positions_show?: Cesium.Cartesian3[]
-  attribute?: Record<string, unknown>
-}
+import type { AttackArrowPWEditEntity } from '../types/index'
 
 /**
  * 攻击箭头(平尾)编辑类
  * 用于编辑由多个点确定的攻击箭头(平尾)
  */
 export class EditAttackArrowPW extends EditPolygonEx {
-  declare entity: ExtendedEntity & AttackArrowPWEntity
+  declare entity: ExtendedEntity & AttackArrowPWEditEntity
   protected override _minPointNum = 3
   protected override _maxPointNum = 999
   protected override _hasMidPoint = true // 可以添加中间点

@@ -30,27 +30,13 @@ function centerOfMass(positions: Cesium.Cartesian3[]): Cesium.Cartesian3 {
   }
 }
 
-/**
- * 扩展的 Entity 接口，包含 Polyline 特有属性
- */
-interface PolylineEntity {
-  _positions_draw?: Cesium.Cartesian3[]
-  attribute?: {
-    type?: string
-    style?: {
-      clampToGround?: boolean
-      [key: string]: unknown
-    }
-    [key: string]: unknown
-  }
-  polyline?: Cesium.PolylineGraphics
-}
+import type { PolylineEditEntity } from '../types'
 
 /**
  * 折线编辑类
  */
 export class EditPolyline extends EditBase {
-  declare entity: ExtendedEntity & PolylineEntity
+  declare entity: ExtendedEntity & PolylineEditEntity
   protected _hasMidPoint = true // 是否有中间拖拽点
   protected hasClosure = false // 是否闭合
   protected heightDraggers: draggerCtl.DraggerEntity[] = [] // 高度拖拽点
@@ -176,7 +162,7 @@ export class EditPolyline extends EditBase {
   /**
    * 更新编辑属性
    */
-  protected updateAttrForEditing(): void {
+  updateAttrForEditing(): void {
     try {
       if (!this.entity) {
         console.warn('EditPolyline.updateAttrForEditing: 实体对象不存在')

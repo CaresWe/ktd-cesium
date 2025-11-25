@@ -1,43 +1,9 @@
 import * as Cesium from 'cesium'
-import { DrawPrimitiveBase, type PrimitiveObject } from './DrawPrimitiveBase'
+import { DrawPrimitiveBase } from './DrawPrimitiveBase'
 import { getCurrentMousePosition, addPositionsHeight } from '@ktd-cesium/shared'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { GraphicsEventType } from '../../EventPlugin'
-
-/**
- * 折线样式接口
- */
-interface PolylinePrimitiveStyle {
-  width?: number
-  color?: string | Cesium.Color
-  show?: boolean
-  [key: string]: unknown
-}
-
-/**
- * 折线配置接口
- */
-interface PolylinePrimitiveConfig {
-  minPointNum?: number
-  maxPointNum?: number
-  addHeight?: number
-}
-
-/**
- * 折线属性接口
- */
-interface PolylinePrimitiveAttribute {
-  style: PolylinePrimitiveStyle
-  config?: PolylinePrimitiveConfig
-  [key: string]: unknown
-}
-
-/**
- * 扩展的 Polyline 接口
- */
-interface ExtendedPolyline extends Cesium.Polyline, PrimitiveObject {
-  attribute?: PolylinePrimitiveAttribute
-}
+import type { PolylinePrimitiveStyle, PolylinePrimitiveAttribute, ExtendedPolyline } from '../types'
 
 /**
  * Primitive 方式的折线绘制类

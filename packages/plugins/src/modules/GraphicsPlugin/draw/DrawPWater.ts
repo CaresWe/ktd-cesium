@@ -4,56 +4,8 @@ import { getCurrentMousePosition } from '@ktd-cesium/shared'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { GraphicsEventType } from '../../EventPlugin'
 import { EditWater } from '../edit/EditWater'
-import type { WaterPrimitiveStyle, WaterPrimitiveAttribute, WaveType } from '../types'
-
-/**
- * 水面材质着色器
- */
-const WaterMaterialSource = `
-  uniform sampler2D normalMap;
-  uniform vec4 baseWaterColor;
-  uniform vec4 blendColor;
-  uniform float frequency;
-  uniform float animationSpeed;
-  uniform float amplitude;
-  uniform float specularIntensity;
-  uniform float fadeFactor;
-  uniform float flowDirection;
-  uniform float flowSpeed;
-
-  czm_material czm_getMaterial(czm_materialInput materialInput) {
-    czm_material material = czm_getDefaultMaterial(materialInput);
-
-    float time = czm_frameNumber * animationSpeed;
-
-    // 计算流动方向
-    float dirRad = flowDirection * 3.14159265 / 180.0;
-    vec2 flowDir = vec2(cos(dirRad), sin(dirRad)) * flowSpeed;
-
-    // 动态UV坐标
-    vec2 uv = materialInput.st;
-    uv.x += sin(uv.y * frequency + time) * amplitude;
-    uv.y += cos(uv.x * frequency + time * 0.8) * amplitude;
-    uv += flowDir * time * 0.01;
-
-    // 采样法线贴图
-    vec3 normalValue = texture(normalMap, fract(uv)).rgb * 2.0 - 1.0;
-
-    // 计算反射
-    vec3 viewDir = normalize(materialInput.positionToEyeEC);
-    vec3 reflectDir = reflect(-viewDir, normalValue);
-    float specular = pow(max(dot(reflectDir, vec3(0.0, 0.0, 1.0)), 0.0), 32.0) * specularIntensity;
-
-    // 混合颜色
-    vec4 waterColor = mix(baseWaterColor, blendColor, fadeFactor);
-
-    material.diffuse = waterColor.rgb + vec3(specular);
-    material.alpha = waterColor.a;
-    material.specular = specularIntensity;
-
-    return material;
-  }
-`
+import { createWaterMaterial } from '../../MaterialPlugin'
+import type { WaterPrimitiveStyle, WaterPrimitiveAttribute, WaterPrimitiveObject } from '../types'
 
 /**
  * 水面 Primitive 绘制类
@@ -63,7 +15,7 @@ export class DrawPWater extends DrawPPolygon {
   override type = 'water-p'
 
   /** 水面 Primitive */
-  protected waterPrimitive: Cesium.Primitive | null = null
+  protected waterPrimitive: Cesium.Primitive | Cesium.GroundPrimitive | null = null
 
   /** 动画帧ID */
   protected animationFrameId: number | null = null
@@ -77,54 +29,22 @@ export class DrawPWater extends DrawPPolygon {
   /** 是否处于编辑模式 */
   protected isEditing = false
 
-  /** 默认法线贴图 */
-  protected static defaultNormalMap = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFeAJ5gJqGJAAAAABJRU5ErkJggg=='
-
-  /**
-   * 获取波浪参数
-   */
-  protected getWaveParams(waveType: WaveType = 'ripple'): { frequency: number; amplitude: number; speed: number } {
-    const waveParams: Record<WaveType, { frequency: number; amplitude: number; speed: number }> = {
-      calm: { frequency: 2.0, amplitude: 0.002, speed: 0.002 },
-      ripple: { frequency: 8.0, amplitude: 0.01, speed: 0.005 },
-      wave: { frequency: 15.0, amplitude: 0.02, speed: 0.01 },
-      turbulent: { frequency: 25.0, amplitude: 0.04, speed: 0.02 }
-    }
-    return waveParams[waveType] || waveParams.ripple
-  }
-
   /**
    * 创建水面材质
    */
   protected createWaterMaterial(style: WaterPrimitiveStyle): Cesium.Material {
-    const waveParams = this.getWaveParams(style.waveType)
-
-    // 创建自定义材质类型
-    const materialType = 'WaterSurface_' + Date.now()
-
-    Cesium.Material._materialCache.addMaterial(materialType, {
-      fabric: {
-        type: materialType,
-        uniforms: {
-          normalMap: style.normalMap || DrawPWater.defaultNormalMap,
-          baseWaterColor: this.parseColor(style.baseWaterColor) || new Cesium.Color(0.0, 0.3, 0.5, 0.8),
-          blendColor: this.parseColor(style.blendColor) || new Cesium.Color(0.0, 0.5, 0.7, 0.8),
-          frequency: style.frequency ?? waveParams.frequency,
-          animationSpeed: style.animationSpeed ?? waveParams.speed,
-          amplitude: style.amplitude ?? waveParams.amplitude,
-          specularIntensity: style.specularIntensity ?? 0.5,
-          fadeFactor: style.fadeFactor ?? 0.3,
-          flowDirection: style.flowDirection ?? 0,
-          flowSpeed: style.flowSpeed ?? 1.0
-        },
-        source: WaterMaterialSource
-      }
-    })
-
-    return new Cesium.Material({
-      fabric: {
-        type: materialType
-      }
+    return createWaterMaterial({
+      normalMap: style.normalMap,
+      baseWaterColor: style.baseWaterColor,
+      blendColor: style.blendColor,
+      waveType: style.waveType,
+      frequency: style.frequency,
+      amplitude: style.amplitude,
+      animationSpeed: style.animationSpeed,
+      specularIntensity: style.specularIntensity,
+      fadeFactor: style.fadeFactor,
+      flowDirection: style.flowDirection,
+      flowSpeed: style.flowSpeed
     })
   }
 
@@ -143,7 +63,7 @@ export class DrawPWater extends DrawPPolygon {
   /**
    * 创建水面 Primitive
    */
-  protected override createPrimitive(attribute: Record<string, unknown>): Cesium.Primitive | null {
+  protected override createPrimitive(attribute: Record<string, unknown>): Cesium.Primitive | Cesium.GroundPrimitive | null {
     this._positions_draw = []
 
     const waterAttr = attribute as WaterPrimitiveAttribute
@@ -197,7 +117,8 @@ export class DrawPWater extends DrawPPolygon {
     if (positions.length < 3) return
 
     // 获取当前样式
-    const waterAttr = (this.waterPrimitive as any)._waterAttribute as WaterPrimitiveAttribute | undefined
+    const waterPrimitiveObj = this.waterPrimitive as unknown as WaterPrimitiveObject
+    const waterAttr = waterPrimitiveObj._waterAttribute
     const style = waterAttr?.style || {}
 
     // 移除旧的 Primitive
@@ -225,7 +146,8 @@ export class DrawPWater extends DrawPPolygon {
     })
 
     // 保存属性引用
-    ;(this.waterPrimitive as any)._waterAttribute = waterAttr
+    const newWaterPrimitiveObj = this.waterPrimitive as unknown as WaterPrimitiveObject
+    newWaterPrimitiveObj._waterAttribute = waterAttr
 
     this.primitives!.add(this.waterPrimitive)
     this.primitive = this.waterPrimitive
@@ -380,10 +302,11 @@ export class DrawPWater extends DrawPPolygon {
   protected override finishPrimitive(): void {
     if (!this.waterPrimitive) return
 
-    ;(this.waterPrimitive as any)._positions_draw = this.getDrawPosition()
+    const waterPrimitiveObj = this.waterPrimitive as unknown as WaterPrimitiveObject
+    waterPrimitiveObj._positions_draw = this.getDrawPosition()
 
     // 绑定编辑对象
-    ;(this.waterPrimitive as any).editing = this.createEditor()
+    waterPrimitiveObj.editing = this.createEditor()
   }
 
   /**
@@ -458,7 +381,8 @@ export class DrawPWater extends DrawPPolygon {
     this._positions_draw = positions
 
     if (this.waterPrimitive) {
-      ;(this.waterPrimitive as any)._positions_draw = positions
+      const waterPrimitiveObj = this.waterPrimitive as unknown as WaterPrimitiveObject
+      waterPrimitiveObj._positions_draw = positions
     }
 
     this.updatePolygonGeometry()

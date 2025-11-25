@@ -3,24 +3,7 @@ import { DrawPPoint } from './DrawPPoint'
 import { getCurrentMousePosition } from '@ktd-cesium/shared'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { GraphicsEventType } from '../../EventPlugin'
-
-/**
- * Plane 样式接口
- */
-interface PlanePrimitiveStyle {
-  dimensions?: Cesium.Cartesian2
-  color?: string | Cesium.Color
-  show?: boolean
-  [key: string]: unknown
-}
-
-/**
- * Plane 属性接口
- */
-interface PlanePrimitiveAttribute {
-  style: PlanePrimitiveStyle
-  [key: string]: unknown
-}
+import type {  PlanePrimitiveAttribute } from '../types'
 
 /**
  * Primitive 方式的平面绘制类

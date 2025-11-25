@@ -5,47 +5,14 @@ import * as draggerCtl from './Dragger'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { setPositionsHeight, addPositionsHeight } from '@ktd-cesium/shared'
 import { getEllipseOuterPositions } from '../attr/AttrCircle'
-
-/**
- * Ellipsoid 样式接口
- */
-interface EllipsoidStyle {
-  extentRadii?: number
-  widthRadii?: number
-  heightRadii?: number
-  rotation?: number
-  [key: string]: unknown
-}
-
-/**
- * 扩展的 Entity 接口，包含 Ellipsoid 特有属性
- */
-interface EllipsoidEntity {
-  _positions_draw?: Cesium.Cartesian3[]
-  position?: Cesium.PositionProperty | Cesium.Cartesian3
-  attribute?: {
-    style: EllipsoidStyle
-    [key: string]: unknown
-  }
-  ellipsoid?: Cesium.EllipsoidGraphics & {
-    radii?: Cesium.ConstantProperty
-  }
-}
-
-/**
- * 扩展的 Dragger 接口
- */
-interface EllipsoidDragger extends draggerCtl.DraggerEntity {
-  majorDragger?: draggerCtl.DraggerEntity
-  minorDragger?: draggerCtl.DraggerEntity
-}
+import type { EllipsoidEditStyle, EllipsoidEditEntity, EllipsoidDragger } from '../types'
 
 /**
  * 椭球体编辑类
  * 继承自 EditBase
  */
 export class EditEllipsoid extends EditBase {
-  declare entity: ExtendedEntity & EllipsoidEntity
+  declare entity: ExtendedEntity & EllipsoidEditEntity
 
   /**
    * 图形编辑结束后调用
@@ -62,7 +29,7 @@ export class EditEllipsoid extends EditBase {
   /**
    * 更新 Ellipsoid 的半径
    */
-  updateRadii(style: EllipsoidStyle): void {
+  updateRadii(style: EllipsoidEditStyle): void {
     try {
       // 验证 style 参数
       if (!style) {

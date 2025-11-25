@@ -3,24 +3,7 @@ import { DrawPPolyline } from './DrawPPolyline'
 import { getCurrentMousePosition } from '@ktd-cesium/shared'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { GraphicsEventType } from '../../EventPlugin'
-
-/**
- * 矩形样式接口
- */
-interface RectanglePrimitiveStyle {
-  color?: string | Cesium.Color
-  show?: boolean
-  classificationType?: Cesium.ClassificationType
-  [key: string]: unknown
-}
-
-/**
- * 矩形属性接口
- */
-interface RectanglePrimitiveAttribute {
-  style: RectanglePrimitiveStyle
-  [key: string]: unknown
-}
+import type { RectanglePrimitiveAttribute } from '../types'
 
 /**
  * Primitive 方式的矩形绘制类

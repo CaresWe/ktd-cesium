@@ -2,22 +2,14 @@ import * as Cesium from 'cesium'
 import { EditPolygonEx } from './EditPolygonEx'
 import { computeLunePositions } from '@ktd-cesium/shared'
 import type { ExtendedEntity } from './EditBase'
-
-/**
- * 扩展的 Entity 接口，包含弓形面特有属性
- */
-interface LuneEntity {
-  _positions_draw?: Cesium.Cartesian3[]
-  _positions_show?: Cesium.Cartesian3[]
-  attribute?: Record<string, unknown>
-}
+import type { LuneEditEntity } from '../types/index'
 
 /**
  * 弓形面编辑类
  * 用于编辑由3个点确定的弓形面
  */
 export class EditLune extends EditPolygonEx {
-  declare entity: ExtendedEntity & LuneEntity
+  declare entity: ExtendedEntity & LuneEditEntity
   protected override _minPointNum = 3
   protected override _maxPointNum = 3
 

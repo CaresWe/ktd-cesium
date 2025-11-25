@@ -2,22 +2,14 @@ import * as Cesium from 'cesium'
 import { EditPolygonEx } from './EditPolygonEx'
 import { computeSectorPositions } from '@ktd-cesium/shared'
 import type { ExtendedEntity } from './EditBase'
-
-/**
- * 扩展的 Entity 接口，包含扇形特有属性
- */
-interface SectorEntity {
-  _positions_draw?: Cesium.Cartesian3[]
-  _positions_show?: Cesium.Cartesian3[]
-  attribute?: Record<string, unknown>
-}
+import type { SectorEditEntity } from '../types/index'
 
 /**
  * 扇形编辑类
  * 用于编辑由圆心和两个边界点确定的扇形
  */
 export class EditSector extends EditPolygonEx {
-  declare entity: ExtendedEntity & SectorEntity
+  declare entity: ExtendedEntity & SectorEditEntity
   protected override _minPointNum = 3
   protected override _maxPointNum = 3
 

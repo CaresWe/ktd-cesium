@@ -2,22 +2,14 @@ import * as Cesium from 'cesium'
 import { EditPolygonEx } from './EditPolygonEx'
 import { computeRegularPositions } from '@ktd-cesium/shared'
 import type { ExtendedEntity } from './EditBase'
-
-/**
- * 扩展的 Entity 接口，包含正多边形特有属性
- */
-interface RegularEntity {
-  _positions_draw?: Cesium.Cartesian3[]
-  _positions_show?: Cesium.Cartesian3[]
-  attribute?: Record<string, unknown>
-}
+import type { RegularEditEntity } from '../types'
 
 /**
  * 正多边形编辑类
  * 用于编辑由圆心和一个顶点确定的正多边形
  */
 export class EditRegular extends EditPolygonEx {
-  declare entity: ExtendedEntity & RegularEntity
+  declare entity: ExtendedEntity & RegularEditEntity
   protected override _minPointNum = 2
   protected override _maxPointNum = 2
 

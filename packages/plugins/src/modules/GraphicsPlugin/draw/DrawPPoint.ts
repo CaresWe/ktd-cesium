@@ -1,36 +1,9 @@
 import * as Cesium from 'cesium'
-import { DrawPrimitiveBase, type PrimitiveObject } from './DrawPrimitiveBase'
+import { DrawPrimitiveBase } from './DrawPrimitiveBase'
 import { getCurrentMousePosition } from '@ktd-cesium/shared'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { GraphicsEventType } from '../../EventPlugin'
-
-/**
- * 点样式接口
- */
-interface PointPrimitiveStyle {
-  pixelSize?: number
-  color?: string | Cesium.Color
-  outlineColor?: string | Cesium.Color
-  outlineWidth?: number
-  show?: boolean
-  disableDepthTestDistance?: number
-  [key: string]: unknown
-}
-
-/**
- * 点属性接口
- */
-interface PointPrimitiveAttribute {
-  style: PointPrimitiveStyle
-  [key: string]: unknown
-}
-
-/**
- * 扩展的 PointPrimitive 接口
- */
-interface ExtendedPointPrimitive extends Cesium.PointPrimitive, PrimitiveObject {
-  attribute?: PointPrimitiveAttribute
-}
+import type { PointPrimitiveStyle, PointPrimitiveAttribute, ExtendedPointPrimitive } from '../types'
 
 /**
  * Primitive 方式的点绘制类

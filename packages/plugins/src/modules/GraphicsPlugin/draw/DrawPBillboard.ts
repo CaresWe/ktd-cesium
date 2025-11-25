@@ -1,9 +1,9 @@
 import * as Cesium from 'cesium'
-import { DrawPrimitiveBase, type PrimitiveObject } from './DrawPrimitiveBase'
+import { DrawPrimitiveBase} from './DrawPrimitiveBase'
 import { getCurrentMousePosition } from '@ktd-cesium/shared'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { GraphicsEventType } from '../../EventPlugin'
-import type { BillboardPrimitiveStyle, BillboardPrimitiveAttribute } from '../types'
+import type { BillboardPrimitiveStyle, BillboardPrimitiveAttribute, PrimitiveObject } from '../types'
 
 /**
  * 扩展的 Billboard 接口

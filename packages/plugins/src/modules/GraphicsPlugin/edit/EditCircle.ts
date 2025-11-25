@@ -5,6 +5,7 @@ import { defaultMessages } from '../../TooltipPlugin/messages'
 import { getEllipseOuterPositions } from '../attr/AttrCircle'
 import { setPositionSurfaceHeight } from '@ktd-cesium/shared'
 import type { ExtendedEntity } from './EditBase'
+import type { CircleEditEntity, CircleDragger } from '../types'
 
 /**
  * 设置位置高度
@@ -15,46 +16,11 @@ function setPositionsHeight(position: Cesium.Cartesian3, newHeight: number): Ces
 }
 
 /**
- * 扩展的 Entity 接口，包含 Circle/Ellipse 特有属性
- */
-interface CircleEntity {
-  _positions_draw?: Cesium.Cartesian3[]
-  attribute?: {
-    style?: {
-      clampToGround?: boolean
-      height?: number
-      extrudedHeight?: number
-      radius?: number
-      semiMajorAxis?: number
-      semiMinorAxis?: number
-      rotation?: number
-      [key: string]: unknown
-    }
-    [key: string]: unknown
-  }
-  ellipse?: Cesium.EllipseGraphics & {
-    height?: Cesium.Property
-    extrudedHeight?: Cesium.Property
-    semiMajorAxis?: Cesium.Property
-    semiMinorAxis?: Cesium.Property
-  }
-}
-
-/**
- * 扩展的 Dragger 接口
- */
-interface CircleDragger extends draggerCtl.DraggerEntity {
-  index?: number
-  majorDragger?: draggerCtl.DraggerEntity
-  minorDragger?: draggerCtl.DraggerEntity
-}
-
-/**
  * 圆/椭圆编辑类
  * 继承自 EditPolygon
  */
 export class EditCircle extends EditPolygon {
-  declare entity: ExtendedEntity & CircleEntity
+  declare entity: ExtendedEntity & CircleEditEntity
 
   /**
    * 获取图形对象

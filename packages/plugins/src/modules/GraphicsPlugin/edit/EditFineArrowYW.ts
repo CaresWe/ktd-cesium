@@ -2,22 +2,14 @@ import * as Cesium from 'cesium'
 import { EditPolygonEx } from './EditPolygonEx'
 import { computeFineArrowYWPositions } from '@ktd-cesium/shared'
 import type { ExtendedEntity } from './EditBase'
-
-/**
- * 扩展的 Entity 接口，包含细直箭头（燕尾）特有属性
- */
-interface FineArrowYWEntity {
-  _positions_draw?: Cesium.Cartesian3[]
-  _positions_show?: Cesium.Cartesian3[]
-  attribute?: Record<string, unknown>
-}
+import type { FineArrowYWEditEntity } from '../types/index'
 
 /**
  * 细直箭头（燕尾）编辑类
  * 用于编辑由2个点确定的细直箭头（燕尾）
  */
 export class EditFineArrowYW extends EditPolygonEx {
-  declare entity: ExtendedEntity & FineArrowYWEntity
+  declare entity: ExtendedEntity & FineArrowYWEditEntity
   protected override _minPointNum = 2
   protected override _maxPointNum = 2
   protected override _hasMidPoint = false // 不可以添加中间点

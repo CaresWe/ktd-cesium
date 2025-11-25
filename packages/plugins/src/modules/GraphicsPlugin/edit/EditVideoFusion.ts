@@ -1,30 +1,11 @@
 import * as Cesium from 'cesium'
 import { EditBase } from './EditBase'
-import type { EditController, VideoEditPointType, VideoEditControlPoint } from '../types'
-
-/**
- * 编辑点实体扩展接口
- */
-interface EditPointEntity extends Cesium.Entity {
-  _editIndex?: number
-  _editType?: VideoEditPointType
-}
-
-/**
- * 视频融合 Primitive 扩展接口
- */
-interface VideoFusionPrimitive {
-  _positions_draw?: Cesium.Cartesian3[]
-  _videoAttribute?: {
-    style?: Record<string, unknown>
-    config?: {
-      editable?: boolean
-      controlPointSize?: number
-      controlPointColor?: string
-    }
-  }
-  show?: boolean
-}
+import type {
+  EditController,
+  VideoEditControlPoint,
+  VideoEditPointEntity,
+  VideoFusionEditPrimitive
+} from '../types'
 
 /**
  * 视频融合编辑类
@@ -35,20 +16,20 @@ interface VideoFusionPrimitive {
  * - 旋转控制
  */
 export class EditVideoFusion extends EditBase implements EditController {
-  /** 编辑控制点实体 */
-  private draggers: EditPointEntity[] = []
+  /** 编辑控制点实体 (角点) */
+  private cornerDraggers: VideoEditPointEntity[] = []
 
   /** 边中点实体 */
-  private edgeDraggers: EditPointEntity[] = []
+  private edgeDraggers: VideoEditPointEntity[] = []
 
   /** 中心点实体 */
-  private centerDragger: EditPointEntity | null = null
+  private centerDragger: VideoEditPointEntity | null = null
 
   /** 旋转控制点实体 */
-  private rotationDragger: EditPointEntity | null = null
+  private rotationDragger: VideoEditPointEntity | null = null
 
   /** 当前拖拽的控制点 */
-  private activeDragger: EditPointEntity | null = null
+  private activeDragger: VideoEditPointEntity | null = null
 
   /** 拖拽处理器 */
   private dragHandler: Cesium.ScreenSpaceEventHandler | null = null
@@ -61,21 +42,20 @@ export class EditVideoFusion extends EditBase implements EditController {
   private controlPointColor = Cesium.Color.YELLOW
   private edgePointColor = Cesium.Color.CYAN
   private centerPointColor = Cesium.Color.GREEN
-  private rotationPointColor = Cesium.Color.MAGENTA
 
   /**
    * 激活编辑
    */
-  activate(): void {
-    if (this._bindedEntity) return
+  activate(): this {
+    if (this._enabled) return this
 
     // 获取 Primitive 的位置
-    const primitive = this.bindedEntity as unknown as VideoFusionPrimitive
+    const primitive = this.entity as unknown as VideoFusionEditPrimitive
     const positions = primitive?._positions_draw
 
-    if (!positions || positions.length < 3) return
+    if (!positions || positions.length < 3) return this
 
-    this._bindedEntity = true
+    this._enabled = true
     this.originalPositions = positions.map(p => p.clone())
 
     // 读取配置
@@ -96,14 +76,16 @@ export class EditVideoFusion extends EditBase implements EditController {
     this.bindDragEvents()
 
     // 触发编辑开始事件
-    this.fire('bindedEntityEdit-bindedEntityStart', { bindedEntity: this.bindedEntity })
+    this.fire('edit-start', { entity: this.entity })
+
+    return this
   }
 
   /**
    * 禁用编辑
    */
-  disable(): void {
-    if (!this._bindedEntity) return
+  disable(): this {
+    if (!this._enabled) return this
 
     // 移除拖拽处理器
     if (this.dragHandler) {
@@ -114,11 +96,13 @@ export class EditVideoFusion extends EditBase implements EditController {
     // 移除所有控制点
     this.removeDraggers()
 
-    this._bindedEntity = false
+    this._enabled = false
     this.activeDragger = null
 
     // 触发编辑结束事件
-    this.fire('edit-stop', { bindedEntity: this.bindedEntity })
+    this.fire('edit-stop', { entity: this.entity })
+
+    return this
   }
 
   /**
@@ -135,11 +119,11 @@ export class EditVideoFusion extends EditBase implements EditController {
           outlineWidth: 2,
           disableDepthTestDistance: Number.POSITIVE_INFINITY
         }
-      }) as EditPointEntity
+      }) as VideoEditPointEntity
 
       dragger._editIndex = index
       dragger._editType = 'corner'
-      this.draggers.push(dragger)
+      this.cornerDraggers.push(dragger)
     })
   }
 
@@ -164,7 +148,7 @@ export class EditVideoFusion extends EditBase implements EditController {
           outlineWidth: 1,
           disableDepthTestDistance: Number.POSITIVE_INFINITY
         }
-      }) as EditPointEntity
+      }) as VideoEditPointEntity
 
       dragger._editIndex = i
       dragger._editType = 'edge'
@@ -187,7 +171,7 @@ export class EditVideoFusion extends EditBase implements EditController {
         outlineWidth: 2,
         disableDepthTestDistance: Number.POSITIVE_INFINITY
       }
-    }) as EditPointEntity
+    }) as VideoEditPointEntity
 
     this.centerDragger._editType = 'center'
   }
@@ -208,16 +192,16 @@ export class EditVideoFusion extends EditBase implements EditController {
    * 绑定拖拽事件
    */
   private bindDragEvents(): void {
-    this.dragHandler = new Cesium.ScreenSpaceEventHandler(this.bindedEntityViewer.canvas)
+    this.dragHandler = new Cesium.ScreenSpaceEventHandler(this.viewer.canvas)
 
     // 左键按下
     this.dragHandler.setInputAction((event: Cesium.ScreenSpaceEventHandler.PositionedEvent) => {
-      const picked = this.bindedEntityViewer.scene.pick(event.position)
+      const picked = this.viewer.scene.pick(event.position)
       if (picked && picked.id) {
-        const entity = picked.id as EditPointEntity
+        const entity = picked.id as VideoEditPointEntity
         if (entity._editType) {
           this.activeDragger = entity
-          this.bindedEntityViewer.scene.screenSpaceCameraController.enableRotate = false
+          this.viewer.scene.screenSpaceCameraController.enableRotate = false
         }
       }
     }, Cesium.ScreenSpaceEventType.LEFT_DOWN)
@@ -226,10 +210,10 @@ export class EditVideoFusion extends EditBase implements EditController {
     this.dragHandler.setInputAction((event: Cesium.ScreenSpaceEventHandler.MotionEvent) => {
       if (!this.activeDragger) return
 
-      const ray = this.bindedEntityViewer.camera.getPickRay(event.endPosition)
+      const ray = this.viewer.camera.getPickRay(event.endPosition)
       if (!ray) return
 
-      const newPosition = this.bindedEntityViewer.scene.globe.pick(ray, this.bindedEntityViewer.scene)
+      const newPosition = this.viewer.scene.globe.pick(ray, this.viewer.scene)
       if (!newPosition) return
 
       this.handleDrag(this.activeDragger, newPosition)
@@ -239,11 +223,11 @@ export class EditVideoFusion extends EditBase implements EditController {
     this.dragHandler.setInputAction(() => {
       if (this.activeDragger) {
         this.activeDragger = null
-        this.bindedEntityViewer.scene.screenSpaceCameraController.enableRotate = true
+        this.viewer.scene.screenSpaceCameraController.enableRotate = true
 
         // 触发编辑完成事件
         this.fire('edit-move-point', {
-          bindedEntity: this.bindedEntity,
+          entity: this.entity,
           positions: this.getPositions()
         })
       }
@@ -253,8 +237,8 @@ export class EditVideoFusion extends EditBase implements EditController {
   /**
    * 处理拖拽
    */
-  private handleDrag(dragger: EditPointEntity, newPosition: Cesium.Cartesian3): void {
-    const primitive = this.bindedEntity as unknown as VideoFusionPrimitive
+  private handleDrag(dragger: VideoEditPointEntity, newPosition: Cesium.Cartesian3): void {
+    const primitive = this.entity as unknown as VideoFusionEditPrimitive
     const positions = primitive._positions_draw
     if (!positions) return
 
@@ -278,7 +262,7 @@ export class EditVideoFusion extends EditBase implements EditController {
    * 处理角点拖拽
    */
   private handleCornerDrag(
-    dragger: EditPointEntity,
+    dragger: VideoEditPointEntity,
     newPosition: Cesium.Cartesian3,
     positions: Cesium.Cartesian3[]
   ): void {
@@ -291,7 +275,7 @@ export class EditVideoFusion extends EditBase implements EditController {
    * 处理边中点拖拽
    */
   private handleEdgeDrag(
-    dragger: EditPointEntity,
+    dragger: VideoEditPointEntity,
     newPosition: Cesium.Cartesian3,
     positions: Cesium.Cartesian3[]
   ): void {
@@ -325,15 +309,24 @@ export class EditVideoFusion extends EditBase implements EditController {
   }
 
   /**
+   * 更新编辑属性
+   * 实现 EditController 接口
+   */
+  updateAttrForEditing(): void {
+    // 视频融合编辑不需要更新属性
+    // 此方法为 EditController 接口要求
+  }
+
+  /**
    * 更新所有控制点位置
    */
-  updateDraggers(): void {
-    const primitive = this.bindedEntity as unknown as VideoFusionPrimitive
+  updateDraggers(): this {
+    const primitive = this.entity as unknown as VideoFusionEditPrimitive
     const positions = primitive._positions_draw
-    if (!positions) return
+    if (!positions) return this
 
     // 更新角点
-    this.draggers.forEach((dragger, index) => {
+    this.cornerDraggers.forEach((dragger, index) => {
       dragger.position = new Cesium.ConstantPositionProperty(positions[index])
     })
 
@@ -353,6 +346,8 @@ export class EditVideoFusion extends EditBase implements EditController {
       const center = this.calculateCenter(positions)
       this.centerDragger.position = new Cesium.ConstantPositionProperty(center)
     }
+
+    return this
   }
 
   /**
@@ -360,10 +355,10 @@ export class EditVideoFusion extends EditBase implements EditController {
    */
   private removeDraggers(): void {
     // 移除角点
-    this.draggers.forEach(dragger => {
+    this.cornerDraggers.forEach(dragger => {
       this.dataSource.entities.remove(dragger)
     })
-    this.draggers = []
+    this.cornerDraggers = []
 
     // 移除边中点
     this.edgeDraggers.forEach(dragger => {
@@ -388,7 +383,7 @@ export class EditVideoFusion extends EditBase implements EditController {
    * 设置位置
    */
   setPositions(positions: Cesium.Cartesian3[]): void {
-    const primitive = this.bindedEntity as unknown as VideoFusionPrimitive
+    const primitive = this.entity as unknown as VideoFusionEditPrimitive
     if (primitive._positions_draw && positions.length === primitive._positions_draw.length) {
       positions.forEach((pos, i) => {
         primitive._positions_draw![i] = pos.clone()
@@ -401,7 +396,7 @@ export class EditVideoFusion extends EditBase implements EditController {
    * 获取位置
    */
   getPositions(): Cesium.Cartesian3[] {
-    const primitive = this.bindedEntity as unknown as VideoFusionPrimitive
+    const primitive = this.entity as unknown as VideoFusionEditPrimitive
     return primitive._positions_draw?.map(p => p.clone()) || []
   }
 
@@ -411,7 +406,7 @@ export class EditVideoFusion extends EditBase implements EditController {
   getControlPoints(): VideoEditControlPoint[] {
     const points: VideoEditControlPoint[] = []
 
-    this.draggers.forEach((dragger, index) => {
+    this.cornerDraggers.forEach((dragger, index) => {
       const pos = dragger.position?.getValue(Cesium.JulianDate.now())
       if (pos) {
         points.push({
@@ -454,7 +449,7 @@ export class EditVideoFusion extends EditBase implements EditController {
    * 撤销到原始位置
    */
   reset(): void {
-    const primitive = this.bindedEntity as unknown as VideoFusionPrimitive
+    const primitive = this.entity as unknown as VideoFusionEditPrimitive
     if (primitive._positions_draw && this.originalPositions.length === primitive._positions_draw.length) {
       this.originalPositions.forEach((pos, i) => {
         primitive._positions_draw![i] = pos.clone()

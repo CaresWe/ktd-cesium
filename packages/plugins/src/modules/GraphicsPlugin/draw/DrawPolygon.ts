@@ -404,10 +404,7 @@ export class DrawPolygon extends DrawPolyline {
 
     try {
       // 绑定编辑对象
-      const editInstance = this.getEditClass(entity)
-      if (editInstance) {
-        extEntity.editing = editInstance
-      }
+      extEntity.editing = this.getEditClass(entity)
 
       const positions = this.getDrawPosition()
       if (!positions || !Array.isArray(positions) || positions.length === 0) {

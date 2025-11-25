@@ -1,56 +1,17 @@
 import * as Cesium from 'cesium'
 import { EditPolygon } from './EditPolygon'
 import type { ExtendedEntity } from './EditBase'
+import type { RectangleEditEntity } from '../types'
 import * as draggerCtl from './Dragger'
 import { defaultMessages } from '../../TooltipPlugin/messages'
-import { setPositionsHeight } from '@ktd-cesium/shared'
-
-/**
- * 计算中心点（质心）
- */
-function centerOfMass(positions: Cesium.Cartesian3[]): Cesium.Cartesian3 {
-  try {
-    if (!positions || positions.length === 0) {
-      throw new Error('位置数组不能为空')
-    }
-
-    const center = new Cesium.Cartesian3()
-    for (const pos of positions) {
-      if (!pos || !(pos instanceof Cesium.Cartesian3)) {
-        throw new Error('位置必须是 Cesium.Cartesian3 类型')
-      }
-      Cesium.Cartesian3.add(center, pos, center)
-    }
-    Cesium.Cartesian3.divideByScalar(center, positions.length, center)
-    return center
-  } catch (error) {
-    console.error('centerOfMass: 计算质心失败', error)
-    // 返回第一个位置作为默认值
-    return positions[0] || new Cesium.Cartesian3()
-  }
-}
-
-/**
- * 扩展的 Entity 接口，包含 Rectangle 特有属性
- */
-interface RectangleEntity {
-  _positions_draw?: Cesium.Cartesian3[]
-  rectangle?: Cesium.RectangleGraphics
-  attribute?: {
-    style?: {
-      clampToGround?: boolean
-      [key: string]: unknown
-    }
-    [key: string]: unknown
-  }
-}
+import { setPositionsHeight, centerOfMass } from '@ktd-cesium/shared'
 
 /**
  * 矩形编辑类
  * 继承自 EditPolygon
  */
 export class EditRectangle extends EditPolygon {
-  declare entity: ExtendedEntity & RectangleEntity
+  declare entity: ExtendedEntity & RectangleEditEntity
 
   /**
    * 获取图形对象

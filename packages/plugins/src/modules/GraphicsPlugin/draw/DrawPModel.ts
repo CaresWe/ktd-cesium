@@ -1,20 +1,11 @@
 import * as Cesium from 'cesium'
 import { DrawBase } from './DrawBase'
-import type { AttrClass, EditClassConstructor, ModelPrimitiveConfig, ModelPrimitiveStyle, ModelPrimitiveAttribute } from '../types'
+import type { AttrClass, EditClassConstructor, ModelPrimitiveConfig, ModelPrimitiveStyle, ModelPrimitiveAttribute, ExtendedModelPrimitive } from '../types'
 import { getCurrentMousePosition } from '@ktd-cesium/shared'
 import * as attr from '../attr/AttrModel'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { GraphicsEventType } from '../../EventPlugin'
 import { EditPModel } from '../edit/EditPModel'
-
-/**
- * 扩展的 Model Primitive 类型
- */
-interface ExtendedModelPrimitive extends Cesium.Model {
-  attribute?: ModelPrimitiveAttribute
-  editing?: unknown
-  position?: Cesium.Cartesian3
-}
 
 /**
  * Primitive类型的3D模型绘制类

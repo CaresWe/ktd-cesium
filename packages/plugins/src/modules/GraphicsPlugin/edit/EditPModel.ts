@@ -5,46 +5,14 @@ import * as draggerCtl from './Dragger'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import * as circleAttr from '../attr/AttrCircle'
 import { addPositionsHeight } from '@ktd-cesium/shared'
-
-/**
- * PModel 样式接口
- */
-interface PModelStyle {
-  heading?: number
-  pitch?: number
-  roll?: number
-  scale?: number
-  [key: string]: unknown
-}
-
-/**
- * 扩展的 Entity 接口,包含 Primitive Model 特有属性
- */
-interface PModelEntity {
-  modelMatrix?: Cesium.Matrix4
-  scale?: number
-  ready?: boolean
-  readyPromise?: Promise<unknown>
-  boundingSphere?: Cesium.BoundingSphere
-  attribute?: {
-    style: PModelStyle
-    [key: string]: unknown
-  }
-}
-
-/**
- * 扩展的 Dragger 接口
- */
-interface ScaleDragger extends draggerCtl.DraggerEntity {
-  radius?: number
-}
+import type { PModelEditEntity, ScaleDragger } from '../types'
 
 /**
  * Primitive模型编辑类
  * 用于编辑Primitive类型的3D模型
  */
 export class EditPModel extends EditBase {
-  declare entity: ExtendedEntity & PModelEntity
+  declare entity: ExtendedEntity & PModelEditEntity
   private entityAngle?: Cesium.Entity
   private entityBox?: Cesium.Entity
 

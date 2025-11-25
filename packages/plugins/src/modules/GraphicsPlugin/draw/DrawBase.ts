@@ -412,7 +412,7 @@ export class DrawBase {
    * 获取编辑类
    */
   getEditClass(entity: Cesium.Entity): unknown {
-    if (this.editClass == null) return null
+    if (this.editClass == null) return {}
 
     const EditClassConstructor = this.editClass as new (
       entity: Cesium.Entity,
