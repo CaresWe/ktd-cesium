@@ -49,7 +49,7 @@ export class KtdViewer implements IKtdViewer {
         // 否则设置到原始 viewer
         return Reflect.set(target.viewer, prop, value)
       }
-    }) as any as KtdViewer & CesiumViewer
+    }) as unknown as KtdViewer & CesiumViewer
   }
 
   /**
@@ -70,7 +70,7 @@ export class KtdViewer implements IKtdViewer {
     const plugin = new Plugin()
 
     // 安装插件（使用类型断言，因为 Proxy 会在运行时提供所有 CesiumViewer 的属性）
-    const result = plugin.install(this as any as KtdViewerType)
+    const result = plugin.install(this as unknown as KtdViewerType)
 
     // 如果安装返回 Promise，则等待完成
     if (result instanceof Promise) {
