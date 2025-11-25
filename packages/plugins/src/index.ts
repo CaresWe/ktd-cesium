@@ -56,3 +56,5 @@ export {
 } from './modules/BaseLayerPlugin'
 export { TransformPlugin } from './modules/TransformPlugin'
 export * from './modules/TransformPlugin/types'
+export { TilesPlugin } from './modules/TilesPlugin'
+export * from './modules/TilesPlugin/types'
