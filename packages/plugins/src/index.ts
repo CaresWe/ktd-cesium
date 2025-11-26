@@ -2,7 +2,13 @@
 export { BasePlugin } from './BasePlugin'
 
 // 导出所有插件
-export { CameraPlugin } from './modules/CameraPlugin'
+export {
+  CameraPlugin,
+  RoamingManager,
+  KeyboardRoamingManager,
+  IndoorRoamingManager
+} from './modules/CameraPlugin'
+export * from './modules/CameraPlugin/types'
 export { EventPlugin } from './modules/EventPlugin'
 export * from './modules/EventPlugin/types'
 export { PopupPlugin } from './modules/PopupPlugin'
