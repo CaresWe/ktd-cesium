@@ -82,6 +82,11 @@ const graphics = viewer.use(GraphicsPlugin, {
 | `sector` | 扇形 |
 | `isoscelesTriangle` | 等腰三角形 |
 | `gatheringPlace` | 集结地标记 |
+| `water` | 水体/湖泊/海面，基于 `WaterMaterial` 的动态波纹 |
+| `flood` | 洪水推进，支持水位动画与渐变效果 |
+| `river` | 河流/河道，支持断面水位、流速动画 |
+| `video-fusion` | 视频融合/投影，可贴地、贴平面或贴 3D 模型 |
+| `particle` | 粒子系统，支持火焰、水枪、爆炸、喷雾、烟雾等特效 |
 
 > 全部类型即 `DrawType` 联合类型，若需扩展，使用 `register('custom-type', CustomDraw)` 注入外部 DrawController。
 
@@ -160,6 +165,2384 @@ if (geojson) {
 }
 ```
 
+## 各类型 GeoJSON 加载示例
+
+### 基础加载方法
+
+```typescript
+// 1. 从字符串加载
+const geojsonString = `{
+  "type": "FeatureCollection",
+  "features": [...]
+}`
+const entities = graphics.loadJson(geojsonString, {
+  clear: false,      // 是否清空现有数据
+  flyTo: true,       // 是否飞行到加载的数据
+  style: {           // 全局样式覆盖
+    material: '#409eff',
+    outlineColor: '#fff'
+  },
+  onEachFeature: (feature, type, index) => {
+    // 每个 feature 加载前的回调
+    console.log('准备加载', type, feature.properties)
+  },
+  onEachEntity: (feature, entity, index) => {
+    // 每个 entity 加载后的回调
+    console.log('已加载实体', entity.id)
+  }
+})
+
+// 2. 从对象加载
+const geojsonObject: GeoJSONFeatureCollection = {
+  type: 'FeatureCollection',
+  features: [...]
+}
+graphics.loadJson(geojsonObject, { clear: true })
+
+// 3. 从文件加载
+async function loadFromFile(file: File) {
+  const text = await file.text()
+  const geojson = JSON.parse(text)
+  return graphics.loadJson(geojson, { clear: true, flyTo: true })
+}
+
+// 4. 从 URL 加载
+async function loadFromURL(url: string) {
+  const response = await fetch(url)
+  const geojson = await response.json()
+  return graphics.loadJson(geojson, { clear: true, flyTo: true })
+}
+```
+
+### 点类型加载
+
+#### 1. 点 (point)
+
+```typescript
+const pointGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'Point',
+    coordinates: [116.4074, 39.9042, 0]
+  },
+  properties: {
+    type: 'point',
+    style: {
+      pixelSize: 10,
+      color: '#ff0000',
+      outline: true,
+      outlineColor: '#ffffff'
+    },
+    attr: {
+      id: 'point-001',
+      name: '标记点'
+    }
+  }
+}
+
+graphics.loadJson(pointGeoJSON, { clear: false })
+```
+
+#### 2. 图标标注 (billboard)
+
+```typescript
+const billboardGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'Point',
+    coordinates: [116.4074, 39.9042, 0]
+  },
+  properties: {
+    type: 'billboard',
+    style: {
+      image: '/icons/marker.png',
+      scale: 1.5,
+      label: {
+        text: '标注点',
+        font: '16px sans-serif'
+      }
+    },
+    attr: { id: 'billboard-001', name: '图标标注' }
+  }
+}
+
+graphics.loadJson(billboardGeoJSON)
+```
+
+#### 3. 文字标注 (label)
+
+```typescript
+const labelGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'Point',
+    coordinates: [116.4074, 39.9042, 0]
+  },
+  properties: {
+    type: 'label',
+    style: {
+      text: '文字标注',
+      font: 'bold 20px sans-serif',
+      fillColor: '#ffffff',
+      background: true
+    },
+    attr: { id: 'label-001', name: '文字标注' }
+  }
+}
+
+graphics.loadJson(labelGeoJSON)
+```
+
+### 线类型加载
+
+#### 4. 折线 (polyline)
+
+```typescript
+const polylineGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'LineString',
+    coordinates: [
+      [116.4074, 39.9042, 0],
+      [116.4084, 39.9052, 0],
+      [116.4094, 39.9062, 0]
+    ]
+  },
+  properties: {
+    type: 'polyline',
+    style: {
+      width: 3,
+      color: '#00ff00',
+      clampToGround: true,
+      lineType: 'dash'
+    },
+    attr: { id: 'polyline-001', name: '路径线' }
+  }
+}
+
+graphics.loadJson(polylineGeoJSON)
+```
+
+#### 5. 曲线 (curve)
+
+```typescript
+const curveGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'LineString',
+    coordinates: [
+      [116.4074, 39.9042, 0],
+      [116.4084, 39.9052, 0],
+      [116.4094, 39.9062, 0]
+    ]
+  },
+  properties: {
+    type: 'curve',
+    style: {
+      width: 3,
+      color: '#9b59b6'
+    },
+    attr: { id: 'curve-001', name: '平滑曲线' }
+  }
+}
+
+graphics.loadJson(curveGeoJSON)
+```
+
+#### 6. 管道体 (polylineVolume)
+
+```typescript
+const polylineVolumeGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'LineString',
+    coordinates: [
+      [116.4074, 39.9042, 0],
+      [116.4084, 39.9052, 0]
+    ]
+  },
+  properties: {
+    type: 'polylineVolume',
+    style: {
+      material: '#27ae60'
+    },
+    attr: { id: 'polylineVolume-001', name: '管道体' }
+  }
+}
+
+graphics.loadJson(polylineVolumeGeoJSON)
+```
+
+#### 7. 走廊 (corridor)
+
+```typescript
+const corridorGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'LineString',
+    coordinates: [
+      [116.4074, 39.9042, 0],
+      [116.4084, 39.9052, 0]
+    ]
+  },
+  properties: {
+    type: 'corridor',
+    style: {
+      width: 500,
+      material: '#16a085',
+      height: 0,
+      extrudedHeight: 50
+    },
+    attr: { id: 'corridor-001', name: '走廊' }
+  }
+}
+
+graphics.loadJson(corridorGeoJSON)
+```
+
+### 面类型加载
+
+#### 8. 面 (polygon)
+
+```typescript
+const polygonGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'Polygon',
+    coordinates: [[
+      [116.4074, 39.9042, 0],
+      [116.4084, 39.9042, 0],
+      [116.4084, 39.9052, 0],
+      [116.4074, 39.9052, 0],
+      [116.4074, 39.9042, 0]
+    ]]
+  },
+  properties: {
+    type: 'polygon',
+    style: {
+      material: '#ff6b6b',
+      opacity: 0.6,
+      outline: true,
+      outlineColor: '#ffffff',
+      height: 0,
+      extrudedHeight: 0
+    },
+    attr: { id: 'polygon-001', name: '区域面' }
+  }
+}
+
+graphics.loadJson(polygonGeoJSON)
+```
+
+#### 9. 矩形 (rectangle)
+
+```typescript
+const rectangleGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'Polygon',
+    coordinates: [[
+      [116.4074, 39.9042, 0],
+      [116.4084, 39.9042, 0],
+      [116.4084, 39.9052, 0],
+      [116.4074, 39.9052, 0],
+      [116.4074, 39.9042, 0]
+    ]]
+  },
+  properties: {
+    type: 'rectangle',
+    style: {
+      material: '#e74c3c',
+      height: 0,
+      extrudedHeight: 50
+    },
+    attr: { id: 'rectangle-001', name: '矩形区域' }
+  }
+}
+
+graphics.loadJson(rectangleGeoJSON)
+```
+
+#### 10. 圆形 (circle)
+
+```typescript
+const circleGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'Polygon',
+    coordinates: [[
+      // 圆形会被转换为多边形坐标
+      [116.4074, 39.9042, 0],
+      [116.4084, 39.9042, 0],
+      // ... 更多点
+    ]]
+  },
+  properties: {
+    type: 'circle',
+    style: {
+      radius: 1000, // 保留半径信息
+      material: '#f39c12',
+      height: 0,
+      extrudedHeight: 0
+    },
+    attr: { id: 'circle-001', name: '圆形区域' }
+  }
+}
+
+graphics.loadJson(circleGeoJSON)
+```
+
+#### 11. 椭圆 (ellipse)
+
+```typescript
+const ellipseGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'Polygon',
+    coordinates: [[
+      // 椭圆多边形坐标
+      [116.4074, 39.9042, 0],
+      // ... 更多点
+    ]]
+  },
+  properties: {
+    type: 'ellipse',
+    style: {
+      semiMajorAxis: 2000,
+      semiMinorAxis: 1000,
+      rotation: 0,
+      material: '#1abc9c'
+    },
+    attr: { id: 'ellipse-001', name: '椭圆区域' }
+  }
+}
+
+graphics.loadJson(ellipseGeoJSON)
+```
+
+#### 12. 扇形 (sector)
+
+```typescript
+const sectorGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'Polygon',
+    coordinates: [[
+      // 扇形多边形坐标
+      [116.4074, 39.9042, 0],
+      // ... 更多点
+    ]]
+  },
+  properties: {
+    type: 'sector',
+    style: {
+      radius: 2000,
+      startAngle: 0,
+      endAngle: Math.PI / 2,
+      material: '#3498db'
+    },
+    attr: { id: 'sector-001', name: '扇形' }
+  }
+}
+
+graphics.loadJson(sectorGeoJSON)
+```
+
+#### 13. 正多边形 (regular)
+
+```typescript
+const regularGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'Polygon',
+    coordinates: [[
+      // 正多边形坐标
+      [116.4074, 39.9042, 0],
+      // ... 更多点
+    ]]
+  },
+  properties: {
+    type: 'regular',
+    style: {
+      sides: 6,
+      radius: 1500,
+      material: '#2ecc71'
+    },
+    attr: { id: 'regular-001', name: '正六边形' }
+  }
+}
+
+graphics.loadJson(regularGeoJSON)
+```
+
+### 军标类型加载
+
+#### 14. 攻击箭头 (attackArrow)
+
+```typescript
+const attackArrowGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'Polygon',
+    coordinates: [[
+      // 箭头形状的多边形坐标
+      [116.4074, 39.9042, 0],
+      // ... 更多点
+    ]]
+  },
+  properties: {
+    type: 'attackArrow',
+    style: {
+      material: '#e74c3c',
+      opacity: 0.7,
+      outline: true
+    },
+    attr: { id: 'attackArrow-001', name: '攻击箭头' }
+  }
+}
+
+graphics.loadJson(attackArrowGeoJSON)
+```
+
+#### 15. 双箭头 (doubleArrow)
+
+```typescript
+const doubleArrowGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'Polygon',
+    coordinates: [[
+      // 双箭头多边形坐标
+      [116.4074, 39.9042, 0],
+      // ... 更多点
+    ]]
+  },
+  properties: {
+    type: 'doubleArrow',
+    style: {
+      material: '#8e44ad',
+      opacity: 0.7
+    },
+    attr: { id: 'doubleArrow-001', name: '双箭头' }
+  }
+}
+
+graphics.loadJson(doubleArrowGeoJSON)
+```
+
+### 三维几何体类型加载
+
+#### 16. 立方体 (box)
+
+```typescript
+const boxGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'Point',
+    coordinates: [116.4074, 39.9042, 0] // 中心点
+  },
+  properties: {
+    type: 'box',
+    style: {
+      dimensions: {
+        x: 1000,
+        y: 1000,
+        z: 500
+      },
+      material: '#e67e22'
+    },
+    attr: { id: 'box-001', name: '立方体' }
+  }
+}
+
+graphics.loadJson(boxGeoJSON)
+```
+
+#### 17. 圆柱体 (cylinder)
+
+```typescript
+const cylinderGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'Point',
+    coordinates: [116.4074, 39.9042, 0]
+  },
+  properties: {
+    type: 'cylinder',
+    style: {
+      length: 2000,
+      topRadius: 500,
+      bottomRadius: 500,
+      material: '#3498db'
+    },
+    attr: { id: 'cylinder-001', name: '圆柱体' }
+  }
+}
+
+graphics.loadJson(cylinderGeoJSON)
+```
+
+#### 18. 墙体 (wall)
+
+```typescript
+const wallGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'LineString',
+    coordinates: [
+      [116.4074, 39.9042, 0],
+      [116.4084, 39.9052, 0],
+      [116.4094, 39.9062, 0]
+    ]
+  },
+  properties: {
+    type: 'wall',
+    style: {
+      minimumHeights: [0, 0, 0],
+      maximumHeights: [100, 100, 100],
+      material: '#34495e'
+    },
+    attr: { id: 'wall-001', name: '墙体' }
+  }
+}
+
+graphics.loadJson(wallGeoJSON)
+```
+
+### 模型类型加载
+
+#### 19. Entity 模式模型 (model)
+
+```typescript
+const modelGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'Point',
+    coordinates: [116.4074, 39.9042, 0]
+  },
+  properties: {
+    type: 'model',
+    style: {
+      url: '/models/vehicle.glb',
+      scale: 1.0,
+      minimumPixelSize: 128
+    },
+    attr: { id: 'model-001', name: '3D模型' }
+  }
+}
+
+graphics.loadJson(modelGeoJSON)
+```
+
+### 水面类型加载（Primitive）
+
+#### 20. 水面 (water)
+
+```typescript
+const waterGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'Polygon',
+    coordinates: [[
+      [116.4074, 39.9042, 0],
+      [116.4084, 39.9042, 0],
+      [116.4084, 39.9052, 0],
+      [116.4074, 39.9052, 0],
+      [116.4074, 39.9042, 0]
+    ]]
+  },
+  properties: {
+    type: 'water',
+    style: {
+      baseWaterColor: '#1e90ff',
+      blendColor: '#00bfff',
+      height: 100,
+      extrudedHeight: 5,
+      waveType: 'ripple',
+      frequency: 8.0,
+      amplitude: 0.01,
+      animationSpeed: 0.005
+    },
+    attr: { id: 'water-001', name: '水面' }
+  }
+}
+
+graphics.loadJson(waterGeoJSON)
+```
+
+#### 21. 洪水推进 (flood)
+
+```typescript
+const floodGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'Polygon',
+    coordinates: [[
+      [116.4074, 39.9042, 0],
+      [116.4084, 39.9042, 0],
+      [116.4084, 39.9052, 0],
+      [116.4074, 39.9052, 0],
+      [116.4074, 39.9042, 0]
+    ]]
+  },
+  properties: {
+    type: 'flood',
+    style: {
+      baseWaterColor: '#4169e1',
+      startHeight: 50,
+      targetHeight: 100,
+      currentHeight: 50,
+      riseSpeed: 0.5,
+      duration: 10,
+      autoStart: false
+    },
+    attr: { id: 'flood-001', name: '洪水推进' }
+  }
+}
+
+graphics.loadJson(floodGeoJSON)
+```
+
+#### 22. 动态河流 (river)
+
+```typescript
+const riverGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'LineString',
+    coordinates: [
+      [116.4074, 39.9042, 0],
+      [116.4084, 39.9052, 0],
+      [116.4094, 39.9062, 0]
+    ]
+  },
+  properties: {
+    type: 'river',
+    style: {
+      baseWaterColor: '#4682b4',
+      width: 200,
+      depth: 5,
+      flowVelocity: 2.0,
+      dynamicWaterLevel: true,
+      waterLevelPeriod: 5,
+      waterLevelAmplitude: 1
+    },
+    attr: { id: 'river-001', name: '动态河流' }
+  }
+}
+
+graphics.loadJson(riverGeoJSON)
+```
+
+### 视频融合类型加载（Primitive）
+
+#### 23. 视频融合 (video-fusion)
+
+```typescript
+const videoGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'Polygon',
+    coordinates: [[
+      [116.4074, 39.9042, 0],
+      [116.4084, 39.9042, 0],
+      [116.4084, 39.9052, 0],
+      [116.4074, 39.9052, 0],
+      [116.4074, 39.9042, 0]
+    ]]
+  },
+  properties: {
+    type: 'video-fusion',
+    style: {
+      videoUrl: '/videos/demo.mp4',
+      sourceType: 'mp4',
+      projectionMode: '2d',
+      width: 1920,
+      height: 1080,
+      opacity: 1.0,
+      autoPlay: false,
+      loop: false
+    },
+    attr: {
+      id: 'video-fusion-001',
+      name: '视频融合',
+      camera: {
+        // 3D投射时的相机参数（可选）
+        position: [116.4074, 39.9042, 100],
+        orientation: {
+          heading: 0,
+          pitch: -Math.PI / 2,
+          roll: 0
+        },
+        fov: Math.PI / 4,
+        aspectRatio: 16 / 9
+      }
+    }
+  }
+}
+
+graphics.loadJson(videoGeoJSON)
+```
+
+### 批量加载示例
+
+#### 1. 加载 FeatureCollection
+
+```typescript
+const featureCollection: GeoJSONFeatureCollection = {
+  type: 'FeatureCollection',
+  features: [
+    {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [116.4074, 39.9042, 0]
+      },
+      properties: {
+        type: 'point',
+        style: { pixelSize: 10, color: '#ff0000' },
+        attr: { id: 'point-001' }
+      }
+    },
+    {
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[
+          [116.4074, 39.9042, 0],
+          [116.4084, 39.9042, 0],
+          [116.4084, 39.9052, 0],
+          [116.4074, 39.9052, 0],
+          [116.4074, 39.9042, 0]
+        ]]
+      },
+      properties: {
+        type: 'polygon',
+        style: { material: '#ff6b6b', opacity: 0.6 },
+        attr: { id: 'polygon-001' }
+      }
+    }
+  ]
+}
+
+const entities = graphics.loadJson(featureCollection, {
+  clear: true,
+  flyTo: true,
+  onEachEntity: (feature, entity) => {
+    console.log('已加载:', entity.id, feature.properties?.type)
+  }
+})
+```
+
+#### 2. 从外部 GeoJSON 自动识别类型
+
+```typescript
+// 如果 GeoJSON 中没有 type 属性，会根据 geometry.type 自动推断
+const externalGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'Polygon',
+    coordinates: [[
+      [116.4074, 39.9042, 0],
+      [116.4084, 39.9042, 0],
+      [116.4084, 39.9052, 0],
+      [116.4074, 39.9052, 0],
+      [116.4074, 39.9042, 0]
+    ]]
+  },
+  properties: {
+    // 没有 type，会自动推断为 'polygon'
+    name: '外部数据',
+    description: '从其他系统导入的数据'
+  }
+}
+
+graphics.loadJson(externalGeoJSON, {
+  style: {
+    // 全局样式覆盖
+    material: '#409eff',
+    outline: true
+  },
+  onEachFeature: (feature, type, index) => {
+    // 自动推断的类型会在这里返回
+    console.log('推断类型:', type) // 'polygon'
+    
+    // 可以手动设置类型
+    if (!feature.properties.type) {
+      feature.properties.type = type
+    }
+  }
+})
+```
+
+#### 3. 加载时更新样式
+
+```typescript
+const geojson: GeoJSONFeatureCollection = {
+  type: 'FeatureCollection',
+  features: [
+    // ... features
+  ]
+}
+
+graphics.loadJson(geojson, {
+  clear: true,
+  // 全局样式覆盖
+  style: {
+    material: '#409eff',
+    outlineColor: '#ffffff',
+    outlineWidth: 2
+  },
+  onEachFeature: (feature, type, index) => {
+    // 根据类型设置不同样式
+    if (type === 'point') {
+      feature.properties.style = {
+        ...feature.properties.style,
+        pixelSize: 15,
+        color: '#ff0000'
+      }
+    } else if (type === 'polygon') {
+      feature.properties.style = {
+        ...feature.properties.style,
+        opacity: 0.7,
+        material: '#00ff00'
+      }
+    }
+  }
+})
+```
+
+#### 4. 加载时添加业务属性
+
+```typescript
+graphics.loadJson(geojson, {
+  onEachFeature: (feature, type, index) => {
+    // 确保有 attr 对象
+    feature.properties.attr = feature.properties.attr || {}
+    
+    // 添加业务属性
+    feature.properties.attr.id = feature.properties.attr.id || `entity-${index}`
+    feature.properties.attr.name = feature.properties.attr.name || `实体${index + 1}`
+    feature.properties.attr.createdAt = new Date().toISOString()
+    feature.properties.attr.source = 'geojson-import'
+  },
+  onEachEntity: (feature, entity, index) => {
+    // 加载后可以进一步处理
+    const attr = (entity as EntityExtension).attribute?.attr
+    console.log('加载完成:', attr?.id, attr?.name)
+  }
+})
+```
+
+#### 5. 增量加载（保留现有数据）
+
+```typescript
+// 第一次加载
+graphics.loadJson(geojson1, { clear: true })
+
+// 增量加载（不清空现有数据）
+graphics.loadJson(geojson2, { clear: false })
+
+// 检查是否有重复 ID，避免重复加载
+graphics.loadJson(geojson3, {
+  clear: false,
+  onEachFeature: (feature, type, index) => {
+    const id = feature.properties?.attr?.id
+    if (id && graphics.getEntityById(id)) {
+      console.warn('实体已存在，跳过:', id)
+      // 可以设置一个标志，在 onEachEntity 中跳过
+      feature.properties._skip = true
+    }
+  },
+  onEachEntity: (feature, entity, index) => {
+    if (feature.properties._skip) {
+      graphics.deleteEntity(entity)
+      return
+    }
+    console.log('新增实体:', entity.id)
+  }
+})
+```
+
+### 加载注意事项
+
+1. **类型识别**：
+   - GeoJSON 中必须包含 `properties.type` 字段，指定标绘类型
+   - 如果没有 `type`，会根据 `geometry.type` 自动推断（Point → point, LineString → polyline, Polygon → polygon）
+
+2. **样式恢复**：
+   - `properties.style` 中的样式会完整恢复
+   - 可以通过 `loadJson` 的 `style` 选项全局覆盖样式
+
+3. **业务属性**：
+   - `properties.attr` 中的业务属性会保存到 `entity.attribute.attr`
+   - 建议在 `onEachFeature` 中确保 `attr.id` 存在，便于后续查询
+
+4. **坐标系统**：
+   - GeoJSON 使用 WGS84 坐标系（经纬度）
+   - 高度值（z 坐标）单位为米
+
+5. **特殊类型处理**：
+   - 圆形、椭圆等类型需要保留特殊参数（radius、semiMajorAxis 等）在 `properties.style` 中
+   - Primitive 类型（water、flood、river、video-fusion）同样支持加载
+
+6. **性能优化**：
+   - 大量数据建议使用 `clear: false` 增量加载
+   - 使用 `flyTo: false` 避免频繁相机移动
+   - 在 `onEachEntity` 中进行必要的后处理
+
+## 各类型标绘示例
+
+### 基础点线面类型
+
+#### 1. 点 (point)
+
+```typescript
+// 简单点
+graphics.startDraw({
+  type: 'point',
+  style: {
+    pixelSize: 10,
+    color: '#ff0000',
+    outline: true,
+    outlineColor: '#ffffff',
+    outlineWidth: 2
+  },
+  attr: { id: 'point-001', name: '标记点' }
+})
+
+// 带缩放距离的点
+graphics.startDraw({
+  type: 'point',
+  style: {
+    pixelSize: 15,
+    color: '#00ff00',
+    scaleByDistance: true,
+    scaleByDistance_near: 1000,
+    scaleByDistance_nearValue: 2.0,
+    scaleByDistance_far: 100000,
+    scaleByDistance_farValue: 0.5
+  }
+})
+```
+
+#### 2. 图标标注 (billboard)
+
+```typescript
+graphics.startDraw({
+  type: 'billboard',
+  style: {
+    image: '/icons/marker.png',
+    scale: 1.5,
+    rotation: 0,
+    horizontalOrigin: 'CENTER',
+    verticalOrigin: 'BOTTOM',
+    // 可选：带文字标签
+    label: {
+      text: '标注点',
+      font: '16px sans-serif',
+      fillColor: '#ffffff',
+      outlineColor: '#000000',
+      outlineWidth: 2,
+      pixelOffset: [0, -40]
+    }
+  },
+  attr: { id: 'billboard-001', name: '图标标注' }
+})
+```
+
+#### 3. 文字标注 (label)
+
+```typescript
+graphics.startDraw({
+  type: 'label',
+  style: {
+    text: '文字标注',
+    font: 'bold 20px sans-serif',
+    fillColor: '#ffffff',
+    outlineColor: '#000000',
+    outlineWidth: 2,
+    background: true,
+    background_color: '#333333',
+    background_opacity: 0.8,
+    pixelOffset: [0, -20]
+  },
+  attr: { id: 'label-001', name: '文字标注' }
+})
+```
+
+#### 4. 折线 (polyline)
+
+```typescript
+// 基础折线
+graphics.startDraw({
+  type: 'polyline',
+  style: {
+    width: 3,
+    color: '#00ff00',
+    clampToGround: true
+  },
+  attr: { id: 'polyline-001', name: '路径线' }
+})
+
+// 带样式的折线
+graphics.startDraw({
+  type: 'polyline',
+  style: {
+    width: 5,
+    color: '#ff6b6b',
+    lineType: 'dash', // 'solid' | 'dash' | 'glow' | 'arrow' | 'animation'
+    dashLength: 16,
+    clampToGround: false,
+    height: 100
+  }
+})
+
+// 流动动画线
+graphics.startDraw({
+  type: 'polyline',
+  style: {
+    width: 4,
+    color: '#409eff',
+    lineType: 'animation',
+    animationDuration: 2000
+  }
+})
+```
+
+#### 5. 曲线 (curve)
+
+```typescript
+graphics.startDraw({
+  type: 'curve',
+  style: {
+    width: 3,
+    color: '#9b59b6',
+    clampToGround: true
+  },
+  attr: { id: 'curve-001', name: '平滑曲线' }
+})
+```
+
+#### 6. 面 (polygon)
+
+```typescript
+// 基础面
+graphics.startDraw({
+  type: 'polygon',
+  style: {
+    material: '#ff6b6b',
+    opacity: 0.6,
+    outline: true,
+    outlineColor: '#ffffff',
+    outlineWidth: 2,
+    clampToGround: true
+  },
+  attr: { id: 'polygon-001', name: '区域面' }
+})
+
+// 带高度的面
+graphics.startDraw({
+  type: 'polygon',
+  style: {
+    material: '#3498db',
+    opacity: 0.7,
+    height: 0,
+    extrudedHeight: 100,
+    outline: true,
+    outlineColor: '#ffffff'
+  }
+})
+
+// 扩展面（更多编辑点）
+graphics.startDraw({
+  type: 'polygonEx',
+  style: {
+    material: '#2ecc71',
+    opacity: 0.5,
+    outline: true
+  }
+})
+```
+
+#### 7. 矩形 (rectangle)
+
+```typescript
+graphics.startDraw({
+  type: 'rectangle',
+  style: {
+    material: '#e74c3c',
+    opacity: 0.6,
+    outline: true,
+    outlineColor: '#ffffff',
+    height: 0,
+    extrudedHeight: 50
+  },
+  attr: { id: 'rectangle-001', name: '矩形区域' }
+})
+```
+
+#### 8. 圆形 (circle)
+
+```typescript
+graphics.startDraw({
+  type: 'circle',
+  style: {
+    material: '#f39c12',
+    opacity: 0.6,
+    outline: true,
+    outlineColor: '#ffffff',
+    radius: 1000, // 米
+    height: 0,
+    extrudedHeight: 20
+  },
+  attr: { id: 'circle-001', name: '圆形区域' }
+})
+```
+
+#### 9. 椭圆 (ellipse)
+
+```typescript
+graphics.startDraw({
+  type: 'ellipse',
+  style: {
+    material: '#1abc9c',
+    opacity: 0.6,
+    outline: true,
+    semiMajorAxis: 2000, // 长半轴（米）
+    semiMinorAxis: 1000, // 短半轴（米）
+    rotation: 0, // 旋转角度（弧度）
+    height: 0,
+    extrudedHeight: 30
+  },
+  attr: { id: 'ellipse-001', name: '椭圆区域' }
+})
+```
+
+### 三维几何体类型
+
+#### 10. 立方体 (box)
+
+```typescript
+graphics.startDraw({
+  type: 'box',
+  style: {
+    material: '#e67e22',
+    dimensions: {
+      x: 1000, // 长度（米）
+      y: 1000, // 宽度（米）
+      z: 500   // 高度（米）
+    },
+    outline: true,
+    outlineColor: '#ffffff'
+  },
+  attr: { id: 'box-001', name: '立方体' }
+})
+```
+
+#### 11. 圆柱体 (cylinder)
+
+```typescript
+graphics.startDraw({
+  type: 'cylinder',
+  style: {
+    material: '#3498db',
+    length: 2000,  // 长度（米）
+    topRadius: 500, // 顶部半径（米）
+    bottomRadius: 500, // 底部半径（米）
+    outline: true,
+    outlineColor: '#ffffff'
+  },
+  attr: { id: 'cylinder-001', name: '圆柱体' }
+})
+```
+
+#### 12. 椭球体 (ellipsoid)
+
+```typescript
+graphics.startDraw({
+  type: 'ellipsoid',
+  style: {
+    material: '#9b59b6',
+    radii: {
+      x: 1000, // X轴半径（米）
+      y: 1000, // Y轴半径（米）
+      z: 500   // Z轴半径（米）
+    },
+    outline: true,
+    outlineColor: '#ffffff'
+  },
+  attr: { id: 'ellipsoid-001', name: '椭球体' }
+})
+```
+
+#### 13. 墙体 (wall)
+
+```typescript
+graphics.startDraw({
+  type: 'wall',
+  style: {
+    material: '#34495e',
+    minimumHeights: [0, 0, 0, 0], // 底部高度数组
+    maximumHeights: [100, 100, 100, 100], // 顶部高度数组
+    outline: true,
+    outlineColor: '#ffffff'
+  },
+  attr: { id: 'wall-001', name: '墙体' }
+})
+```
+
+#### 14. 平面 (plane)
+
+```typescript
+graphics.startDraw({
+  type: 'plane',
+  style: {
+    material: '#95a5a6',
+    plane: new Cesium.Plane(Cesium.Cartesian3.UNIT_Z, 0), // 平面定义
+    dimensions: {
+      x: 2000, // X方向尺寸
+      y: 2000  // Y方向尺寸
+    }
+  },
+  attr: { id: 'plane-001', name: '平面' }
+})
+```
+
+#### 15. 走廊 (corridor)
+
+```typescript
+graphics.startDraw({
+  type: 'corridor',
+  style: {
+    material: '#16a085',
+    width: 500, // 宽度（米）
+    height: 0,
+    extrudedHeight: 50,
+    outline: true,
+    outlineColor: '#ffffff'
+  },
+  attr: { id: 'corridor-001', name: '走廊' }
+})
+```
+
+#### 16. 管道体 (polylineVolume)
+
+```typescript
+graphics.startDraw({
+  type: 'polylineVolume',
+  style: {
+    material: '#27ae60',
+    shape: [
+      new Cesium.Cartesian2(-500, -500),
+      new Cesium.Cartesian2(500, -500),
+      new Cesium.Cartesian2(500, 500),
+      new Cesium.Cartesian2(-500, 500)
+    ], // 横截面形状
+    outline: true,
+    outlineColor: '#ffffff'
+  },
+  attr: { id: 'polylineVolume-001', name: '管道体' }
+})
+```
+
+### 军标类型
+
+#### 17. 攻击箭头 (attackArrow)
+
+```typescript
+graphics.startDraw({
+  type: 'attackArrow',
+  style: {
+    material: '#e74c3c',
+    opacity: 0.7,
+    outline: true,
+    outlineColor: '#ffffff',
+    outlineWidth: 2
+  },
+  attr: { id: 'attackArrow-001', name: '攻击箭头' }
+})
+```
+
+#### 18. 平尾攻击箭头 (attackArrowPW)
+
+```typescript
+graphics.startDraw({
+  type: 'attackArrowPW',
+  style: {
+    material: '#c0392b',
+    opacity: 0.7,
+    outline: true
+  },
+  attr: { id: 'attackArrowPW-001', name: '平尾攻击箭头' }
+})
+```
+
+#### 19. 燕尾攻击箭头 (attackArrowYW)
+
+```typescript
+graphics.startDraw({
+  type: 'attackArrowYW',
+  style: {
+    material: '#a93226',
+    opacity: 0.7,
+    outline: true
+  },
+  attr: { id: 'attackArrowYW-001', name: '燕尾攻击箭头' }
+})
+```
+
+#### 20. 双箭头 (doubleArrow)
+
+```typescript
+graphics.startDraw({
+  type: 'doubleArrow',
+  style: {
+    material: '#8e44ad',
+    opacity: 0.7,
+    outline: true
+  },
+  attr: { id: 'doubleArrow-001', name: '双箭头' }
+})
+```
+
+#### 21. 细长箭头 (fineArrow)
+
+```typescript
+graphics.startDraw({
+  type: 'fineArrow',
+  style: {
+    material: '#7d3c98',
+    opacity: 0.7,
+    outline: true
+  },
+  attr: { id: 'fineArrow-001', name: '细长箭头' }
+})
+```
+
+#### 22. 细长燕尾箭头 (fineArrowYW)
+
+```typescript
+graphics.startDraw({
+  type: 'fineArrowYW',
+  style: {
+    material: '#6c3483',
+    opacity: 0.7,
+    outline: true
+  },
+  attr: { id: 'fineArrowYW-001', name: '细长燕尾箭头' }
+})
+```
+
+#### 23. 集结地 (gatheringPlace)
+
+```typescript
+graphics.startDraw({
+  type: 'gatheringPlace',
+  style: {
+    material: '#f39c12',
+    opacity: 0.6,
+    outline: true,
+    outlineColor: '#ffffff'
+  },
+  attr: { id: 'gatheringPlace-001', name: '集结地' }
+})
+```
+
+### 特殊形状类型
+
+#### 24. 扇形 (sector)
+
+```typescript
+graphics.startDraw({
+  type: 'sector',
+  style: {
+    material: '#3498db',
+    opacity: 0.6,
+    outline: true,
+    startAngle: 0,    // 起始角度（弧度）
+    endAngle: Math.PI / 2, // 结束角度（弧度）
+    radius: 2000      // 半径（米）
+  },
+  attr: { id: 'sector-001', name: '扇形' }
+})
+```
+
+#### 25. 弓形 (lune)
+
+```typescript
+graphics.startDraw({
+  type: 'lune',
+  style: {
+    material: '#1abc9c',
+    opacity: 0.6,
+    outline: true
+  },
+  attr: { id: 'lune-001', name: '弓形' }
+})
+```
+
+#### 26. 正多边形 (regular)
+
+```typescript
+graphics.startDraw({
+  type: 'regular',
+  style: {
+    material: '#2ecc71',
+    opacity: 0.6,
+    outline: true,
+    sides: 6,        // 边数
+    radius: 1500     // 半径（米）
+  },
+  attr: { id: 'regular-001', name: '正六边形' }
+})
+```
+
+#### 27. 等腰三角形 (isoscelesTriangle)
+
+```typescript
+graphics.startDraw({
+  type: 'isoscelesTriangle',
+  style: {
+    material: '#e67e22',
+    opacity: 0.6,
+    outline: true
+  },
+  attr: { id: 'isoscelesTriangle-001', name: '等腰三角形' }
+})
+```
+
+#### 28. 闭合曲线 (closeCurve)
+
+```typescript
+graphics.startDraw({
+  type: 'closeCurve',
+  style: {
+    material: '#9b59b6',
+    opacity: 0.6,
+    outline: true
+  },
+  attr: { id: 'closeCurve-001', name: '闭合曲线' }
+})
+```
+
+### 模型类型
+
+#### 29. Entity 模式模型 (model)
+
+```typescript
+graphics.startDraw({
+  type: 'model',
+  style: {
+    url: '/models/vehicle.glb',
+    scale: 1.0,
+    minimumPixelSize: 128,
+    maximumScale: 20000,
+    runAnimations: true
+  },
+  attr: { id: 'model-001', name: '3D模型' }
+})
+```
+
+#### 30. Primitive 模式模型 (model-p)
+
+```typescript
+graphics.startDraw({
+  type: 'model-p',
+  style: {
+    url: '/models/building.glb',
+    scale: 1.5,
+    minimumPixelSize: 128
+  },
+  attr: { id: 'model-p-001', name: 'Primitive模型' }
+})
+```
+
+### 水面类型（Primitive）
+
+#### 31. 水面 (water)
+
+```typescript
+graphics.startDraw({
+  type: 'water',
+  style: {
+    baseWaterColor: '#1e90ff',
+    blendColor: '#00bfff',
+    height: 100,
+    extrudedHeight: 5,
+    waveType: 'ripple', // 'calm' | 'ripple' | 'wave' | 'turbulent'
+    frequency: 8.0,
+    amplitude: 0.01,
+    animationSpeed: 0.005,
+    specularIntensity: 0.5,
+    opacity: 0.8
+  },
+  attr: { id: 'water-001', name: '水面' }
+})
+```
+
+#### 32. 洪水推进 (flood)
+
+```typescript
+graphics.startDraw({
+  type: 'flood',
+  style: {
+    baseWaterColor: '#4169e1',
+    height: 50,
+    extrudedHeight: 10,
+    startHeight: 50,
+    targetHeight: 100,
+    riseSpeed: 0.5, // 米/秒
+    duration: 10,   // 秒
+    autoStart: true,
+    floodGradient: true,
+    deepWaterColor: '#000080',
+    shallowWaterColor: '#87ceeb'
+  },
+  attr: { id: 'flood-001', name: '洪水推进' }
+})
+```
+
+#### 33. 动态河流 (river)
+
+```typescript
+graphics.startDraw({
+  type: 'river',
+  style: {
+    baseWaterColor: '#4682b4',
+    width: 200,      // 河流宽度（米）
+    depth: 5,        // 河流深度（米）
+    flowVelocity: 2.0, // 流速（米/秒）
+    dynamicWaterLevel: true,
+    waterLevelPeriod: 5,    // 水位变化周期（秒）
+    waterLevelAmplitude: 1,  // 水位变化幅度（米）
+    showRiverbed: true,
+    riverbedColor: '#8b7355'
+  },
+  attr: { id: 'river-001', name: '动态河流' }
+})
+```
+
+### 视频融合类型（Primitive）
+
+#### 34. 视频融合 (video-fusion)
+
+```typescript
+// 2D 平面投射
+graphics.startDraw({
+  type: 'video-fusion',
+  style: {
+    videoUrl: '/videos/demo.mp4',
+    sourceType: 'mp4', // 'mp4' | 'webm' | 'flv' | 'hls' | 'm3u8' | 'rtmp' | 'webrtc'
+    projectionMode: '2d', // '2d' | '3d' | 'ground'
+    width: 1920,
+    height: 1080,
+    opacity: 1.0,
+    autoPlay: true,
+    loop: false,
+    muted: true,
+    playbackRate: 1.0
+  },
+  attr: { id: 'video-fusion-001', name: '视频融合' }
+})
+
+// 3D 贴物投射（需要相机参数）
+graphics.startDraw({
+  type: 'video-fusion',
+  style: {
+    videoUrl: '/videos/stream.m3u8',
+    sourceType: 'hls',
+    projectionMode: '3d',
+    showFrustum: true,      // 显示视锥体
+    frustumColor: '#ffff00',
+    frustumLineWidth: 2,
+    opacity: 0.9
+  },
+  attr: {
+    id: 'video-fusion-002',
+    name: '3D视频投射',
+    camera: {
+      position: new Cesium.Cartesian3(...),
+      orientation: {
+        heading: 0,
+        pitch: -Math.PI / 2,
+        roll: 0
+      },
+      fov: Math.PI / 4,
+      aspectRatio: 16 / 9,
+      near: 0.1,
+      far: 10000
+    }
+  }
+})
+
+// 贴地投射
+graphics.startDraw({
+  type: 'video-fusion',
+  style: {
+    videoUrl: '/videos/ground.mp4',
+    projectionMode: 'ground',
+    groundHeight: 0,
+    opacity: 0.8
+  },
+  attr: { id: 'video-fusion-003', name: '贴地视频' }
+})
+```
+
+### 使用技巧
+
+1. **样式继承**：所有类型都支持 `material`、`opacity`、`outline` 等通用样式属性。
+2. **高度设置**：面类型支持 `height`（底部高度）和 `extrudedHeight`（拉伸高度）。
+3. **贴地模式**：设置 `clampToGround: true` 可以让图形贴合地形。
+4. **业务属性**：通过 `attr` 字段存储业务相关的 ID、名称等信息，便于后续查询和管理。
+5. **回调函数**：使用 `success` 回调在绘制完成后执行自定义逻辑。
+
+## 各类型 GeoJSON 导出示例
+
+### 基础导出方法
+
+```typescript
+// 导出单个实体
+const entity = graphics.getEntityById('point-001')
+const singleGeoJSON = graphics.toGeoJSON(entity)
+// 返回: GeoJSONFeature | null
+
+// 导出所有实体
+const allGeoJSON = graphics.toGeoJSON()
+// 返回: GeoJSONFeatureCollection | null
+
+// 导出后保存
+function saveGeoJSON(geojson: GeoJSONFeature | GeoJSONFeatureCollection) {
+  const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'graphics.geojson'
+  a.click()
+  URL.revokeObjectURL(url)
+}
+```
+
+### 点类型导出
+
+#### 1. 点 (point)
+
+```typescript
+const pointEntity = graphics.startDraw({
+  type: 'point',
+  style: { pixelSize: 10, color: '#ff0000' },
+  attr: { id: 'point-001', name: '标记点' }
+})
+
+// 导出
+const pointGeoJSON = graphics.toGeoJSON(pointEntity)
+// 结果示例:
+// {
+//   type: 'Feature',
+//   geometry: {
+//     type: 'Point',
+//     coordinates: [116.4074, 39.9042, 0]
+//   },
+//   properties: {
+//     type: 'point',
+//     style: { pixelSize: 10, color: '#ff0000' },
+//     attr: { id: 'point-001', name: '标记点' }
+//   }
+// }
+```
+
+#### 2. 图标标注 (billboard)
+
+```typescript
+const billboardEntity = graphics.startDraw({
+  type: 'billboard',
+  style: { image: '/icons/marker.png', scale: 1.5 },
+  attr: { id: 'billboard-001', name: '图标标注' }
+})
+
+const billboardGeoJSON = graphics.toGeoJSON(billboardEntity)
+// geometry.type: 'Point'
+// properties.type: 'billboard'
+```
+
+#### 3. 文字标注 (label)
+
+```typescript
+const labelEntity = graphics.startDraw({
+  type: 'label',
+  style: { text: '文字标注', font: '16px sans-serif' },
+  attr: { id: 'label-001', name: '文字标注' }
+})
+
+const labelGeoJSON = graphics.toGeoJSON(labelEntity)
+// geometry.type: 'Point'
+// properties.type: 'label'
+```
+
+### 线类型导出
+
+#### 4. 折线 (polyline)
+
+```typescript
+const polylineEntity = graphics.startDraw({
+  type: 'polyline',
+  style: { width: 3, color: '#00ff00' },
+  attr: { id: 'polyline-001', name: '路径线' }
+})
+
+const polylineGeoJSON = graphics.toGeoJSON(polylineEntity)
+// 结果示例:
+// {
+//   type: 'Feature',
+//   geometry: {
+//     type: 'LineString',
+//     coordinates: [
+//       [116.4074, 39.9042, 0],
+//       [116.4084, 39.9052, 0],
+//       [116.4094, 39.9062, 0]
+//     ]
+//   },
+//   properties: {
+//     type: 'polyline',
+//     style: { width: 3, color: '#00ff00' },
+//     attr: { id: 'polyline-001', name: '路径线' }
+//   }
+// }
+```
+
+#### 5. 曲线 (curve)
+
+```typescript
+const curveEntity = graphics.startDraw({
+  type: 'curve',
+  style: { width: 3, color: '#9b59b6' },
+  attr: { id: 'curve-001', name: '平滑曲线' }
+})
+
+const curveGeoJSON = graphics.toGeoJSON(curveEntity)
+// geometry.type: 'LineString' (平滑后的坐标点)
+// properties.type: 'curve'
+```
+
+#### 6. 管道体 (polylineVolume)
+
+```typescript
+const polylineVolumeEntity = graphics.startDraw({
+  type: 'polylineVolume',
+  style: { material: '#27ae60' },
+  attr: { id: 'polylineVolume-001', name: '管道体' }
+})
+
+const polylineVolumeGeoJSON = graphics.toGeoJSON(polylineVolumeEntity)
+// geometry.type: 'LineString'
+// properties.type: 'polylineVolume'
+```
+
+#### 7. 走廊 (corridor)
+
+```typescript
+const corridorEntity = graphics.startDraw({
+  type: 'corridor',
+  style: { width: 500, material: '#16a085' },
+  attr: { id: 'corridor-001', name: '走廊' }
+})
+
+const corridorGeoJSON = graphics.toGeoJSON(corridorEntity)
+// geometry.type: 'LineString'
+// properties.type: 'corridor'
+```
+
+### 面类型导出
+
+#### 8. 面 (polygon)
+
+```typescript
+const polygonEntity = graphics.startDraw({
+  type: 'polygon',
+  style: { material: '#ff6b6b', opacity: 0.6 },
+  attr: { id: 'polygon-001', name: '区域面' }
+})
+
+const polygonGeoJSON = graphics.toGeoJSON(polygonEntity)
+// 结果示例:
+// {
+//   type: 'Feature',
+//   geometry: {
+//     type: 'Polygon',
+//     coordinates: [[
+//       [116.4074, 39.9042, 0],
+//       [116.4084, 39.9042, 0],
+//       [116.4084, 39.9052, 0],
+//       [116.4074, 39.9052, 0],
+//       [116.4074, 39.9042, 0]
+//     ]]
+//   },
+//   properties: {
+//     type: 'polygon',
+//     style: { material: '#ff6b6b', opacity: 0.6, height: 0, extrudedHeight: 0 },
+//     attr: { id: 'polygon-001', name: '区域面' }
+//   }
+// }
+```
+
+#### 9. 矩形 (rectangle)
+
+```typescript
+const rectangleEntity = graphics.startDraw({
+  type: 'rectangle',
+  style: { material: '#e74c3c', height: 0, extrudedHeight: 50 },
+  attr: { id: 'rectangle-001', name: '矩形区域' }
+})
+
+const rectangleGeoJSON = graphics.toGeoJSON(rectangleEntity)
+// geometry.type: 'Polygon'
+// properties.type: 'rectangle'
+```
+
+#### 10. 圆形 (circle)
+
+```typescript
+const circleEntity = graphics.startDraw({
+  type: 'circle',
+  style: { radius: 1000, material: '#f39c12' },
+  attr: { id: 'circle-001', name: '圆形区域' }
+})
+
+const circleGeoJSON = graphics.toGeoJSON(circleEntity)
+// geometry.type: 'Polygon' (转换为多边形坐标)
+// properties.type: 'circle'
+// properties.style.radius: 1000 (保留半径信息)
+```
+
+#### 11. 椭圆 (ellipse)
+
+```typescript
+const ellipseEntity = graphics.startDraw({
+  type: 'ellipse',
+  style: {
+    semiMajorAxis: 2000,
+    semiMinorAxis: 1000,
+    rotation: 0
+  },
+  attr: { id: 'ellipse-001', name: '椭圆区域' }
+})
+
+const ellipseGeoJSON = graphics.toGeoJSON(ellipseEntity)
+// geometry.type: 'Polygon'
+// properties.type: 'ellipse'
+// properties.style.semiMajorAxis: 2000
+// properties.style.semiMinorAxis: 1000
+```
+
+#### 12. 扇形 (sector)
+
+```typescript
+const sectorEntity = graphics.startDraw({
+  type: 'sector',
+  style: {
+    radius: 2000,
+    startAngle: 0,
+    endAngle: Math.PI / 2
+  },
+  attr: { id: 'sector-001', name: '扇形' }
+})
+
+const sectorGeoJSON = graphics.toGeoJSON(sectorEntity)
+// geometry.type: 'Polygon'
+// properties.type: 'sector'
+```
+
+#### 13. 弓形 (lune)
+
+```typescript
+const luneEntity = graphics.startDraw({
+  type: 'lune',
+  style: { material: '#1abc9c' },
+  attr: { id: 'lune-001', name: '弓形' }
+})
+
+const luneGeoJSON = graphics.toGeoJSON(luneEntity)
+// geometry.type: 'Polygon'
+// properties.type: 'lune'
+```
+
+#### 14. 正多边形 (regular)
+
+```typescript
+const regularEntity = graphics.startDraw({
+  type: 'regular',
+  style: { sides: 6, radius: 1500 },
+  attr: { id: 'regular-001', name: '正六边形' }
+})
+
+const regularGeoJSON = graphics.toGeoJSON(regularEntity)
+// geometry.type: 'Polygon'
+// properties.type: 'regular'
+// properties.style.sides: 6
+// properties.style.radius: 1500
+```
+
+#### 15. 等腰三角形 (isoscelesTriangle)
+
+```typescript
+const triangleEntity = graphics.startDraw({
+  type: 'isoscelesTriangle',
+  style: { material: '#e67e22' },
+  attr: { id: 'isoscelesTriangle-001', name: '等腰三角形' }
+})
+
+const triangleGeoJSON = graphics.toGeoJSON(triangleEntity)
+// geometry.type: 'Polygon'
+// properties.type: 'isoscelesTriangle'
+```
+
+#### 16. 闭合曲线 (closeCurve)
+
+```typescript
+const closeCurveEntity = graphics.startDraw({
+  type: 'closeCurve',
+  style: { material: '#9b59b6' },
+  attr: { id: 'closeCurve-001', name: '闭合曲线' }
+})
+
+const closeCurveGeoJSON = graphics.toGeoJSON(closeCurveEntity)
+// geometry.type: 'Polygon'
+// properties.type: 'closeCurve'
+```
+
+#### 17. 扩展面 (polygonEx)
+
+```typescript
+const polygonExEntity = graphics.startDraw({
+  type: 'polygonEx',
+  style: { material: '#2ecc71' },
+  attr: { id: 'polygonEx-001', name: '扩展面' }
+})
+
+const polygonExGeoJSON = graphics.toGeoJSON(polygonExEntity)
+// geometry.type: 'Polygon'
+// properties.type: 'polygonEx'
+```
+
+### 军标类型导出
+
+#### 18. 攻击箭头 (attackArrow)
+
+```typescript
+const attackArrowEntity = graphics.startDraw({
+  type: 'attackArrow',
+  style: { material: '#e74c3c' },
+  attr: { id: 'attackArrow-001', name: '攻击箭头' }
+})
+
+const attackArrowGeoJSON = graphics.toGeoJSON(attackArrowEntity)
+// geometry.type: 'Polygon' (箭头形状的多边形)
+// properties.type: 'attackArrow'
+```
+
+#### 19. 平尾攻击箭头 (attackArrowPW)
+
+```typescript
+const attackArrowPWEntity = graphics.startDraw({
+  type: 'attackArrowPW',
+  style: { material: '#c0392b' },
+  attr: { id: 'attackArrowPW-001', name: '平尾攻击箭头' }
+})
+
+const attackArrowPWGeoJSON = graphics.toGeoJSON(attackArrowPWEntity)
+// geometry.type: 'Polygon'
+// properties.type: 'attackArrowPW'
+```
+
+#### 20. 燕尾攻击箭头 (attackArrowYW)
+
+```typescript
+const attackArrowYWEntity = graphics.startDraw({
+  type: 'attackArrowYW',
+  style: { material: '#a93226' },
+  attr: { id: 'attackArrowYW-001', name: '燕尾攻击箭头' }
+})
+
+const attackArrowYWGeoJSON = graphics.toGeoJSON(attackArrowYWEntity)
+// geometry.type: 'Polygon'
+// properties.type: 'attackArrowYW'
+```
+
+#### 21. 双箭头 (doubleArrow)
+
+```typescript
+const doubleArrowEntity = graphics.startDraw({
+  type: 'doubleArrow',
+  style: { material: '#8e44ad' },
+  attr: { id: 'doubleArrow-001', name: '双箭头' }
+})
+
+const doubleArrowGeoJSON = graphics.toGeoJSON(doubleArrowEntity)
+// geometry.type: 'Polygon'
+// properties.type: 'doubleArrow'
+```
+
+#### 22. 细长箭头 (fineArrow)
+
+```typescript
+const fineArrowEntity = graphics.startDraw({
+  type: 'fineArrow',
+  style: { material: '#7d3c98' },
+  attr: { id: 'fineArrow-001', name: '细长箭头' }
+})
+
+const fineArrowGeoJSON = graphics.toGeoJSON(fineArrowEntity)
+// geometry.type: 'Polygon'
+// properties.type: 'fineArrow'
+```
+
+#### 23. 细长燕尾箭头 (fineArrowYW)
+
+```typescript
+const fineArrowYWEntity = graphics.startDraw({
+  type: 'fineArrowYW',
+  style: { material: '#6c3483' },
+  attr: { id: 'fineArrowYW-001', name: '细长燕尾箭头' }
+})
+
+const fineArrowYWGeoJSON = graphics.toGeoJSON(fineArrowYWEntity)
+// geometry.type: 'Polygon'
+// properties.type: 'fineArrowYW'
+```
+
+#### 24. 集结地 (gatheringPlace)
+
+```typescript
+const gatheringPlaceEntity = graphics.startDraw({
+  type: 'gatheringPlace',
+  style: { material: '#f39c12' },
+  attr: { id: 'gatheringPlace-001', name: '集结地' }
+})
+
+const gatheringPlaceGeoJSON = graphics.toGeoJSON(gatheringPlaceEntity)
+// geometry.type: 'Polygon'
+// properties.type: 'gatheringPlace'
+```
+
+### 三维几何体类型导出
+
+#### 25. 立方体 (box)
+
+```typescript
+const boxEntity = graphics.startDraw({
+  type: 'box',
+  style: {
+    dimensions: { x: 1000, y: 1000, z: 500 }
+  },
+  attr: { id: 'box-001', name: '立方体' }
+})
+
+const boxGeoJSON = graphics.toGeoJSON(boxEntity)
+// geometry.type: 'Point' (中心点)
+// properties.type: 'box'
+// properties.style.dimensions: { x: 1000, y: 1000, z: 500 }
+```
+
+#### 26. 圆柱体 (cylinder)
+
+```typescript
+const cylinderEntity = graphics.startDraw({
+  type: 'cylinder',
+  style: {
+    length: 2000,
+    topRadius: 500,
+    bottomRadius: 500
+  },
+  attr: { id: 'cylinder-001', name: '圆柱体' }
+})
+
+const cylinderGeoJSON = graphics.toGeoJSON(cylinderEntity)
+// geometry.type: 'Point'
+// properties.type: 'cylinder'
+// properties.style.length: 2000
+// properties.style.topRadius: 500
+// properties.style.bottomRadius: 500
+```
+
+#### 27. 椭球体 (ellipsoid)
+
+```typescript
+const ellipsoidEntity = graphics.startDraw({
+  type: 'ellipsoid',
+  style: {
+    radii: { x: 1000, y: 1000, z: 500 }
+  },
+  attr: { id: 'ellipsoid-001', name: '椭球体' }
+})
+
+const ellipsoidGeoJSON = graphics.toGeoJSON(ellipsoidEntity)
+// geometry.type: 'Point'
+// properties.type: 'ellipsoid'
+// properties.style.radii: { x: 1000, y: 1000, z: 500 }
+```
+
+#### 28. 墙体 (wall)
+
+```typescript
+const wallEntity = graphics.startDraw({
+  type: 'wall',
+  style: {
+    minimumHeights: [0, 0, 0, 0],
+    maximumHeights: [100, 100, 100, 100]
+  },
+  attr: { id: 'wall-001', name: '墙体' }
+})
+
+const wallGeoJSON = graphics.toGeoJSON(wallEntity)
+// geometry.type: 'LineString' (墙体路径)
+// properties.type: 'wall'
+// properties.style.minimumHeights: [0, 0, 0, 0]
+// properties.style.maximumHeights: [100, 100, 100, 100]
+```
+
+#### 29. 平面 (plane)
+
+```typescript
+const planeEntity = graphics.startDraw({
+  type: 'plane',
+  style: {
+    dimensions: { x: 2000, y: 2000 }
+  },
+  attr: { id: 'plane-001', name: '平面' }
+})
+
+const planeGeoJSON = graphics.toGeoJSON(planeEntity)
+// geometry.type: 'Polygon'
+// properties.type: 'plane'
+```
+
+### 模型类型导出
+
+#### 30. Entity 模式模型 (model)
+
+```typescript
+const modelEntity = graphics.startDraw({
+  type: 'model',
+  style: {
+    url: '/models/vehicle.glb',
+    scale: 1.0
+  },
+  attr: { id: 'model-001', name: '3D模型' }
+})
+
+const modelGeoJSON = graphics.toGeoJSON(modelEntity)
+// geometry.type: 'Point' (模型位置)
+// properties.type: 'model'
+// properties.style.url: '/models/vehicle.glb'
+// properties.style.scale: 1.0
+```
+
+#### 31. Primitive 模式模型 (model-p)
+
+```typescript
+const modelPEntity = graphics.startDraw({
+  type: 'model-p',
+  style: {
+    url: '/models/building.glb',
+    scale: 1.5
+  },
+  attr: { id: 'model-p-001', name: 'Primitive模型' }
+})
+
+const modelPGeoJSON = graphics.toGeoJSON(modelPEntity)
+// geometry.type: 'Point'
+// properties.type: 'model-p'
+// properties.style.url: '/models/building.glb'
+```
+
+### 水面类型导出（Primitive）
+
+#### 32. 水面 (water)
+
+```typescript
+const waterEntity = graphics.startDraw({
+  type: 'water',
+  style: {
+    baseWaterColor: '#1e90ff',
+    height: 100,
+    extrudedHeight: 5,
+    waveType: 'ripple'
+  },
+  attr: { id: 'water-001', name: '水面' }
+})
+
+const waterGeoJSON = graphics.toGeoJSON(waterEntity)
+// geometry.type: 'Polygon' (水面边界)
+// properties.type: 'water'
+// properties.style.baseWaterColor: '#1e90ff'
+// properties.style.height: 100
+// properties.style.extrudedHeight: 5
+// properties.style.waveType: 'ripple'
+```
+
+#### 33. 洪水推进 (flood)
+
+```typescript
+const floodEntity = graphics.startDraw({
+  type: 'flood',
+  style: {
+    startHeight: 50,
+    targetHeight: 100,
+    riseSpeed: 0.5
+  },
+  attr: { id: 'flood-001', name: '洪水推进' }
+})
+
+const floodGeoJSON = graphics.toGeoJSON(floodEntity)
+// geometry.type: 'Polygon'
+// properties.type: 'flood'
+// properties.style.startHeight: 50
+// properties.style.targetHeight: 100
+// properties.style.riseSpeed: 0.5
+```
+
+#### 34. 动态河流 (river)
+
+```typescript
+const riverEntity = graphics.startDraw({
+  type: 'river',
+  style: {
+    width: 200,
+    depth: 5,
+    flowVelocity: 2.0
+  },
+  attr: { id: 'river-001', name: '动态河流' }
+})
+
+const riverGeoJSON = graphics.toGeoJSON(riverEntity)
+// geometry.type: 'LineString' (河流中心线)
+// properties.type: 'river'
+// properties.style.width: 200
+// properties.style.depth: 5
+// properties.style.flowVelocity: 2.0
+```
+
+### 视频融合类型导出（Primitive）
+
+#### 35. 视频融合 (video-fusion)
+
+```typescript
+const videoEntity = graphics.startDraw({
+  type: 'video-fusion',
+  style: {
+    videoUrl: '/videos/demo.mp4',
+    projectionMode: '2d',
+    width: 1920,
+    height: 1080
+  },
+  attr: {
+    id: 'video-fusion-001',
+    name: '视频融合',
+    camera: {
+      position: new Cesium.Cartesian3(...),
+      orientation: { heading: 0, pitch: -Math.PI / 2, roll: 0 },
+      fov: Math.PI / 4
+    }
+  }
+})
+
+const videoGeoJSON = graphics.toGeoJSON(videoEntity)
+// geometry.type: 'Polygon' (视频投射区域)
+// properties.type: 'video-fusion'
+// properties.style.videoUrl: '/videos/demo.mp4'
+// properties.style.projectionMode: '2d'
+// properties.attr.camera: { ... } (3D投射时的相机参数)
+```
+
+### 批量导出示例
+
+```typescript
+// 1. 导出所有实体
+const allGeoJSON = graphics.toGeoJSON()
+if (allGeoJSON && 'features' in allGeoJSON) {
+  console.log(`共导出 ${allGeoJSON.features.length} 个实体`)
+  saveGeoJSON(allGeoJSON)
+}
+
+// 2. 按类型分组导出
+function exportByType(type: string): GeoJSONFeatureCollection | null {
+  const entities = graphics.getEntitys().filter(entity => {
+    const attr = (entity as EntityExtension).attribute
+    return attr?.type === type
+  })
+  
+  const features: GeoJSONFeature[] = []
+  entities.forEach(entity => {
+    const geojson = graphics.toGeoJSON(entity)
+    if (geojson && 'type' in geojson && geojson.type === 'Feature') {
+      features.push(geojson as GeoJSONFeature)
+    }
+  })
+  
+  return features.length > 0 ? { type: 'FeatureCollection', features } : null
+}
+
+// 使用示例
+const polygonCollection = exportByType('polygon')
+if (polygonCollection) {
+  saveGeoJSON(polygonCollection)
+}
+
+// 3. 导出指定业务属性的实体
+function exportByAttr(key: string, value: unknown): GeoJSONFeatureCollection | null {
+  const entities = graphics.getEntitys().filter(entity => {
+    const attr = (entity as EntityExtension).attribute?.attr
+    return attr && attr[key] === value
+  })
+  
+  const features: GeoJSONFeature[] = []
+  entities.forEach(entity => {
+    const geojson = graphics.toGeoJSON(entity)
+    if (geojson && 'type' in geojson && geojson.type === 'Feature') {
+      features.push(geojson as GeoJSONFeature)
+    }
+  })
+  
+  return features.length > 0 ? { type: 'FeatureCollection', features } : null
+}
+
+// 导出所有告警级别的实体
+const warningCollection = exportByAttr('level', 'warning')
+if (warningCollection) {
+  saveGeoJSON(warningCollection)
+}
+
+// 4. 导出并格式化（美化JSON）
+function exportFormatted(entity?: Entity): string {
+  const geojson = graphics.toGeoJSON(entity)
+  return JSON.stringify(geojson, null, 2)
+}
+
+// 5. 导出并压缩（去除空格）
+function exportMinified(entity?: Entity): string {
+  const geojson = graphics.toGeoJSON(entity)
+  return JSON.stringify(geojson)
+}
+```
+
+### 导出注意事项
+
+1. **几何类型映射**：
+   - 点类型（point、billboard、label）→ `Point`
+   - 线类型（polyline、curve、corridor、wall、river）→ `LineString`
+   - 面类型（polygon、rectangle、circle、ellipse等）→ `Polygon`
+   - 三维体（box、cylinder、ellipsoid）→ `Point`（中心点）+ 样式参数
+
+2. **样式保留**：所有样式信息都会保存在 `properties.style` 中，包括颜色、透明度、尺寸等。
+
+3. **业务属性**：`properties.attr` 中保存的业务属性（如 id、name）会完整保留。
+
+4. **高度信息**：对于有高度的实体，`properties.style.height` 和 `properties.style.extrudedHeight` 会保留。
+
+5. **特殊参数**：某些类型的特殊参数（如圆的 radius、椭圆的 semiMajorAxis 等）会保留在 `properties.style` 中，便于重新加载时恢复。
+
+6. **Primitive 类型**：Primitive 类型（water、flood、river、video-fusion、model-p）同样支持导出，会转换为对应的 GeoJSON 格式。
+
 ## 使用场景
 
 ### 场景 1：作业标绘与编辑
@@ -231,6 +2614,1099 @@ graphics.startDraw({
 ```
 
 - 使用 Primitive 模式模型并立即开启 TransformPlugin，实现装备拖拽摆放的交互体验。
+
+### 场景 3.1：Primitive 标绘完成后的编辑流程
+
+```typescript
+import { EventType, TransformMode, TransformSpace } from '@ktd-cesium/plugins'
+
+// 1. 绘制 Primitive 类型（如水面、洪水、河流、视频融合等）
+let currentPrimitive: Entity | Cesium.Primitive | null = null
+
+graphics.startDraw({
+  type: 'water', // 或 'flood', 'river', 'video-fusion' 等
+  style: {
+    baseWaterColor: '#1e90ff',
+    height: 100,
+    extrudedHeight: 5,
+    waveType: 'ripple',
+    frequency: 8.0,
+    amplitude: 0.01
+  },
+  attr: {
+    id: 'water-001',
+    name: '水库区域'
+  },
+  success: (entity) => {
+    currentPrimitive = entity
+    console.log('Primitive 标绘完成', entity)
+    
+    // 标绘完成后自动进入编辑模式
+    graphics.startEditing(entity)
+  }
+})
+
+// 2. 监听绘制完成事件，自动进入编辑
+graphics.on(EventType.DrawCreated, ({ entity }) => {
+  if (entity) {
+    // 检查是否为 Primitive 类型
+    const attr = (entity as EntityExtension).attribute
+    const isPrimitive = ['water', 'flood', 'river', 'video-fusion', 'model-p'].includes(
+      attr?.type as string
+    )
+    
+    if (isPrimitive) {
+      // 启用编辑模式
+      graphics.hasEdit(true)
+      
+      // 启动编辑
+      graphics.startEditing(entity)
+      
+      // 如果支持变换，启用 TransformPlugin
+      if (graphics.getTransformPlugin()) {
+        graphics.enableTransform()
+        graphics.setTransformMode(TransformMode.TRANSLATE)
+        graphics.setTransformSpace(TransformSpace.WORLD)
+      }
+    }
+  }
+})
+
+// 3. 通过点击选择已绘制的 Primitive 进行编辑
+const eventPlugin = viewer.getPlugin('event')
+eventPlugin?.onLeftClick((pickInfo) => {
+  const picked = pickInfo?.pickedObject
+  
+  if (picked) {
+    // 检查是否为 Primitive（通过 id 或 primitive 属性）
+    const primitive = (picked as any).primitive || picked
+    const entity = (picked as any).id || primitive
+    
+    // 判断是否属于 GraphicsPlugin 管理的 Primitive
+    if (graphics.isMyEntity(entity)) {
+      const attr = (entity as EntityExtension).attribute
+      const isPrimitive = ['water', 'flood', 'river', 'video-fusion', 'model-p'].includes(
+        attr?.type as string
+      )
+      
+      if (isPrimitive) {
+        // 停止当前编辑
+        graphics.stopEditing()
+        
+        // 开始编辑选中的 Primitive
+        graphics.startEditing(entity)
+        
+        // 启用变换控制器
+        if (graphics.getTransformPlugin()) {
+          graphics.enableTransform()
+        }
+      }
+    }
+  } else {
+    // 点击空白处，停止编辑
+    graphics.stopEditing()
+  }
+})
+
+// 4. 编辑 Primitive 的属性（位置、样式等）
+function editPrimitivePosition(entityId: string, newPositions: Cesium.Cartesian3[]) {
+  const entity = graphics.getEntityById(entityId)
+  if (!entity) return
+  
+  // 更新位置
+  graphics.setPositions(newPositions, entity)
+  
+  // 如果是水面类型，可以更新水位高度
+  const attr = (entity as EntityExtension).attribute
+  if (attr?.type === 'water' || attr?.type === 'flood') {
+    // 通过 updateAttribute 更新样式中的高度
+    graphics.updateAttribute({
+      style: {
+        height: newPositions[0]?.z || 100,
+        extrudedHeight: 5
+      }
+    }, entity)
+  }
+}
+
+// 5. 编辑 Primitive 的样式
+function editPrimitiveStyle(entityId: string, styleUpdates: Record<string, unknown>) {
+  const entity = graphics.getEntityById(entityId)
+  if (!entity) return
+  
+  // 更新样式
+  graphics.updateStyle(styleUpdates, entity)
+  
+  // 对于特定类型，可能需要特殊处理
+  const attr = (entity as EntityExtension).attribute
+  if (attr?.type === 'water') {
+    // 水面样式更新示例
+    graphics.updateAttribute({
+      style: {
+        ...attr.style,
+        ...styleUpdates,
+        baseWaterColor: styleUpdates.baseWaterColor || attr.style?.baseWaterColor,
+        waveType: styleUpdates.waveType || attr.style?.waveType
+      }
+    }, entity)
+  } else if (attr?.type === 'video-fusion') {
+    // 视频融合样式更新示例
+    graphics.updateAttribute({
+      style: {
+        ...attr.style,
+        ...styleUpdates,
+        opacity: styleUpdates.opacity ?? attr.style?.opacity,
+        brightness: styleUpdates.brightness ?? attr.style?.brightness
+      }
+    }, entity)
+  }
+}
+
+// 6. 使用 TransformPlugin 进行交互式编辑
+function enablePrimitiveTransform(entityId: string) {
+  const entity = graphics.getEntityById(entityId)
+  if (!entity) return
+  
+  // 确保编辑模式已启用
+  graphics.hasEdit(true)
+  graphics.startEditing(entity)
+  
+  // 启用变换控制器
+  graphics.enableTransform()
+  graphics.setTransformMode(TransformMode.TRANSLATE) // 或 ROTATE, SCALE
+  
+  // 监听变换完成事件（通过 TransformPlugin）
+  const transformPlugin = graphics.getTransformPlugin()
+  if (transformPlugin) {
+    // TransformPlugin 通常会在变换时触发事件
+    // 这里需要根据实际的 TransformPlugin API 来监听
+  }
+}
+
+// 7. 完整示例：绘制水面并编辑
+async function drawAndEditWater() {
+  // 步骤1：绘制水面
+  const waterEntity = graphics.startDraw({
+    type: 'water',
+    style: {
+      baseWaterColor: '#4169e1',
+      height: 50,
+      extrudedHeight: 10,
+      waveType: 'wave',
+      frequency: 15.0,
+      amplitude: 0.02
+    },
+    attr: {
+      id: 'water-' + Date.now(),
+      name: '新建水面'
+    }
+  })
+  
+  // 步骤2：等待绘制完成（通过事件或 Promise）
+  return new Promise<void>((resolve) => {
+    graphics.on(EventType.DrawCreated, ({ entity }) => {
+      if (entity === waterEntity) {
+        // 步骤3：进入编辑模式
+        graphics.hasEdit(true)
+        graphics.startEditing(entity)
+        
+        // 步骤4：启用变换控制器
+        graphics.enableTransform()
+        graphics.setTransformMode(TransformMode.TRANSLATE)
+        
+        resolve()
+      }
+    })
+  })
+}
+
+// 使用示例
+drawAndEditWater().then(() => {
+  console.log('水面绘制完成，已进入编辑模式')
+  
+  // 后续可以通过 UI 控件调用 editPrimitiveStyle 来修改样式
+  // 或通过 TransformPlugin 拖拽来调整位置
+})
+```
+
+**关键要点：**
+
+- **Primitive 类型识别**：通过 `entity.attribute.type` 判断是否为 Primitive 类型（`water`、`flood`、`river`、`video-fusion`、`model-p` 等）。
+- **编辑入口**：使用 `graphics.startEditing(entity)` 启动编辑，支持 Entity 和 Primitive 对象。
+- **位置编辑**：通过 `graphics.setPositions()` 更新坐标，会自动刷新编辑器的拖拽点。
+- **样式编辑**：使用 `graphics.updateStyle()` 或 `graphics.updateAttribute()` 更新样式，某些类型（如水面、视频）可能需要特殊处理。
+- **TransformPlugin 配合**：对于支持变换的 Primitive（有 `position` 或 `modelMatrix`），可启用 `TransformPlugin` 进行交互式移动/旋转/缩放。
+- **事件监听**：通过 `EventType.DrawCreated`、`EventType.EditStart` 等事件监听编辑状态变化。
+
+### 场景 4：事件联动与属性面板
+
+```typescript
+import { useState } from 'react'
+import { EventType } from '@ktd-cesium/plugins'
+
+const [selectedId, setSelectedId] = useState<string>()
+const [styleForm, setStyleForm] = useState({ material: '#ff6b6b', outlineWidth: 2 })
+
+graphics.on(EventType.EditStart, ({ entity }) => {
+  const attr = entity?.attribute
+  setSelectedId(attr?.attr?.id)
+  setStyleForm({
+    material: String(attr?.style?.material || '#ff6b6b'),
+    outlineWidth: Number(attr?.style?.outlineWidth || 1)
+  })
+})
+
+function applyStyle() {
+  if (selectedId) {
+    const entity = graphics.getEntityById(selectedId)
+    graphics.updateStyle(
+      {
+        material: styleForm.material,
+        outlineWidth: styleForm.outlineWidth
+      },
+      entity || undefined
+    )
+  }
+}
+```
+
+- 监听 `edit-start` 事件后，将当前实体属性同步到表单，并允许用户实时修改样式。
+
+### 场景 5：聚合点击联动弹窗
+
+```typescript
+graphics.setClusterOptions({
+  enabled: true,
+  clusterStyle: {
+    color: '#ffaf40',
+    pixelSize: 32,
+    labelColor: '#fff'
+  },
+  clusterEvent: (clusteredEntities, cluster) => {
+    cluster.billboard.scale = 1.2
+    cluster.billboard.color = Cesium.Color.ORANGE
+    cluster.label.text = `${clusteredEntities.length} 个告警`
+    cluster.billboard.id = { type: 'cluster', members: clusteredEntities }
+  }
+})
+
+const event = viewer.getPlugin('event')
+event?.onLeftClick((pickInfo) => {
+  const id = pickInfo?.pickedObject?.id
+  if (id?.type === 'cluster') {
+    popup.createHTML(
+      `<div>共 ${id.members.length} 个告警点</div>`,
+      pickInfo.position ? [pickInfo.position.x, pickInfo.position.y] : undefined,
+      { positionType: 'screen' }
+    )
+  }
+})
+```
+
+- 自定义聚合图标后，通过 EventPlugin 捕获聚合点点击，展示聚合详情。
+
+### 场景 6：自定义绘制 + 编辑
+
+```typescript
+class DrawFence extends DrawPolygon {
+  constructor(config: DrawConfig) {
+    super(config)
+    this.attrClass = {
+      ...this.attrClass,
+      getCoordinates: (entity) => super.attrClass?.getCoordinates?.(entity) || null
+    }
+  }
+
+  override activate(attribute: DrawAttribute, cb?: (entity: Entity) => void) {
+    attribute.style = {
+      clampToGround: true,
+      material: Cesium.Color.fromCssColorString(attribute.style?.material as string || '#3498db'),
+      outline: true,
+      outlineColor: '#ffffff',
+      ...attribute.style
+    }
+    return super.activate(attribute, (entity) => {
+      entity.attribute = {
+        ...(entity.attribute || {}),
+        attr: { type: 'fence', ...attribute.attr }
+      }
+      entity.editing = new EditPolygon(entity, this.viewer, this.dataSource!)
+      cb?.(entity)
+    })
+  }
+}
+
+register('fence', DrawFence)
+
+// 启动
+graphics.startDraw({
+  type: 'fence',
+  style: { material: '#1abc9c', extrudedHeight: 20 },
+  attr: { id: 'fence-01' }
+})
+```
+
+- 继承 `DrawPolygon` 定制样式、属性及编辑器，让新类型完整接入 `loadJson`、编辑、事件等能力。
+
+### 场景 7：湖泊/水库模拟（`water`）
+
+```typescript
+import { WaveType } from '@ktd-cesium/plugins'
+
+const lake = graphics.startDraw({
+  type: 'water',
+  style: {
+    baseWaterColor: 'rgba(0,132,255,0.65)',
+    blendColor: '#4dd2ff',
+    waveType: 'ripple' satisfies WaveType,
+    normalMap: '/textures/water-normal.png',
+    flowDirection: Cesium.Math.toRadians(45),
+    flowSpeed: 0.8,
+    extrudedHeight: 3,
+    fadeFactor: 0.4
+  },
+  attr: {
+    id: 'lake-01',
+    waterType: 'lake'
+  }
+})
+
+graphics.startEditing(lake!)
+```
+
+- `water` 类型基于 `WaterMaterial`，可通过 `waveType`、`frequency`、`amplitude`、`flowSpeed` 等参数控制波纹与流向，支持 `normalMap` 自定义法线。
+- `attr.waterType` 可用于区分 `lake`、`ocean` 等业务语义；编辑模式下可拖拽控制水域范围。
+
+### 场景 8：洪水推进/淹没演练（`flood`）
+
+```typescript
+const flood = graphics.startDraw({
+  type: 'flood',
+  style: {
+    startHeight: 1.5,
+    targetHeight: 8,
+    duration: 90,
+    loop: false,
+    baseWaterColor: 'rgba(64,158,255,0.85)',
+    shallowWaterColor: '#b3e5fc',
+    deepWaterColor: '#01579b'
+  },
+  attr: { id: 'flood-demo' }
+})
+
+// 触发二次抬升
+setTimeout(() => {
+  graphics.updateAttribute(
+    {
+      style: {
+        targetHeight: 12,
+        duration: 45
+      }
+    },
+    flood || undefined
+  )
+}, 8000)
+```
+
+- `flood` 在 `startHeight → targetHeight` 间插值动画，可通过 `duration`、`riseSpeed`、`loop` 控制推进过程，并支持浅水/深水渐变。
+- 调用 `graphics.updateAttribute` 即可在运行时修改水位或颜色，动画会自动过渡到新的目标高度。
+
+### 场景 9：河流断面 + 水位动画（`river`）
+
+```typescript
+const river = graphics.startDraw({
+  type: 'river',
+  style: {
+    baseWaterColor: '#1abc9c',
+    width: 45,
+    depth: 6,
+    dynamicWaterLevel: true,
+    waterLevelPeriod: 30,
+    waterLevelAmplitude: 2,
+    flowVelocity: 3,
+    crossSections: [
+      { position: Cesium.Cartesian3.fromDegrees(120.1, 30.2), width: 30, depth: 5, waterLevel: 1 },
+      { position: Cesium.Cartesian3.fromDegrees(120.3, 30.25), width: 40, depth: 6, waterLevel: 1.2 }
+    ]
+  },
+  attr: { id: 'river-main' }
+})
+```
+
+- `river` 支持设置多段 `crossSections` 来模拟河床宽度/深度，并内置 `dynamicWaterLevel` 水位震荡动画。
+- `flowVelocity`、`flowDirection`（通过 `style.flowDirection`）可营造流动感，适合洪水演练、泄洪可视化等场景。
+
+### 场景 10：视频融合投射（`video-fusion`）
+
+```typescript
+import type { VideoProjectionCamera } from '@ktd-cesium/plugins'
+
+const camera: VideoProjectionCamera = {
+  position: Cesium.Cartesian3.fromDegrees(116.391, 39.907, 80),
+  orientation: {
+    heading: Cesium.Math.toRadians(180),
+    pitch: Cesium.Math.toRadians(-12),
+    roll: 0
+  },
+  fov: Cesium.Math.toRadians(60),
+  aspectRatio: 16 / 9,
+  near: 0.1,
+  far: 500
+}
+
+const video = graphics.startDraw({
+  type: 'video-fusion',
+  style: {
+    videoUrl: 'https://media.example.com/stream/site01.m3u8',
+    sourceType: 'hls',
+    projectionMode: 'ground',
+    width: 80,
+    height: 45,
+    opacity: 0.95,
+    autoPlay: true,
+    loop: true,
+    showFrustum: true,
+    frustumColor: '#ffaf40'
+  },
+  config: {
+    editable: true,
+    controlPointSize: 14
+  },
+  camera
+})
+
+// 控制播放
+const videoPrimitive = video as unknown as { play?: () => Promise<void>; pause?: () => void }
+videoPrimitive?.play?.()
+
+// 支持自定义 HLS/FLV：确保在入口文件引入 hls.js / flv.js，全局挂载 Hls / flvjs
+```
+
+- `video-fusion` 会自动创建隐藏的 `<video>` 元素并生成 `VideoMaterial`，支持 MP4/WebM/FLV/HLS/RTMP/WEBRTC，`projectionMode` 可在 `2d`/`3d`/`ground` 间切换。
+- `camera` 参数可指定投射相机，启用 `showFrustum` 可实时查看视锥体，便于标定；可通过返回对象上的 `play/pause/stop/setVolume` 等方法控制播放。
+- 若使用 HLS/FLV 流，请在业务入口引入对应播放器库（`hls.js`、`flv.js`）并挂载到全局，GraphicsPlugin 会自动调用。
+
+### 场景 11：重新编辑历史标绘
+
+```typescript
+import { EventType } from '@ktd-cesium/plugins'
+
+// 1. 加载历史结果（geojson 来自后端）
+const list = graphics.loadJson(savedGeoJSON, {
+  clear: true,
+  onEachEntity: (feature, entity) => {
+    entity.attribute!.attr = {
+      ...feature.properties?.attr,
+      id: feature.properties?.attr?.id ?? crypto.randomUUID()
+    }
+  }
+})
+
+// 2. 启用编辑模式
+graphics.hasEdit(true)
+
+// 3. 监听 draw-created，自动进入编辑
+graphics.on(EventType.DrawCreated, ({ entity }) => {
+  if (entity) {
+    graphics.startEditing(entity)
+  }
+})
+
+// 4. 手动指定某个业务 ID 重新编辑
+function reopen(entityId: string) {
+  const entity = graphics.getEntityById(entityId)
+  if (!entity) return
+
+  graphics.stopDraw() // 确保退出绘制状态
+  graphics.startEditing(entity)
+  graphics.enableTransform()
+}
+
+// 5. 在编辑面板修改后刷写属性
+function saveStyle(entityId: string, nextStyle: Record<string, unknown>) {
+  const entity = graphics.getEntityById(entityId)
+  if (!entity) return
+  graphics.updateAttribute({ style: nextStyle }, entity)
+}
+```
+
+- `graphics.getEntityById` 通过 `attribute.attr.id` 查找实体，方便与业务 ID 对齐。
+- `graphics.startEditing(entity)` 支持 Entity 与 Primitive（如 `model-p`），配合 `enableTransform` 可与 TransformPlugin 联动。
+- `graphics.updateAttribute` / `setPositions` 可在编辑过程中与自定义表单或吸附逻辑同步，实现“再次编辑→保存”的完整闭环。
+
+### 场景 12：批量操作与筛选
+
+```typescript
+// 1. 按类型筛选实体
+function getEntitiesByType(type: string): Entity[] {
+  return graphics.getEntitys().filter(entity => {
+    const attr = (entity as EntityExtension).attribute
+    return attr?.type === type
+  })
+}
+
+// 2. 批量更新样式
+function updateEntitiesStyle(entities: Entity[], style: Record<string, unknown>) {
+  entities.forEach(entity => {
+    graphics.updateStyle(style, entity)
+  })
+}
+
+// 3. 批量删除
+function deleteEntities(entities: Entity[]) {
+  entities.forEach(entity => {
+    graphics.deleteEntity(entity)
+  })
+}
+
+// 4. 按业务属性筛选
+function getEntitiesByAttr(key: string, value: unknown): Entity[] {
+  return graphics.getEntitys().filter(entity => {
+    const attr = (entity as EntityExtension).attribute?.attr
+    return attr && attr[key] === value
+  })
+}
+
+// 5. 批量导出
+function exportByType(type: string): GeoJSONFeatureCollection | null {
+  const entities = getEntitiesByType(type)
+  const features: GeoJSONFeature[] = []
+  
+  entities.forEach(entity => {
+    const geojson = graphics.toGeoJSON(entity)
+    if (geojson && 'type' in geojson && geojson.type === 'Feature') {
+      features.push(geojson as GeoJSONFeature)
+    }
+  })
+  
+  return features.length > 0 ? { type: 'FeatureCollection', features } : null
+}
+
+// 使用示例
+const warningZones = getEntitiesByAttr('level', 'warning')
+updateEntitiesStyle(warningZones, { material: '#ff6b6b', outlineWidth: 3 })
+```
+
+- 通过 `graphics.getEntitys()` 获取全部实体后，可按 `attribute.type`、`attribute.attr` 等字段进行筛选。
+- 批量操作时建议先收集目标实体数组，再统一调用 `updateStyle`/`deleteEntity`，避免在遍历过程中修改集合。
+
+### 场景 13：图层分组与可见性管理
+
+```typescript
+class LayerGroupManager {
+  private groups: Map<string, Set<Entity>> = new Map()
+  
+  constructor(private graphics: GraphicsPlugin) {}
+  
+  // 创建分组
+  createGroup(groupId: string, entities: Entity[]) {
+    this.groups.set(groupId, new Set(entities))
+  }
+  
+  // 添加实体到分组
+  addToGroup(groupId: string, entity: Entity) {
+    const group = this.groups.get(groupId)
+    if (group) {
+      group.add(entity)
+    } else {
+      this.groups.set(groupId, new Set([entity]))
+    }
+  }
+  
+  // 显示/隐藏分组
+  setGroupVisible(groupId: string, visible: boolean) {
+    const group = this.groups.get(groupId)
+    if (!group) return
+    
+    group.forEach(entity => {
+      if (entity instanceof Cesium.Entity) {
+        entity.show = visible
+      }
+    })
+  }
+  
+  // 切换分组显示
+  toggleGroup(groupId: string) {
+    const group = this.groups.get(groupId)
+    if (!group || group.size === 0) return
+    
+    const firstEntity = Array.from(group)[0]
+    const currentVisible = firstEntity.show !== false
+    this.setGroupVisible(groupId, !currentVisible)
+  }
+  
+  // 获取分组实体
+  getGroupEntities(groupId: string): Entity[] {
+    return Array.from(this.groups.get(groupId) || [])
+  }
+  
+  // 删除分组
+  removeGroup(groupId: string) {
+    this.groups.delete(groupId)
+  }
+}
+
+// 使用示例
+const layerManager = new LayerGroupManager(graphics)
+
+// 创建分组
+const buildings = graphics.getEntitys().filter(e => 
+  (e as EntityExtension).attribute?.type === 'box'
+)
+layerManager.createGroup('buildings', buildings)
+
+const roads = graphics.getEntitys().filter(e => 
+  (e as EntityExtension).attribute?.type === 'polyline'
+)
+layerManager.createGroup('roads', roads)
+
+// 控制显示
+layerManager.setGroupVisible('buildings', true)
+layerManager.setGroupVisible('roads', false)
+layerManager.toggleGroup('buildings')
+```
+
+- 通过 `Set<Entity>` 维护分组，利用 `entity.show` 控制可见性，实现图层管理面板的开关功能。
+
+### 场景 14：动画效果与闪烁提示
+
+```typescript
+// 1. 闪烁动画（通过定时器更新透明度）
+function startBlinkAnimation(entity: Entity, duration = 2000) {
+  let startTime = Date.now()
+  const interval = setInterval(() => {
+    const elapsed = Date.now() - startTime
+    const progress = (elapsed % duration) / duration
+    const alpha = Math.abs(Math.sin(progress * Math.PI))
+    
+    const attr = (entity as EntityExtension).attribute
+    if (attr) {
+      graphics.updateStyle({ opacity: alpha }, entity)
+    }
+    
+    if (elapsed >= duration * 5) { // 闪烁5次后停止
+      clearInterval(interval)
+      graphics.updateStyle({ opacity: 1 }, entity)
+    }
+  }, 16) // 约60fps
+  
+  return () => clearInterval(interval)
+}
+
+// 2. 脉冲效果（缩放变化）
+function startPulseAnimation(entity: Entity, scaleRange = [1, 1.2]) {
+  let direction = 1
+  let currentScale = scaleRange[0]
+  
+  const interval = setInterval(() => {
+    currentScale += direction * 0.02
+    if (currentScale >= scaleRange[1] || currentScale <= scaleRange[0]) {
+      direction *= -1
+    }
+    
+    const attr = (entity as EntityExtension).attribute
+    if (attr?.type === 'billboard' && attr.style) {
+      graphics.updateStyle({ scale: currentScale }, entity)
+    }
+  }, 16)
+  
+  return () => clearInterval(interval)
+}
+
+// 3. 颜色渐变
+function startColorTransition(
+  entity: Entity,
+  fromColor: string,
+  toColor: string,
+  duration = 1000
+) {
+  const from = Cesium.Color.fromCssColorString(fromColor)
+  const to = Cesium.Color.fromCssColorString(toColor)
+  let startTime = Date.now()
+  
+  const interval = setInterval(() => {
+    const elapsed = Date.now() - startTime
+    const progress = Math.min(elapsed / duration, 1)
+    
+    const color = Cesium.Color.lerp(from, to, progress, new Cesium.Color())
+    graphics.updateStyle({ material: color.toCssColorString() }, entity)
+    
+    if (progress >= 1) {
+      clearInterval(interval)
+    }
+  }, 16)
+  
+  return () => clearInterval(interval)
+}
+
+// 使用示例
+const alertEntity = graphics.getEntityById('alert-001')
+if (alertEntity) {
+  const stopBlink = startBlinkAnimation(alertEntity, 1000)
+  // 5秒后停止
+  setTimeout(stopBlink, 5000)
+}
+```
+
+- 通过 `setInterval` 结合 `graphics.updateStyle` 实现动画，注意在组件卸载时清理定时器。
+
+### 场景 15：与 PopupPlugin 联动
+
+```typescript
+import { PopupPlugin } from '@ktd-cesium/plugins'
+
+const popup = viewer.use(PopupPlugin)
+
+// 1. 点击实体显示弹窗
+graphics.on(EventType.EditStart, ({ entity }) => {
+  if (!entity) return
+  
+  const attr = (entity as EntityExtension).attribute
+  const positions = graphics.getPositions(entity)
+  
+  if (positions && positions.length > 0) {
+    const firstPos = positions[0]
+    const cartographic = Cesium.Cartographic.fromCartesian(firstPos)
+    const lon = Cesium.Math.toDegrees(cartographic.longitude)
+    const lat = Cesium.Math.toDegrees(cartographic.latitude)
+    
+    popup.createHTML(
+      `
+      <div style="padding: 15px; min-width: 200px;">
+        <h3 style="margin: 0 0 10px 0;">${attr?.attr?.name || '未命名'}</h3>
+        <p><strong>类型:</strong> ${attr?.type || '未知'}</p>
+        <p><strong>ID:</strong> ${attr?.attr?.id || 'N/A'}</p>
+        <button onclick="graphics.deleteEntity(entity)">删除</button>
+      </div>
+      `,
+      [lon, lat, 0],
+      {
+        closeOnClickOutside: true,
+        draggable: true
+      }
+    )
+  }
+})
+
+// 2. 鼠标悬停显示简要信息
+const eventPlugin = viewer.getPlugin('event')
+eventPlugin?.onMouseMove((pickInfo) => {
+  const entity = pickInfo?.pickedObject?.id as Entity | undefined
+  if (entity && graphics.isMyEntity(entity)) {
+    const attr = (entity as EntityExtension).attribute
+    const tooltip = viewer.getPlugin('tooltip')
+    if (tooltip && pickInfo.position) {
+      tooltip.showAt(
+        { x: pickInfo.position.x, y: pickInfo.position.y },
+        attr?.attr?.name || `类型: ${attr?.type}`
+      )
+    }
+  }
+})
+```
+
+- PopupPlugin 与 GraphicsPlugin 配合，实现点击详情弹窗、悬停提示等交互。
+
+### 场景 16：性能优化 - 按需加载与 LOD
+
+```typescript
+// 1. 根据相机高度动态显示/隐藏
+function setupLOD(viewer: KtdViewer, graphics: GraphicsPlugin) {
+  const camera = viewer.cesiumViewer.camera
+  
+  const updateVisibility = () => {
+    const height = camera.positionCartographic.height
+    const entities = graphics.getEntitys()
+    
+    entities.forEach(entity => {
+      const attr = (entity as EntityExtension).attribute
+      const lodLevel = attr?.attr?.lodLevel as number | undefined
+      
+      if (lodLevel !== undefined) {
+        // 根据高度阈值控制显示
+        const threshold = lodLevel * 1000 // 每级1000米
+        entity.show = height <= threshold
+      }
+    })
+  }
+  
+  // 监听相机变化
+  camera.changed.addEventListener(updateVisibility)
+  updateVisibility()
+  
+  return () => {
+    camera.changed.removeEventListener(updateVisibility)
+  }
+}
+
+// 2. 分页加载大量数据
+async function loadLargeDataset(
+  graphics: GraphicsPlugin,
+  geojsonUrl: string,
+  pageSize = 100
+) {
+  const response = await fetch(geojsonUrl)
+  const geojson: GeoJSONFeatureCollection = await response.json()
+  const features = geojson.features
+  
+  for (let i = 0; i < features.length; i += pageSize) {
+    const page = features.slice(i, i + pageSize)
+    const pageGeoJSON: GeoJSONFeatureCollection = {
+      type: 'FeatureCollection',
+      features: page
+    }
+    
+    graphics.loadJson(pageGeoJSON, { clear: i === 0 })
+    
+    // 等待下一帧，避免阻塞
+    await new Promise(resolve => requestAnimationFrame(resolve))
+  }
+}
+
+// 3. 视锥剔除（仅显示视野内的实体）
+function setupFrustumCulling(viewer: KtdViewer, graphics: GraphicsPlugin) {
+  const scene = viewer.cesiumViewer.scene
+  
+  scene.postRender.addEventListener(() => {
+    const camera = scene.camera
+    const frustum = camera.frustum
+    const entities = graphics.getEntitys()
+    
+    entities.forEach(entity => {
+      const positions = graphics.getPositions(entity)
+      if (!positions || positions.length === 0) return
+      
+      // 检查实体是否在视锥内
+      const inFrustum = positions.some(pos => {
+        if (frustum instanceof Cesium.PerspectiveFrustum) {
+          return frustum.computeCullingVolume(
+            camera.position,
+            camera.direction,
+            camera.up
+          ).computeVisibility(
+            new Cesium.BoundingSphere(pos, 100)
+          ) !== Cesium.Intersect.OUTSIDE
+        }
+        return true
+      })
+      
+      entity.show = inFrustum
+    })
+  })
+}
+```
+
+- 通过相机高度、分页加载、视锥剔除等方式优化大量实体渲染性能。
+
+### 场景 17：围栏告警与空间分析
+
+```typescript
+// 1. 检查点是否在围栏内
+function isPointInFence(
+  point: Cesium.Cartesian3,
+  fenceEntity: Entity
+): boolean {
+  const positions = graphics.getPositions(fenceEntity)
+  if (!positions || positions.length < 3) return false
+  
+  const cartographic = Cesium.Cartographic.fromCartesian(point)
+  const lon = Cesium.Math.toDegrees(cartographic.longitude)
+  const lat = Cesium.Math.toDegrees(cartographic.latitude)
+  
+  // 射线法判断点是否在多边形内
+  let inside = false
+  for (let i = 0, j = positions.length - 1; i < positions.length; j = i++) {
+    const pi = Cesium.Cartographic.fromCartesian(positions[i])
+    const pj = Cesium.Cartographic.fromCartesian(positions[j])
+    const xi = Cesium.Math.toDegrees(pi.longitude)
+    const yi = Cesium.Math.toDegrees(pi.latitude)
+    const xj = Cesium.Math.toDegrees(pj.longitude)
+    const yj = Cesium.Math.toDegrees(pj.latitude)
+    
+    const intersect = ((yi > lat) !== (yj > lat)) &&
+      (lon < (xj - xi) * (lat - yi) / (yj - yi) + xi)
+    if (intersect) inside = !inside
+  }
+  
+  return inside
+}
+
+// 2. 围栏告警检测
+function setupFenceAlarm(
+  graphics: GraphicsPlugin,
+  targetEntity: Entity,
+  fenceEntities: Entity[]
+) {
+  const checkAlarm = () => {
+    const targetPos = targetEntity.position?.getValue(
+      viewer.cesiumViewer.clock.currentTime
+    ) as Cesium.Cartesian3 | undefined
+    
+    if (!targetPos) return
+    
+    fenceEntities.forEach(fence => {
+      const isInside = isPointInFence(targetPos, fence)
+      const attr = (fence as EntityExtension).attribute
+      const alarmEnabled = attr?.attr?.alarmEnabled !== false
+      
+      if (alarmEnabled) {
+        if (isInside) {
+          // 触发告警
+          graphics.updateStyle(
+            { material: '#ff0000', outlineWidth: 3 },
+            fence
+          )
+          console.warn(`目标进入围栏: ${attr?.attr?.name}`)
+        } else {
+          // 恢复正常
+          graphics.updateStyle(
+            { material: '#00ff00', outlineWidth: 1 },
+            fence
+          )
+        }
+      }
+    })
+  }
+  
+  // 定期检查
+  const interval = setInterval(checkAlarm, 1000)
+  return () => clearInterval(interval)
+}
+
+// 3. 计算围栏面积
+function calculateFenceArea(fenceEntity: Entity): number {
+  const positions = graphics.getPositions(fenceEntity)
+  if (!positions || positions.length < 3) return 0
+  
+  // 使用球面多边形面积计算
+  const cartographics = positions.map(pos =>
+    Cesium.Cartographic.fromCartesian(pos)
+  )
+  
+  let area = 0
+  for (let i = 0; i < cartographics.length; i++) {
+    const j = (i + 1) % cartographics.length
+    const lon1 = cartographics[i].longitude
+    const lat1 = cartographics[i].latitude
+    const lon2 = cartographics[j].longitude
+    const lat2 = cartographics[j].latitude
+    
+    area += (lon2 - lon1) * (2 + Math.sin(lat1) + Math.sin(lat2))
+  }
+  
+  const radius = Cesium.Ellipsoid.WGS84.maximumRadius
+  return Math.abs(area * radius * radius / 2)
+}
+```
+
+- 通过空间计算实现围栏告警、面积统计等功能。
+
+### 场景 18：数据同步与版本控制
+
+```typescript
+// 1. 增量同步（仅同步变更）
+class GraphicsSync {
+  private lastSyncTime = Date.now()
+  private localChanges: Map<string, Entity> = new Map()
+  
+  constructor(private graphics: GraphicsPlugin) {
+    // 监听变更
+    graphics.on(EventType.EditStop, ({ entity }) => {
+      if (entity) {
+        const attr = (entity as EntityExtension).attribute
+        const id = attr?.attr?.id as string
+        if (id) {
+          this.localChanges.set(id, entity)
+        }
+      }
+    })
+    
+    graphics.on(EventType.Delete, ({ entity }) => {
+      if (entity) {
+        const attr = (entity as EntityExtension).attribute
+        const id = attr?.attr?.id as string
+        if (id) {
+          this.localChanges.set(id, null as unknown as Entity)
+        }
+      }
+    })
+  }
+  
+  // 获取变更
+  getChanges(): Array<{ id: string; action: 'create' | 'update' | 'delete'; data?: GeoJSONFeature }> {
+    const changes: Array<{ id: string; action: 'create' | 'update' | 'delete'; data?: GeoJSONFeature }> = []
+    
+    this.localChanges.forEach((entity, id) => {
+      if (entity === null) {
+        changes.push({ id, action: 'delete' })
+      } else {
+        const geojson = graphics.toGeoJSON(entity)
+        if (geojson && 'type' in geojson) {
+          changes.push({
+            id,
+            action: 'update',
+            data: geojson as GeoJSONFeature
+          })
+        }
+      }
+    })
+    
+    return changes
+  }
+  
+  // 同步到服务器
+  async syncToServer() {
+    const changes = this.getChanges()
+    if (changes.length === 0) return
+    
+    try {
+      await fetch('/api/graphics/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          timestamp: this.lastSyncTime,
+          changes
+        })
+      })
+      
+      this.localChanges.clear()
+      this.lastSyncTime = Date.now()
+    } catch (error) {
+      console.error('同步失败', error)
+    }
+  }
+  
+  // 从服务器拉取更新
+  async syncFromServer() {
+    try {
+      const response = await fetch(`/api/graphics/sync?since=${this.lastSyncTime}`)
+      const { updates } = await response.json()
+      
+      updates.forEach((update: { id: string; data: GeoJSONFeature }) => {
+        const existing = graphics.getEntityById(update.id)
+        if (existing) {
+          graphics.updateAttribute({ style: update.data.properties?.style }, existing)
+        } else {
+          graphics.loadJson(update.data)
+        }
+      })
+      
+      this.lastSyncTime = Date.now()
+    } catch (error) {
+      console.error('拉取更新失败', error)
+    }
+  }
+}
+
+// 使用示例
+const sync = new GraphicsSync(graphics)
+
+// 定期同步
+setInterval(() => sync.syncToServer(), 5000)
+setInterval(() => sync.syncFromServer(), 10000)
+```
+
+- 通过监听事件记录变更，实现增量同步与版本控制。
 
 ## API 概览
 

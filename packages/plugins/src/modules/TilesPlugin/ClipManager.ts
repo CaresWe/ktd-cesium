@@ -9,7 +9,9 @@ import {
   Math as CesiumMath,
   Cartographic,
   Color as CesiumColor,
-  Ellipsoid
+  Ellipsoid,
+  PolygonHierarchy,
+  JulianDate
 } from 'cesium'
 import type { KtdViewer } from '@ktd-cesium/core'
 import type { BoxClipConfig, ModelClipConfig } from './types'
@@ -255,6 +257,46 @@ export class ClipManager {
   }
 
   /**
+   * 从 Entity 获取 polygon 的坐标
+   * 支持多种方式获取位置，兼容 GraphicsPlugin 绘制的 polygon
+   */
+  private getPolygonPositions(entity: Record<string, unknown>): Cartesian3[] | null {
+    try {
+      const polygon = entity.polygon as Record<string, unknown>
+      if (!polygon || !polygon.hierarchy) {
+        return null
+      }
+
+      const hierarchy = polygon.hierarchy as { getValue?: (time: JulianDate) => PolygonHierarchy | Cartesian3[] }
+
+      if (hierarchy.getValue) {
+        const value = hierarchy.getValue(JulianDate.now())
+
+        // 如果是 PolygonHierarchy 类型
+        if (value instanceof PolygonHierarchy) {
+          return value.positions
+        }
+
+        // 如果直接是 Cartesian3 数组
+        if (Array.isArray(value)) {
+          return value
+        }
+      }
+
+      // 尝试从扩展属性获取（GraphicsPlugin 可能使用）
+      const extendedEntity = entity as { _positions_draw?: Cartesian3[] }
+      if (extendedEntity._positions_draw) {
+        return extendedEntity._positions_draw
+      }
+
+      return null
+    } catch (error) {
+      console.error('Failed to get polygon positions:', error)
+      return null
+    }
+  }
+
+  /**
    * 根据实体几何创建裁剪平面
    */
   private createModelClippingPlanes(entity: unknown, config: ModelClipConfig): ClippingPlane[] {
@@ -264,35 +306,31 @@ export class ClipManager {
 
       // 处理多边形裁剪
       if (entityAny.polygon) {
-        const polygon = entityAny.polygon as Record<string, unknown>
-        const hierarchy = polygon.hierarchy as { getValue?: () => { positions?: Cartesian3[] } }
+        const positions = this.getPolygonPositions(entityAny)
 
-        if (hierarchy?.getValue) {
-          const positions = hierarchy.getValue()?.positions
-          if (positions && positions.length >= 3) {
-            // 为多边形的每条边创建垂直剖切平面
-            for (let i = 0; i < positions.length; i++) {
-              const p1 = positions[i]
-              const p2 = positions[(i + 1) % positions.length]
+        if (positions && positions.length >= 3) {
+          // 为多边形的每条边创建垂直剖切平面
+          for (let i = 0; i < positions.length; i++) {
+            const p1 = positions[i]
+            const p2 = positions[(i + 1) % positions.length]
 
-              // 计算边的方向
-              const edge = Cartesian3.subtract(p2, p1, new Cartesian3())
-              const edgeNormalized = Cartesian3.normalize(edge, new Cartesian3())
+            // 计算边的方向
+            const edge = Cartesian3.subtract(p2, p1, new Cartesian3())
+            const edgeNormalized = Cartesian3.normalize(edge, new Cartesian3())
 
-              // 计算垂直于边的法向量（指向多边形内部）
-              const up = new Cartesian3(0, 0, 1)
-              const normal = Cartesian3.cross(up, edgeNormalized, new Cartesian3())
-              Cartesian3.normalize(normal, normal)
+            // 计算垂直于边的法向量（指向多边形内部）
+            const up = new Cartesian3(0, 0, 1)
+            const normal = Cartesian3.cross(up, edgeNormalized, new Cartesian3())
+            Cartesian3.normalize(normal, normal)
 
-              // 如果是 outside 模式，反转法向量
-              if (config.mode === 'outside') {
-                Cartesian3.negate(normal, normal)
-              }
-
-              // 计算平面距离
-              const distance = -Cartesian3.dot(normal, p1)
-              planes.push(new ClippingPlane(normal, distance))
+            // 如果是 outside 模式，反转法向量
+            if (config.mode === 'outside') {
+              Cartesian3.negate(normal, normal)
             }
+
+            // 计算平面距离
+            const distance = -Cartesian3.dot(normal, p1)
+            planes.push(new ClippingPlane(normal, distance))
           }
         }
       }

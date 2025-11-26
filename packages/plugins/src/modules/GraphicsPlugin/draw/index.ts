@@ -79,6 +79,19 @@ export { DrawPRiver } from './DrawPRiver'
 // 视频投射、2D/3D贴物投射、可编辑
 export { DrawPVideoFusion } from './DrawPVideoFusion'
 
+// ==================== 粒子系统绘制 ====================
+// 火焰、水枪、爆炸、喷雾、烟雾等粒子效果
+export { DrawParticle } from './DrawParticle'
+export type { ParticleSystemOptions } from './DrawParticle'
+export {
+  createFireEffect,
+  createWaterEffect,
+  createExplosionEffect,
+  createSprayEffect,
+  createSmokeEffect,
+  getParticleEffect
+} from './ParticleEffects'
+
 // 导出类型
 export type {
   DrawConfig,

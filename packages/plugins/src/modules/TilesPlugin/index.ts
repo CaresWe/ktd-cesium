@@ -15,7 +15,7 @@ import type { KtdViewer } from '@ktd-cesium/core'
 import type { EventPlugin } from '../EventPlugin'
 import { MonomerManager } from './MonomerManager'
 import { StyleManager } from './StyleManager'
-import { ClippingPlaneManager } from './ClippingPlaneManager'
+import { ClippingPlaneManager} from './ClippingPlaneManager'
 import { ClipManager } from './ClipManager'
 import { FloodAnalyzer } from './FloodAnalyzer'
 import { FlattenManager } from './FlattenManager'
@@ -23,6 +23,7 @@ import { HeightAnalyzer } from './HeightAnalyzer'
 import { HeatmapManager } from './HeatmapManager'
 import { ColorCorrectionManager } from './ColorCorrectionManager'
 import { SeismicAnalyzer } from './SeismicAnalyzer'
+import { WeatherEffectManager } from './WeatherEffectManager'
 import type {
   TilesLayerConfig,
   TilesLayerInstance,
@@ -36,14 +37,20 @@ import type {
   TilesEditOptions,
   ClippingPlanesConfig,
   ClippingPlaneConfig,
+  EntityClippingConfig,
   BoxClipConfig,
   ModelClipConfig,
   FloodAnalysisConfig,
+  RegionalFloodConfig,
   FlattenConfig,
+  EntityFlattenConfig,
   HeightLimitConfig,
   HeatmapConfig,
   ColorCorrectionConfig,
-  SeismicAnalysisConfig
+  SeismicAnalysisConfig,
+  RainDropsConfig,
+  SnowAccumulationConfig,
+  WeatherEffectType
 } from './types'
 import type { TransformPlugin } from '../TransformPlugin'
 
@@ -61,6 +68,7 @@ import type { TransformPlugin } from '../TransformPlugin'
  * 9. 热力图
  * 10. 颜色校正
  * 11. 地震分析
+ * 12. 天气效果（雨水滴、积雪）
  */
 export class TilesPlugin extends BasePlugin {
   static readonly pluginName = 'tiles'
@@ -358,14 +366,15 @@ export class TilesPlugin extends BasePlugin {
       }
 
       // 创建分析管理器
-      const clippingManager = new ClippingPlaneManager(tileset)
+      const clippingManager = new ClippingPlaneManager(tileset, this.viewer ?? undefined)
       const clipManager = new ClipManager(tileset, this.viewer!)
       const floodAnalyzer = new FloodAnalyzer(tileset)
-      const flattenManager = new FlattenManager(tileset)
+      const flattenManager = new FlattenManager(tileset, this.viewer ?? undefined)
       const heightAnalyzer = new HeightAnalyzer(tileset)
       const heatmapManager = new HeatmapManager(tileset)
       const colorCorrectionManager = new ColorCorrectionManager(tileset)
       const seismicAnalyzer = new SeismicAnalyzer(tileset)
+      const weatherEffectManager = new WeatherEffectManager(tileset)
 
       // 保存原始变换参数
       const originalTransform: TilesTransform = {
@@ -637,6 +646,10 @@ export class TilesPlugin extends BasePlugin {
           clippingManager.enable(clippingConfig)
         },
 
+        enableEntityClipping: (entityConfig: EntityClippingConfig) => {
+          clippingManager.enableEntityClipping(entityConfig)
+        },
+
         updateClipping: (clippingConfig: Partial<ClippingPlanesConfig>) => {
           clippingManager.update(clippingConfig)
         },
@@ -679,6 +692,10 @@ export class TilesPlugin extends BasePlugin {
           floodAnalyzer.enable(floodConfig)
         },
 
+        enableRegionalFlood: (polygon: import('cesium').Entity, regionalConfig: RegionalFloodConfig) => {
+          floodAnalyzer.enableRegionalFlood(polygon, regionalConfig)
+        },
+
         updateFloodHeight: (height: number) => {
           floodAnalyzer.updateHeight(height)
         },
@@ -698,6 +715,10 @@ export class TilesPlugin extends BasePlugin {
         // ========== 压平功能 ==========
         enableFlatten: (flattenConfig: FlattenConfig) => {
           flattenManager.enable(flattenConfig)
+        },
+
+        enableEntityFlatten: (entityFlattenConfig: EntityFlattenConfig) => {
+          flattenManager.enableEntityFlatten(entityFlattenConfig)
         },
 
         updateFlattenHeight: (height: number) => {
@@ -764,6 +785,31 @@ export class TilesPlugin extends BasePlugin {
           seismicAnalyzer.disable()
         },
 
+        // ========== 天气效果 ==========
+        enableRainDrops: (config?: RainDropsConfig) => {
+          weatherEffectManager.enableRainDrops(config)
+        },
+
+        updateRainIntensity: (intensity: number) => {
+          weatherEffectManager.updateRainIntensity(intensity)
+        },
+
+        enableSnowAccumulation: (config?: SnowAccumulationConfig) => {
+          weatherEffectManager.enableSnowAccumulation(config)
+        },
+
+        updateSnowThickness: (thickness: number) => {
+          weatherEffectManager.updateSnowThickness(thickness)
+        },
+
+        disableWeatherEffect: () => {
+          weatherEffectManager.disable()
+        },
+
+        getCurrentWeatherEffect: (): WeatherEffectType | null => {
+          return weatherEffectManager.getCurrentEffect()
+        },
+
         destroy: () => {
           // 先禁用编辑模式
           if (layer.isEditing) {
@@ -779,6 +825,7 @@ export class TilesPlugin extends BasePlugin {
           heatmapManager.destroy()
           colorCorrectionManager.destroy()
           seismicAnalyzer.destroy()
+          weatherEffectManager.destroy()
 
           this.removeLayer(id)
         }

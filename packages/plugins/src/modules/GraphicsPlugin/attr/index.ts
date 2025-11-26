@@ -22,6 +22,7 @@ import * as AttrCircle from './AttrCircle'
 import * as AttrCylinder from './AttrCylinder'
 import * as AttrRectangle from './AttrRectangle'
 import * as AttrEllipsoid from './AttrEllipsoid'
+import * as AttrParticle from './AttrParticle'
 
 // 导出所有 Attr 模块
 export {
@@ -40,6 +41,7 @@ export {
   AttrCylinder,
   AttrRectangle,
   AttrEllipsoid,
+  AttrParticle,
 }
 
 // 别名

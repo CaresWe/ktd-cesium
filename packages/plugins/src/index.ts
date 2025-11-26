@@ -58,3 +58,15 @@ export { TransformPlugin } from './modules/TransformPlugin'
 export * from './modules/TransformPlugin/types'
 export { TilesPlugin } from './modules/TilesPlugin'
 export * from './modules/TilesPlugin/types'
+export { ScenePlugin } from './modules/ScenePlugin'
+export * from './modules/ScenePlugin/types'
+export {
+  RainEffect,
+  SnowEffect,
+  FogEffect,
+  LightningEffect,
+  HeightFogEffect,
+  LocalRainEffect
+} from './modules/ScenePlugin'
+export { GraphicsPlugin } from './modules/GraphicsPlugin'
+export * from './modules/GraphicsPlugin/types'

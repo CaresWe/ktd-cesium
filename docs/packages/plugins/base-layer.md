@@ -8,6 +8,7 @@
 import { BaseLayerPlugin } from '@ktd-cesium/plugins'
 import {
   CoordinateSystem,
+  CoordinateOffset,
   TiandituLayerType,
   AmapLayerType,
   TencentLayerType,
@@ -22,6 +23,7 @@ import {
 - **多种瓦片服务类型**：XYZ、TMS、WMS、WMTS、ArcGIS MapServer
 - **国内外地图预设**：天地图、高德、腾讯、百度、星图地球、超图
 - **多坐标系支持**：WGS84、EPSG3857、CGCS2000（大地2000）
+- **坐标偏移纠正**：内置 GCJ-02、BD-09 偏移处理，配合 `coordinateOffset` 快速对齐国内瓦片
 - **图层管理**：显示/隐藏、透明度、亮度、对比度控制
 - **图层排序**：支持图层上移、下移、置顶、置底
 - **批量操作**：批量添加、移除图层
@@ -56,6 +58,20 @@ const layer = baseLayer.addXYZ('osm', {
   show: true,
   index: 0
 })
+
+// GCJ-02 偏移的高德底图
+baseLayer.addXYZ('amap', {
+  url: 'https://wprd0{s}.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&style=7',
+  subdomains: ['1', '2', '3', '4'],
+  maximumLevel: 18,
+  coordinateOffset: CoordinateOffset.GCJ02
+})
+
+// 百度 BD-09 偏移瓦片
+baseLayer.addXYZ('baidu', {
+  url: 'https://example.com/baidu/{z}/{x}/{y}.png',
+  coordinateOffset: CoordinateOffset.BD09
+})
 ```
 
 **参数说明：**
@@ -65,6 +81,7 @@ const layer = baseLayer.addXYZ('osm', {
 - `minimumLevel`/`maximumLevel`: 最小/最大缩放级别
 - `rectangle`: 显示区域 `[west, south, east, north]`（度数）
 - `coordinateSystem`: 坐标系统
+- `coordinateOffset`: 坐标偏移模式（`NONE`、`GCJ02`、`BD09`）
 - `alpha`: 透明度 (0-1)
 - `brightness`: 亮度
 - `contrast`: 对比度
@@ -408,6 +425,20 @@ CoordinateSystem.EPSG3857   // Web 墨卡托投影 (Google/OSM)
 CoordinateSystem.CGCS2000   // 中国大地2000坐标系
 ```
 
+## 坐标偏移
+
+```typescript
+import { CoordinateOffset } from '@ktd-cesium/plugins'
+
+CoordinateOffset.NONE   // 无偏移，标准 WGS84/CGCS2000
+CoordinateOffset.GCJ02  // 国测局偏移（高德、腾讯、天地图等）
+CoordinateOffset.BD09   // 百度偏移
+```
+
+- `coordinateOffset` 由 BaseLayerPlugin 统一处理，内部调用 shared 包的转换工具，无需手动改写 URL。
+- 如果瓦片服务本身输出 WGS84/3857，则保持 `CoordinateOffset.NONE`（默认值）。
+- 当同一场景混合多家国内地图时，可为底图/标注分别设置偏移，避免出现错位。
+
 ## 使用场景
 
 ### 场景 1：天地图完整配置
@@ -669,6 +700,60 @@ class LayerManager {
   getAllLayers() {
     return Array.from(this.layers.keys())
   }
+}
+```
+
+### 场景 8：国内偏移瓦片对齐
+
+```typescript
+import { CoordinateOffset } from '@ktd-cesium/plugins'
+
+// 高德底图（GCJ-02）
+baseLayer.addXYZ('amap-base', {
+  url: 'https://wprd0{s}.is.autonavi.com/appmaptile?style=7&x={x}&y={y}&z={z}',
+  subdomains: ['1', '2', '3', '4'],
+  maximumLevel: 18,
+  coordinateOffset: CoordinateOffset.GCJ02
+})
+
+// 百度路网（BD-09），叠加并半透明
+baseLayer.addXYZ('baidu-road', {
+  url: 'https://example.com/baidu-road/{z}/{x}/{y}.png',
+  coordinateOffset: CoordinateOffset.BD09,
+  alpha: 0.6
+})
+
+// 只需设置 coordinateOffset，插件会自动完成地理配准
+```
+
+### 场景 9：WMTS 行政区切换
+
+```typescript
+const wmtsConfig = {
+  url: 'https://example.com/wmts',
+  tileMatrixSetID: 'GoogleMapsCompatible',
+  format: 'image/png'
+}
+
+const shanghai = baseLayer.addWMTS('wmts-sh', {
+  ...wmtsConfig,
+  layer: 'Shanghai',
+  style: 'default',
+  rectangle: [120.8, 30.6, 122.2, 31.6]
+})
+
+const hangzhou = baseLayer.addWMTS('wmts-hz', {
+  ...wmtsConfig,
+  layer: 'Hangzhou',
+  style: 'default',
+  rectangle: [118.4, 29.0, 121.0, 30.8],
+  show: false
+})
+
+function switchCity(id: 'wmts-sh' | 'wmts-hz') {
+  baseLayer.setLayerVisible('wmts-sh', id === 'wmts-sh')
+  baseLayer.setLayerVisible('wmts-hz', id === 'wmts-hz')
+  baseLayer.raiseLayerToTop(id) // 切换时置顶，避免被其他叠加层遮挡
 }
 ```
 

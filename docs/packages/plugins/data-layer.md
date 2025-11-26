@@ -1,16 +1,32 @@
 # DataLayerPlugin
 
-数据图层管理插件，负责在 Cesium 中统一管理 Entity 与 Primitive 两种渲染方式的数据点位，并与事件、弹窗等插件协同工作。
+数据图层管理插件，支持 **Entity 和 Primitive** 两种渲染模式，提供**聚合、点击事件、弹窗、数据映射**等功能，适用于批量数据可视化场景。
+
+## 导入
+
+```typescript
+import { DataLayerPlugin } from '@ktd-cesium/plugins'
+import type {
+  DataLayerConfig,
+  DataLayerInstance,
+  DataItem,
+  GeometryType,
+  ClusterConfig,
+  PopupConfig,
+  DataMappingConfig
+} from '@ktd-cesium/plugins'
+```
 
 ## 核心特性
 
-- 同时支持 Entity 与 Primitive 图层，按需选择性能或功能
-- 完整的数据项生命周期（增删改查、批量更新、飞行定位）
-- 内建 Entity 聚合与自定义 Primitive 聚合（像素范围、标签样式可调）
-- 与 `EventPlugin`、`PopupPlugin` 解耦集成，支持 Vue、React、HTML 三类弹窗
-- 提供 `createDataItemsFromArray`、`importArrayData` 辅助函数，快速把业务数据映射为 DataItem
+- **双渲染模式**：Entity 模式（功能完整）和 Primitive 模式（高性能）
+- **多种几何类型**：点、线、面、模型、圆、椭圆、矩形、走廊、墙、圆柱、盒子
+- **聚合功能**：Entity 模式使用 Cesium 原生聚合，Primitive 模式自定义聚合算法
+- **点击交互**：支持点击事件回调、弹窗展示（HTML/Vue/React）
+- **数据映射**：从数组数据自动映射创建图层，支持字段转换和过滤
+- **图层管理**：创建、删除、显示/隐藏、飞行等完整管理功能
 
-## 导入与安装
+## 安装
 
 ```typescript
 import { KtdViewer } from '@ktd-cesium/core'
@@ -20,375 +36,1067 @@ const viewer = new KtdViewer(cesiumViewer)
 const dataLayer = viewer.use(DataLayerPlugin)
 ```
 
-> `DataLayerPlugin` 会在安装阶段尝试获取 `EventPlugin` 与 `PopupPlugin`，若已安装则自动接入点击事件与弹窗能力。
+## 快速上手
 
-## 创建图层
-
-### Entity 图层（支持多种几何体）
+### 创建 Entity 图层
 
 ```typescript
 const layerId = dataLayer.createLayer({
-  name: 'administration',
+  name: '点位图层',
   type: 'entity',
+  show: true,
   defaultStyle: {
-    polygon: { material: Cesium.Color.BLUE.withAlpha(0.25) },
-    label: { text: '行政区', font: '16px sans-serif' }
-  },
-  clustering: {
-    enabled: true,
-    pixelRange: 100,
-    minimumClusterSize: 5
-  },
-  popup: {
-    enabled: true,
-    title: item => item.data?.name ?? '未命名区域',
-    fields: [
-      { field: 'code', label: '行政区划码' },
-      { field: 'population', label: '人口', formatter: value => `${value ?? 0} 人` }
-    ]
-  },
-  onClick: (item) => console.log('clicked', item.id)
-})
-
-const layer = dataLayer.getLayer(layerId)!
-layer.addItem({
-  id: 'bj',
-  geometryType: 'polygon',
-  positions: beijingPositions,
-  data: { name: '北京市', code: '110000', population: 21893095 }
-})
-
-await layer.flyTo()
-```
-
-### Primitive 图层（极致性能的点要素）
-
-```typescript
-const primitiveLayerId = dataLayer.createLayer({
-  name: 'poi',
-  type: 'primitive',
-  defaultStyle: {
-    point: { pixelSize: 8, color: Cesium.Color.CYAN }
-  },
-  clustering: {
-    enabled: true,
-    minimumClusterSize: 10,
-    showLabels: true
+    point: {
+      pixelSize: 10,
+      color: Cesium.Color.BLUE,
+      outlineColor: Cesium.Color.WHITE,
+      outlineWidth: 2
+    }
   }
 })
 
-const primitiveLayer = dataLayer.getLayer(primitiveLayerId)!
-primitiveLayer.addItems(poiList.map(poi => ({
-  id: poi.id,
+const layer = dataLayer.getLayer(layerId)
+
+// 添加数据
+layer.addItem({
+  id: 'point-001',
   geometryType: 'point',
-  position: [poi.lon, poi.lat],
-  data: poi
-})))
-```
-
-## DataLayerConfig（图层配置）
-
-| 字段 | 说明 |
-| --- | --- |
-| `name: string` | 图层名称，用于人类可读识别 |
-| `type: 'entity' | 'primitive'` | 渲染模式：Entity 功能丰富、Primitive 极致性能 |
-| `mode?: 'normal' | 'cluster'` | 渲染模式标记（目前主要用于语义说明） |
-| `show?: boolean` | 是否默认显示 |
-| `clustering?: ClusterConfig` | 聚合配置（Entity 原生、Primitive 内置算法） |
-| `defaultStyle?: DataItemStyle` | DataItem 默认样式 |
-| `onClick?: (item, event) => void` | 点击回调（依赖 EventPlugin） |
-| `showPopup?: boolean` | 简单开关，等价于 `popup.enabled` |
-| `popup?: PopupConfig` | 弹窗配置：支持字段驱动、HTML、Vue、React |
-| `popupContent?: (item) => string | HTMLElement` | 兼容旧版自定义弹窗（建议改用 `popup.content`） |
-
-## DataItem（数据项描述）
-
-```typescript
-interface DataItem {
-  id: string | number
-  geometryType: 'point' | 'polyline' | 'polygon' | 'model' | 'circle' | 'ellipse' | 'rectangle' | 'corridor' | 'wall' | 'cylinder' | 'box'
-  position?: Cartesian3 | [number, number, number?]           // 点、模型、圆心等
-  positions?: Cartesian3[] | Array<[number, number, number?]> // 线、面、走廊、墙等
-  data?: any                                                   // 业务属性，自动挂到 Entity properties
-  style?: DataItemStyle                                        // 覆盖 defaultStyle
-  show?: boolean
-  geometry?: GeometryConfig                                    // rectangleBounds、cornerType 等
-}
-```
-
-### 常见几何
-
-- `point`：支持 `billboard` 图标或 `point` 原语；可叠加 `label`
-- `polyline`：宽度、颜色、贴地、depthFailMaterial
-- `polygon`：填充、边框、挤压、贴地
-- `model`：GLTF URI、scale、minimumPixelSize、颜色
-- `circle` / `ellipse`：半轴、材质、挤压
-- `rectangle`：通过 `geometry.rectangleBounds` 指定边界
-- `corridor`：`positions` + `width` + `cornerType`
-- `wall`：支持 `minimumHeights` / `maximumHeights`
-- `cylinder`、`box`：三维体渲染
-
-## DataLayerInstance API
-
-`dataLayer.getLayer(layerId)` / `dataLayer.getLayerByName(name)` 返回图层实例，具备以下方法：
-
-| 方法 | 说明 |
-| --- | --- |
-| `setShow(show: boolean)` | 显示 / 隐藏图层 |
-| `addItem(item: DataItem)` | 新增数据项 |
-| `addItems(items: DataItem[])` | 批量新增 |
-| `removeItem(id)` | 删除数据项 |
-| `clear()` | 清空所有数据 |
-| `getItem(id)` | 获取数据项（原始结构） |
-| `updateItem(id, updates)` | 更新位置、样式、显隐、业务字段 |
-| `flyTo(duration?)` | 视角飞向图层要素（Entity 使用 `viewer.flyTo`，Primitive 使用 `flyToBoundingSphere`） |
-| `destroy()` | 销毁并从 DataLayerManager 中移除 |
-
-管理层 API：
-
-- `dataLayer.createLayer(config)`：返回 layerId
-- `dataLayer.getLayer(id)` / `getLayerByName(name)`
-- `dataLayer.removeLayer(id)` / `removeAllLayers()`
-- `dataLayer.getAllLayerIds()` / `getLayerCount()`
-
-## 弹窗与点击
-
-1. DataLayer 安装后会尝试从 Viewer 中获取 `EventPlugin`，并自动注册左键点击回调。
-2. 当点中图层内的 Entity / Primitive，插件会：
-   - 执行 `config.onClick(item, info)` 自定义逻辑
-   - 若开启 `showPopup` 或 `popup.enabled` 且存在 `PopupPlugin`，则基于配置渲染弹窗
-3. `PopupConfig` 支持以下优先级：
-   - `vueComponent` / `reactComponent`：直接交给 PopupPlugin 创建对应前端组件
-   - `content(item)`：返回 HTML 字符串或 HTMLElement
-   - `fields`：按字段渲染表格
-   - 默认模板：展示 `item.data` 的键值
-
-> 如果未安装 `PopupPlugin` 或没有点击到数据项，插件会忽略弹窗逻辑而不中断流程。
-
-## 聚合能力
-
-### Entity 聚合（Cesium 原生）
-
-```typescript
-clustering: {
-  enabled: true,
-  pixelRange: 80,
-  minimumClusterSize: 3,
-  showLabels: true,
-  clusterStyle: (clusteredEntities, cluster) => ({
-    label: `${clusteredEntities.length} 个点`,
-    image: '/assets/cluster.png',
-    scale: 0.8
-  })
-}
-```
-
-- 将配置写入 `CustomDataSource.clustering`
-- `clusterStyle` 可自定义 label、billboard 或 point
-
-### Primitive 聚合（插件内置）
-
-- 通过 `camera.moveEnd` 监听实时聚合
-- `pixelRange`/`minimumClusterSize` 与 Entity 同步语义
-- `clusterStyle` 同样可自定义标签文本和聚合图形
-- 插件自动清理监听器，`removeLayer` 时释放事件
-
-## 数据映射与批量导入
-
-### createDataItemsFromArray
-
-```typescript
-const items = dataLayer.createDataItemsFromArray(rawList, {
-  idField: 'id',
-  geometryType: 'polygon',
-  positions: { field: 'coordinates', format: 'lonlat' },
-  styleMapping: {
-    polygon: data => ({
-      material: Cesium.Color.fromCssColorString(data.color).withAlpha(0.4)
-    }),
-    label: data => ({ text: data.name })
-  },
-  showField: 'visible',
-  filter: item => item.coordinates?.length > 3
+  position: [116.4074, 39.9042, 0],
+  data: { name: '北京', value: 100 }
 })
 
-const layer = dataLayer.getLayer(layerId)!
+// 批量添加
+layer.addItems([
+  {
+    id: 'point-002',
+    geometryType: 'point',
+    position: [121.4737, 31.2304, 0],
+    data: { name: '上海', value: 200 }
+  },
+  {
+    id: 'point-003',
+    geometryType: 'point',
+    position: [113.2644, 23.1291, 0],
+    data: { name: '广州', value: 150 }
+  }
+])
+```
+
+### 创建 Primitive 图层（高性能）
+
+```typescript
+const layerId = dataLayer.createLayer({
+  name: '高性能点位图层',
+  type: 'primitive',
+  show: true,
+  defaultStyle: {
+    point: {
+      pixelSize: 8,
+      color: Cesium.Color.RED
+    }
+  }
+})
+
+const layer = dataLayer.getLayer(layerId)
+
+// 添加大量数据（适合万级数据）
+const items = Array.from({ length: 10000 }, (_, i) => ({
+  id: `point-${i}`,
+  geometryType: 'point' as GeometryType,
+  position: [
+    116 + Math.random() * 0.1,
+    39 + Math.random() * 0.1,
+    0
+  ] as [number, number, number],
+  data: { index: i }
+}))
+
 layer.addItems(items)
 ```
 
-### importArrayData
+## 支持的几何类型
+
+| 类型 | 说明 | 位置字段 | 样式配置 |
+| --- | --- | --- | --- |
+| `point` | 点 | `position` | `point` 或 `icon` |
+| `polyline` | 折线 | `positions` | `polyline` |
+| `polygon` | 面 | `positions` | `polygon` |
+| `model` | 3D模型 | `position` | `model` |
+| `circle` | 圆形 | `position` | `circle` |
+| `ellipse` | 椭圆 | `position` | `ellipse` |
+| `rectangle` | 矩形 | `geometry.rectangleBounds` | `rectangle` |
+| `corridor` | 走廊 | `positions` | `corridor` |
+| `wall` | 墙体 | `positions` | `wall` |
+| `cylinder` | 圆柱体 | `position` | `cylinder` |
+| `box` | 立方体 | `position` | `box` |
+
+## API 概览
+
+### 图层管理
+
+#### createLayer(config)
+
+创建数据图层。
 
 ```typescript
-dataLayer.importArrayData(layerId, rawList, {
-  idField: 'id',
-  geometryType: 'point',
-  position: { lonField: 'lon', latField: 'lat', heightField: 'height' },
-  styleMapping: {
-    point: item => ({
-      pixelSize: item.level > 3 ? 14 : 8,
-      color: item.level > 3 ? Cesium.Color.RED : Cesium.Color.YELLOW
-    })
-  }
+const layerId = dataLayer.createLayer({
+  name: '图层名称',
+  type: 'entity', // 'entity' | 'primitive'
+  show: true,
+  defaultStyle: { /* 默认样式 */ },
+  clustering: { /* 聚合配置 */ },
+  popup: { /* 弹窗配置 */ },
+  onClick: (item, event) => { /* 点击回调 */ }
 })
 ```
 
-`importArrayData` 内部会调用 `createDataItemsFromArray` 并直接 `addItems`。
+**参数说明：**
 
-### importArrayData 混合几何类型
+- `name`: 图层名称
+- `type`: 图层类型，`entity` 或 `primitive`
+- `show`: 是否显示（默认 `true`）
+- `defaultStyle`: 默认样式配置
+- `clustering`: 聚合配置（仅 Entity 模式）
+- `popup`: 弹窗配置
+- `onClick`: 点击回调函数
 
-单次调用 `importArrayData` 需要为 `geometryType` 指定一个固定值；如果原始数据混合了点、线、面等多种要素，可以先对源数据分组，再分别调用该方法：
+#### getLayer(id)
+
+获取图层实例。
 
 ```typescript
-const grouped = rawFeatures.reduce(
-  (acc, feature) => {
-    acc[feature.kind]?.push(feature)
-    return acc
-  },
-  {
-    point: [] as Feature[],
-    line: [] as Feature[],
-    area: [] as Feature[]
-  }
-)
-
-dataLayer.importArrayData(pointLayerId, grouped.point, {
-  idField: 'id',
-  geometryType: 'point',
-  position: { lonField: 'lon', latField: 'lat', heightField: 'height' },
-  styleMapping: {
-    point: item => ({
-      pixelSize: item.level > 3 ? 12 : 8,
-      color: item.level > 3 ? Cesium.Color.ORANGE : Cesium.Color.SKYBLUE
-    })
-  }
-})
-
-dataLayer.importArrayData(lineLayerId, grouped.line, {
-  idField: 'id',
-  geometryType: 'polyline',
-  positions: { field: 'coordinates' },
-  styleMapping: {
-    polyline: item => ({
-      width: item.width || 2,
-      material: Cesium.Color.fromCssColorString(item.stroke || '#33ffff')
-    })
-  }
-})
-
-dataLayer.importArrayData(polygonLayerId, grouped.area, {
-  idField: 'id',
-  geometryType: 'polygon',
-  positions: { field: 'coordinates' },
-  styleMapping: {
-    polygon: item => ({
-      material: Cesium.Color.fromCssColorString(item.fill || '#2670ff').withAlpha(0.3),
-      outlineColor: Cesium.Color.WHITE,
-      outlineWidth: 1
-    })
-  }
-})
-```
-
-这样既能复用 `importArrayData` 的映射能力，又能让不同几何类型落在各自的图层上（必要时还能给每类图层配置差异化的聚合、弹窗、默认样式）。
-
-## React & Vue 示例
-
-### React 18（结合 PopupPlugin）
-
-```tsx
-use client
-
-import { useEffect, useRef } from 'react'
-import { KtdViewer } from '@ktd-cesium/core'
-import { DataLayerPlugin, PopupPlugin } from '@ktd-cesium/plugins'
-import * as Cesium from 'cesium'
-
-export function PoiLayerDemo() {
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!containerRef.current) return
-    const cesiumViewer = new Cesium.Viewer(containerRef.current)
-    const viewer = new KtdViewer(cesiumViewer)
-    const popup = viewer.use(PopupPlugin)
-    const dataLayer = viewer.use(DataLayerPlugin)
-
-    popup.registerReactRenderer()
-
-    const layerId = dataLayer.createLayer({
-      name: 'poi',
-      type: 'entity',
-      popup: {
-        enabled: true,
-        reactComponent: (item) => ({
-          component: PoiPopup,
-          props: { data: item.data }
-        })
-      }
-    })
-
-    dataLayer.importArrayData(layerId, poiList, {
-      idField: 'id',
-      geometryType: 'point',
-      position: { lonField: 'lon', latField: 'lat' }
-    })
-
-    return () => viewer.destroy()
-  }, [])
-
-  return <div ref={containerRef} className="map-container" />
+const layer = dataLayer.getLayer(layerId)
+if (layer) {
+  layer.addItem({ /* ... */ })
+  layer.setShow(false)
+  layer.flyTo()
 }
 ```
 
-### Vue 3
+#### getLayerByName(name)
 
-```vue
-<script setup lang="ts">
-use client
+根据名称获取图层。
 
-import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { KtdViewer } from '@ktd-cesium/core'
-import { DataLayerPlugin } from '@ktd-cesium/plugins'
-import * as Cesium from 'cesium'
+```typescript
+const layer = dataLayer.getLayerByName('点位图层')
+```
 
-const containerRef = ref<HTMLElement>()
-let viewer: KtdViewer | null = null
-let dataLayer: DataLayerPlugin | null = null
+#### removeLayer(id)
 
-onMounted(() => {
-  if (!containerRef.value) return
-  const cesiumViewer = new Cesium.Viewer(containerRef.value)
-  viewer = new KtdViewer(cesiumViewer)
-  dataLayer = viewer.use(DataLayerPlugin)
+移除图层。
 
-  const layerId = dataLayer.createLayer({
-    name: 'province',
-    type: 'entity',
-    defaultStyle: { polygon: { material: Cesium.Color.SKYBLUE.withAlpha(0.3) } }
+```typescript
+dataLayer.removeLayer(layerId)
+```
+
+#### removeAllLayers()
+
+移除所有图层。
+
+```typescript
+dataLayer.removeAllLayers()
+```
+
+#### getAllLayerIds()
+
+获取所有图层 ID。
+
+```typescript
+const ids = dataLayer.getAllLayerIds()
+```
+
+#### getLayerCount()
+
+获取图层数量。
+
+```typescript
+const count = dataLayer.getLayerCount()
+```
+
+### 图层实例方法
+
+#### addItem(item)
+
+添加单个数据项。
+
+```typescript
+layer.addItem({
+  id: 'item-001',
+  geometryType: 'point',
+  position: [116.4074, 39.9042, 0],
+  data: { name: '数据项' },
+  style: { /* 样式覆盖 */ }
+})
+```
+
+#### addItems(items)
+
+批量添加数据项。
+
+```typescript
+layer.addItems([
+  { id: 'item-001', geometryType: 'point', position: [116, 39, 0] },
+  { id: 'item-002', geometryType: 'point', position: [121, 31, 0] }
+])
+```
+
+#### removeItem(itemId)
+
+移除数据项。
+
+```typescript
+layer.removeItem('item-001')
+```
+
+#### clear()
+
+清空图层所有数据。
+
+```typescript
+layer.clear()
+```
+
+#### getItem(itemId)
+
+获取数据项。
+
+```typescript
+const item = layer.getItem('item-001')
+```
+
+#### updateItem(itemId, updates)
+
+更新数据项。
+
+```typescript
+layer.updateItem('item-001', {
+  position: [116.5, 39.9, 0],
+  style: { point: { pixelSize: 15 } },
+  data: { name: '更新后的名称' }
+})
+```
+
+#### setShow(show)
+
+设置图层显示/隐藏。
+
+```typescript
+layer.setShow(false) // 隐藏
+layer.setShow(true)  // 显示
+```
+
+#### flyTo(duration?)
+
+飞行到图层。
+
+```typescript
+await layer.flyTo(2.0) // 2秒飞行动画
+```
+
+#### destroy()
+
+销毁图层。
+
+```typescript
+layer.destroy()
+```
+
+## 各类型数据项示例
+
+### 点类型
+
+```typescript
+// 基础点
+layer.addItem({
+  id: 'point-001',
+  geometryType: 'point',
+  position: [116.4074, 39.9042, 0],
+  style: {
+    point: {
+      pixelSize: 10,
+      color: Cesium.Color.BLUE,
+      outlineColor: Cesium.Color.WHITE,
+      outlineWidth: 2
+    }
+  }
+})
+
+// 图标点
+layer.addItem({
+  id: 'icon-001',
+  geometryType: 'point',
+  position: [116.4074, 39.9042, 0],
+  style: {
+    icon: {
+      image: '/icons/marker.png',
+      scale: 1.5,
+      color: Cesium.Color.WHITE
+    },
+    label: {
+      text: '标注点',
+      font: '14px sans-serif',
+      fillColor: Cesium.Color.WHITE,
+      pixelOffset: [0, -30]
+    }
+  }
+})
+```
+
+### 线类型
+
+```typescript
+layer.addItem({
+  id: 'polyline-001',
+  geometryType: 'polyline',
+  positions: [
+    [116.4074, 39.9042, 0],
+    [116.4084, 39.9052, 0],
+    [116.4094, 39.9062, 0]
+  ],
+  style: {
+    polyline: {
+      width: 3,
+      material: Cesium.Color.BLUE,
+      clampToGround: true
+    }
+  }
+})
+```
+
+### 面类型
+
+```typescript
+layer.addItem({
+  id: 'polygon-001',
+  geometryType: 'polygon',
+  positions: [
+    [116.4074, 39.9042, 0],
+    [116.4084, 39.9042, 0],
+    [116.4084, 39.9052, 0],
+    [116.4074, 39.9052, 0],
+    [116.4074, 39.9042, 0]
+  ],
+  style: {
+    polygon: {
+      material: Cesium.Color.BLUE.withAlpha(0.6),
+      outline: true,
+      outlineColor: Cesium.Color.BLACK,
+      outlineWidth: 2,
+      height: 0,
+      extrudedHeight: 100
+    }
+  }
+})
+```
+
+### 圆形
+
+```typescript
+layer.addItem({
+  id: 'circle-001',
+  geometryType: 'circle',
+  position: [116.4074, 39.9042, 0],
+  style: {
+    circle: {
+      semiMajorAxis: 1000, // 半径（米）
+      material: Cesium.Color.RED.withAlpha(0.5),
+      outline: true,
+      outlineColor: Cesium.Color.BLACK,
+      height: 0,
+      extrudedHeight: 50
+    }
+  }
+})
+```
+
+### 椭圆
+
+```typescript
+layer.addItem({
+  id: 'ellipse-001',
+  geometryType: 'ellipse',
+  position: [116.4074, 39.9042, 0],
+  style: {
+    ellipse: {
+      semiMajorAxis: 2000, // 长半轴（米）
+      semiMinorAxis: 1000,  // 短半轴（米）
+      material: Cesium.Color.GREEN.withAlpha(0.5)
+    }
+  }
+})
+```
+
+### 矩形
+
+```typescript
+layer.addItem({
+  id: 'rectangle-001',
+  geometryType: 'rectangle',
+  geometry: {
+    rectangleBounds: {
+      west: 116.4074,
+      south: 39.9042,
+      east: 116.4084,
+      north: 39.9052
+    }
+  },
+  style: {
+    rectangle: {
+      material: Cesium.Color.YELLOW.withAlpha(0.5),
+      outline: true,
+      height: 0,
+      extrudedHeight: 30
+    }
+  }
+})
+```
+
+### 走廊
+
+```typescript
+layer.addItem({
+  id: 'corridor-001',
+  geometryType: 'corridor',
+  positions: [
+    [116.4074, 39.9042, 0],
+    [116.4084, 39.9052, 0]
+  ],
+  style: {
+    corridor: {
+      width: 500, // 宽度（米）
+      material: Cesium.Color.CYAN.withAlpha(0.5),
+      outline: true
+    }
+  },
+  geometry: {
+    cornerType: 'ROUNDED' // 'ROUNDED' | 'MITERED' | 'BEVELED'
+  }
+})
+```
+
+### 墙体
+
+```typescript
+layer.addItem({
+  id: 'wall-001',
+  geometryType: 'wall',
+  positions: [
+    [116.4074, 39.9042, 0],
+    [116.4084, 39.9052, 0],
+    [116.4094, 39.9062, 0]
+  ],
+  style: {
+    wall: {
+      material: Cesium.Color.ORANGE.withAlpha(0.5),
+      minimumHeights: [0, 0, 0],
+      maximumHeights: [100, 100, 100]
+    }
+  }
+})
+```
+
+### 圆柱体
+
+```typescript
+layer.addItem({
+  id: 'cylinder-001',
+  geometryType: 'cylinder',
+  position: [116.4074, 39.9042, 0],
+  style: {
+    cylinder: {
+      length: 2000,
+      topRadius: 500,
+      bottomRadius: 500,
+      material: Cesium.Color.PURPLE.withAlpha(0.5)
+    }
+  }
+})
+```
+
+### 立方体
+
+```typescript
+layer.addItem({
+  id: 'box-001',
+  geometryType: 'box',
+  position: [116.4074, 39.9042, 0],
+  style: {
+    box: {
+      dimensions: {
+        x: 1000, // 长度（米）
+        y: 1000, // 宽度（米）
+        z: 500   // 高度（米）
+      },
+      material: Cesium.Color.PINK.withAlpha(0.5)
+    }
+  }
+})
+```
+
+### 3D模型
+
+```typescript
+layer.addItem({
+  id: 'model-001',
+  geometryType: 'model',
+  position: [116.4074, 39.9042, 0],
+  style: {
+    model: {
+      uri: '/models/vehicle.glb',
+      scale: 1.0,
+      minimumPixelSize: 128,
+      maximumScale: 20000
+    }
+  }
+})
+```
+
+## 聚合功能
+
+### Entity 模式聚合
+
+```typescript
+const layerId = dataLayer.createLayer({
+  name: '聚合图层',
+  type: 'entity',
+  clustering: {
+    enabled: true,
+    pixelRange: 80,        // 聚合像素范围
+    minimumClusterSize: 3, // 最小聚合数量
+    showLabels: true,
+    clusterStyle: (clusteredEntities, cluster) => {
+      const count = clusteredEntities.length
+      return {
+        image: '/icons/cluster.png',
+        label: `${count} 个`,
+        scale: count >= 100 ? 1.5 : 1.0
+      }
+    }
+  }
+})
+```
+
+### Primitive 模式聚合
+
+```typescript
+const layerId = dataLayer.createLayer({
+  name: 'Primitive聚合图层',
+  type: 'primitive',
+  clustering: {
+    enabled: true,
+    pixelRange: 60,
+    minimumClusterSize: 5,
+    showLabels: true
+  }
+})
+```
+
+**注意：** Primitive 模式的聚合会在相机移动时自动更新，使用自定义聚合算法。
+
+## 弹窗功能
+
+### HTML 弹窗
+
+```typescript
+const layerId = dataLayer.createLayer({
+  name: '弹窗图层',
+  type: 'entity',
+  popup: {
+    enabled: true,
+    content: (item) => {
+      return `
+        <div style="padding: 15px;">
+          <h3>${item.data.name}</h3>
+          <p>值: ${item.data.value}</p>
+        </div>
+      `
+    }
+  }
+})
+```
+
+### 字段配置弹窗
+
+```typescript
+const layerId = dataLayer.createLayer({
+  name: '字段弹窗图层',
+  type: 'entity',
+  popup: {
+    enabled: true,
+    title: '数据详情',
+    fields: [
+      {
+        field: 'name',
+        label: '名称',
+        formatter: (value) => `<strong>${value}</strong>`
+      },
+      {
+        field: 'value',
+        label: '数值',
+        formatter: (value) => `${value.toLocaleString()}`
+      },
+      {
+        field: 'user.name', // 支持嵌套字段
+        label: '用户名'
+      }
+    ],
+    style: {
+      width: '300px',
+      backgroundColor: '#ffffff',
+      borderRadius: '8px',
+      padding: '15px'
+    }
+  }
+})
+```
+
+### Vue 组件弹窗
+
+```typescript
+import MyPopupComponent from './MyPopupComponent.vue'
+
+const layerId = dataLayer.createLayer({
+  name: 'Vue弹窗图层',
+  type: 'entity',
+  popup: {
+    enabled: true,
+    vueComponent: (item) => ({
+      component: MyPopupComponent,
+      props: {
+        data: item.data,
+        position: item.position
+      }
+    })
+  }
+})
+```
+
+### React 组件弹窗
+
+```typescript
+import MyPopupComponent from './MyPopupComponent'
+
+const layerId = dataLayer.createLayer({
+  name: 'React弹窗图层',
+  type: 'entity',
+  popup: {
+    enabled: true,
+    reactComponent: (item) => ({
+      component: MyPopupComponent,
+      props: {
+        data: item.data,
+        position: item.position
+      }
+    })
+  }
+})
+```
+
+### 点击回调
+
+```typescript
+const layerId = dataLayer.createLayer({
+  name: '点击回调图层',
+  type: 'entity',
+  onClick: (item, event) => {
+    console.log('点击了数据项:', item.id, item.data)
+    console.log('点击位置:', event.position)
+    
+    // 自定义处理逻辑
+    if (item.data.type === 'warning') {
+      alert('警告数据！')
+    }
+  },
+  showPopup: false // 禁用默认弹窗
+})
+```
+
+## 数据映射（从数组导入）
+
+### 基础映射
+
+```typescript
+// 原始数据
+const rawData = [
+  { id: 1, lon: 116.4074, lat: 39.9042, name: '北京', value: 100 },
+  { id: 2, lon: 121.4737, lat: 31.2304, name: '上海', value: 200 },
+  { id: 3, lon: 113.2644, lat: 23.1291, name: '广州', value: 150 }
+]
+
+// 创建图层
+const layerId = dataLayer.createLayer({
+  name: '映射图层',
+  type: 'entity'
+})
+
+// 导入数据
+dataLayer.importArrayData(layerId, rawData, {
+  idField: 'id',
+  geometryType: 'point',
+  position: {
+    lonField: 'lon',
+    latField: 'lat'
+  },
+  styleMapping: {
+    'point.pixelSize': (item) => item.value > 150 ? 15 : 10,
+    'point.color': (item) => item.value > 150 ? Cesium.Color.RED : Cesium.Color.BLUE
+  }
+})
+```
+
+### 复杂映射
+
+```typescript
+const rawData = [
+  {
+    id: 'polygon-001',
+    type: 'polygon',
+    coordinates: [
+      [116.4074, 39.9042],
+      [116.4084, 39.9042],
+      [116.4084, 39.9052],
+      [116.4074, 39.9052]
+    ],
+    name: '区域A',
+    area: 1000,
+    status: 'active'
+  }
+]
+
+dataLayer.importArrayData(layerId, rawData, {
+  idField: 'id',
+  geometryType: 'type', // 从数据中读取类型
+  positions: {
+    field: 'coordinates',
+    format: 'lonlat'
+  },
+  styleMapping: {
+    'polygon.material': (item) => {
+      return item.status === 'active' 
+        ? Cesium.Color.GREEN.withAlpha(0.5)
+        : Cesium.Color.RED.withAlpha(0.5)
+    },
+    'polygon.outlineColor': Cesium.Color.BLACK
+  },
+  filter: (item) => item.status === 'active', // 只导入激活的数据
+  transform: (item) => ({
+    ...item,
+    name: item.name.toUpperCase() // 数据转换
   })
+})
+```
 
-  // 业务数据转换示例
-  dataLayer.importArrayData(layerId, provinceList, {
-    idField: 'code',
+### 手动创建数据项
+
+```typescript
+// 从数组创建数据项（不导入图层）
+const dataItems = dataLayer.createDataItemsFromArray(rawData, {
+  idField: 'id',
+  geometryType: 'point',
+  position: {
+    lonField: 'lon',
+    latField: 'lat'
+  }
+})
+
+// 手动添加到图层
+const layer = dataLayer.getLayer(layerId)
+layer.addItems(dataItems)
+```
+
+## 使用场景
+
+### 场景 1：POI 点位展示
+
+```typescript
+// 创建 POI 图层
+const poiLayerId = dataLayer.createLayer({
+  name: 'POI点位',
+  type: 'entity',
+  clustering: {
+    enabled: true,
+    pixelRange: 60,
+    minimumClusterSize: 3
+  },
+  popup: {
+    enabled: true,
+    fields: [
+      { field: 'name', label: '名称' },
+      { field: 'address', label: '地址' },
+      { field: 'phone', label: '电话' }
+    ]
+  },
+  defaultStyle: {
+    icon: {
+      image: '/icons/poi.png',
+      scale: 1.0
+    }
+  }
+})
+
+// 从 API 加载数据
+async function loadPOIData() {
+  const response = await fetch('/api/poi')
+  const data = await response.json()
+  
+  dataLayer.importArrayData(poiLayerId, data, {
+    idField: 'id',
+    geometryType: 'point',
+    position: {
+      lonField: 'longitude',
+      latField: 'latitude'
+    },
+    styleMapping: {
+      'icon.image': (item) => `/icons/${item.category}.png`
+    }
+  })
+  
+  // 飞行到数据
+  const layer = dataLayer.getLayer(poiLayerId)
+  await layer.flyTo()
+}
+```
+
+### 场景 2：轨迹线展示
+
+```typescript
+const trackLayerId = dataLayer.createLayer({
+  name: '轨迹线',
+  type: 'entity',
+  defaultStyle: {
+    polyline: {
+      width: 3,
+      material: Cesium.Color.CYAN,
+      clampToGround: true
+    }
+  }
+})
+
+// 添加轨迹
+trackLayerId.addItem({
+  id: 'track-001',
+  geometryType: 'polyline',
+  positions: [
+    [116.4074, 39.9042, 0],
+    [116.4084, 39.9052, 0],
+    [116.4094, 39.9062, 0]
+  ],
+  data: {
+    vehicleId: 'V001',
+    startTime: '2024-01-01 10:00:00',
+    endTime: '2024-01-01 11:00:00'
+  }
+})
+```
+
+### 场景 3：区域统计
+
+```typescript
+const regionLayerId = dataLayer.createLayer({
+  name: '区域统计',
+  type: 'entity',
+  popup: {
+    enabled: true,
+    title: '区域统计',
+    fields: [
+      { field: 'name', label: '区域名称' },
+      { 
+        field: 'population', 
+        label: '人口',
+        formatter: (value) => `${value.toLocaleString()} 人`
+      },
+      {
+        field: 'area',
+        label: '面积',
+        formatter: (value) => `${value.toFixed(2)} km²`
+      }
+    ]
+  },
+  defaultStyle: {
+    polygon: {
+      material: Cesium.Color.BLUE.withAlpha(0.3),
+      outline: true,
+      outlineColor: Cesium.Color.BLUE,
+      outlineWidth: 2
+    }
+  }
+})
+
+// 根据数据值设置不同颜色
+function addRegion(region: any) {
+  const layer = dataLayer.getLayer(regionLayerId)
+  layer.addItem({
+    id: region.id,
     geometryType: 'polygon',
-    positions: { field: 'positions' }
+    positions: region.boundary,
+    data: region,
+    style: {
+      polygon: {
+        material: getColorByValue(region.population).withAlpha(0.3)
+      }
+    }
   })
+}
+
+function getColorByValue(value: number): Cesium.Color {
+  if (value > 1000000) return Cesium.Color.RED
+  if (value > 500000) return Cesium.Color.ORANGE
+  return Cesium.Color.GREEN
+}
+```
+
+### 场景 4：高性能海量数据
+
+```typescript
+// 使用 Primitive 模式处理大量数据
+const massiveLayerId = dataLayer.createLayer({
+  name: '海量数据',
+  type: 'primitive',
+  clustering: {
+    enabled: true,
+    pixelRange: 50,
+    minimumClusterSize: 10
+  },
+  defaultStyle: {
+    point: {
+      pixelSize: 5,
+      color: Cesium.Color.BLUE
+    }
+  }
 })
 
-onBeforeUnmount(() => {
-  viewer?.destroy()
-})
-</script>
+// 生成10万条数据
+const items = Array.from({ length: 100000 }, (_, i) => ({
+  id: `item-${i}`,
+  geometryType: 'point' as GeometryType,
+  position: [
+    116 + Math.random() * 0.5,
+    39 + Math.random() * 0.5,
+    0
+  ] as [number, number, number],
+  data: { index: i, value: Math.random() * 100 }
+}))
 
-<template>
-  <div ref="containerRef" class="map-container" />
-</template>
+const layer = dataLayer.getLayer(massiveLayerId)
+layer.addItems(items)
+```
+
+### 场景 5：动态更新数据
+
+```typescript
+const dynamicLayerId = dataLayer.createLayer({
+  name: '动态数据',
+  type: 'entity'
+})
+
+const layer = dataLayer.getLayer(dynamicLayerId)
+
+// 定时更新数据
+setInterval(() => {
+  // 更新现有数据项
+  layer.updateItem('item-001', {
+    position: [
+      116.4074 + Math.random() * 0.01,
+      39.9042 + Math.random() * 0.01,
+      0
+    ],
+    style: {
+      point: {
+        pixelSize: 10 + Math.random() * 5
+      }
+    }
+  })
+  
+  // 添加新数据
+  layer.addItem({
+    id: `item-${Date.now()}`,
+    geometryType: 'point',
+    position: [
+      116.4074 + Math.random() * 0.1,
+      39.9042 + Math.random() * 0.1,
+      0
+    ],
+    data: { timestamp: Date.now() }
+  })
+}, 1000)
+```
+
+### 场景 6：图层分组管理
+
+```typescript
+class LayerGroupManager {
+  private dataLayer: DataLayerPlugin
+  private groups: Map<string, string[]> = new Map()
+  
+  constructor(dataLayer: DataLayerPlugin) {
+    this.dataLayer = dataLayer
+  }
+  
+  createGroup(groupName: string, layerIds: string[]) {
+    this.groups.set(groupName, layerIds)
+  }
+  
+  showGroup(groupName: string) {
+    const layerIds = this.groups.get(groupName)
+    if (!layerIds) return
+    
+    layerIds.forEach(id => {
+      const layer = this.dataLayer.getLayer(id)
+      layer?.setShow(true)
+    })
+  }
+  
+  hideGroup(groupName: string) {
+    const layerIds = this.groups.get(groupName)
+    if (!layerIds) return
+    
+    layerIds.forEach(id => {
+      const layer = this.dataLayer.getLayer(id)
+      layer?.setShow(false)
+    })
+  }
+  
+  flyToGroup(groupName: string) {
+    const layerIds = this.groups.get(groupName)
+    if (!layerIds) return
+    
+    // 飞行到第一个图层
+    const firstLayer = this.dataLayer.getLayer(layerIds[0])
+    firstLayer?.flyTo()
+  }
+}
+
+// 使用示例
+const manager = new LayerGroupManager(dataLayer)
+manager.createGroup('基础图层', [layerId1, layerId2])
+manager.showGroup('基础图层')
 ```
 
 ## 注意事项
 
-1. Primitive 聚合通过 `camera.moveEnd` 监听实现，长时间存在大量图层时请及时 `destroy` 释放监听器。
-2. Entity 图层聚合依赖 Cesium 原生能力，仅对点状要素生效。
-3. 弹窗渲染需要 PopupPlugin 支持：Vue 需 `createApp` 宿主，React 需 `createRoot` 宿主，确保在 Viewer 初始化时注册。
-4. `DataLayerPlugin` 不直接加载 GeoJSON/KML/CZML 文件，如需格式转换请在上游解析后构造 `DataItem`。
-5. 大数据量（>10w）建议优先使用 Primitive 模式，并适当开启聚合以减少屏幕元素数量。
+1. **Entity vs Primitive**：
+   - Entity 模式：功能完整，支持聚合、弹窗、点击等，适合中小规模数据（< 1万）
+   - Primitive 模式：性能更高，适合大规模数据（> 1万），但功能相对简单
+
+2. **聚合性能**：
+   - Entity 模式使用 Cesium 原生聚合，性能较好
+   - Primitive 模式使用自定义聚合算法，在相机移动时更新，注意性能影响
+
+3. **数据映射**：
+   - 使用 `importArrayData` 可以快速从数组数据创建图层
+   - 支持字段转换、过滤、样式映射等功能
+
+4. **弹窗依赖**：
+   - 弹窗功能需要安装 `PopupPlugin`
+   - 点击事件需要安装 `EventPlugin`
+
+5. **内存管理**：
+   - 大量数据建议使用 Primitive 模式
+   - 及时清理不需要的图层和数据项
+
+6. **坐标系统**：
+   - 位置坐标使用 WGS84 坐标系（经纬度）
+   - 高度单位为米
+
+DataLayerPlugin 提供了完整的数据图层管理能力，适用于各种数据可视化场景，从简单的点位展示到复杂的海量数据渲染都能很好地支持。
+

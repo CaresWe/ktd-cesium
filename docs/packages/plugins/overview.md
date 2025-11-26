@@ -92,6 +92,65 @@ popup.show({
 })
 ```
 
+### [GraphicsPlugin](/packages/plugins/graphics)
+
+标绘插件，提供点、线、面、圆、矩形等图形绘制和编辑功能。
+
+```typescript
+import { GraphicsPlugin } from '@ktd-cesium/plugins'
+
+const graphics = viewer.use(GraphicsPlugin)
+
+// 绘制多边形
+graphics.draw.polygon({
+  positions: [[116.4, 39.9], [116.5, 39.9], [116.5, 40.0]],
+  style: { fillColor: Cesium.Color.RED.withAlpha(0.5) }
+})
+```
+
+### [TilesPlugin](/packages/plugins/3dtiles)
+
+3D Tiles 模型插件，支持模型加载、裁剪分析、淹没分析、天气效果等高级功能。
+
+```typescript
+import { TilesPlugin } from '@ktd-cesium/plugins'
+
+const tiles = viewer.use(TilesPlugin)
+
+// 加载模型
+const layerId = await tiles.createLayer({
+  name: '建筑模型',
+  url: '/path/to/tileset.json'
+})
+
+const layer = tiles.getLayer(layerId)
+
+// 添加雨水滴效果
+layer.enableRainDrops({ intensity: 0.7 })
+```
+
+### [ScenePlugin](/packages/plugins/scene)
+
+场景特效插件，提供雨、雪、雾、闪电、高度雾、局部下雨等天气和环境效果。
+
+```typescript
+import { ScenePlugin } from '@ktd-cesium/plugins'
+
+const scene = viewer.use(ScenePlugin)
+
+// 添加雨效果
+scene.addRain({ mixFactor: 0.5 })
+
+// 添加闪电效果
+scene.addLightning({ mixFactor: 0.35 })
+
+// 添加局部下雨（多边形区域）
+scene.addLocalRain({
+  positions: [[116.0, 39.5], [117.0, 39.5], [117.0, 40.5], [116.0, 40.5]],
+  dropCount: 5000
+})
+```
+
 ## 插件架构
 
 所有插件都继承自 `BasePlugin`，遵循统一的接口规范：
@@ -296,6 +355,9 @@ try {
 - [DataLayerPlugin](/packages/plugins/data-layer)
 - [EventPlugin](/packages/plugins/event)
 - [PopupPlugin](/packages/plugins/popup)
+- [GraphicsPlugin](/packages/plugins/graphics)
+- [TilesPlugin](/packages/plugins/3dtiles)
+- [ScenePlugin](/packages/plugins/scene)
 
 ## 下一步
 

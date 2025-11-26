@@ -11,7 +11,8 @@ import type {
   GeoJSONFeature,
   GeoJSONFeatureCollection,
   DrawController,
-  EntityExtension
+  EntityExtension,
+  EditController
 } from './types'
 import { EventType as EventTypeEnum } from './types'
 import { TooltipCore } from '../TooltipPlugin/TooltipCore'
@@ -34,6 +35,7 @@ import { DrawModel } from './draw/DrawModel'
 import { DrawPolylineVolume } from './draw/DrawPolylineVolume'
 import { DrawPolygonEx } from './draw/DrawPolygonEx'
 import { DrawPModel } from './draw/DrawPModel'
+import { DrawParticle } from './draw/DrawParticle'
 import { TransformPlugin, TransformMode, TransformSpace } from '../TransformPlugin'
 
 /**
@@ -264,93 +266,98 @@ export class GraphicsPlugin extends BasePlugin {
     // 点绘制
     const drawPoint = new DrawPoint(opts)
     drawPoint.setFireFunction(fire).setTooltip(this.tooltip)
-    this.drawCtrl['point'] = drawPoint
+    this.drawCtrl['point'] = drawPoint as unknown as DrawController
 
     // Billboard 图标绘制
     const drawBillboard = new DrawBillboard(opts)
     drawBillboard.setFireFunction(fire).setTooltip(this.tooltip)
-    this.drawCtrl['billboard'] = drawBillboard
+    this.drawCtrl['billboard'] = drawBillboard as unknown as DrawController
 
     // Label 文字标注
     const drawLabel = new DrawLabel(opts)
     drawLabel.setFireFunction(fire).setTooltip(this.tooltip)
-    this.drawCtrl['label'] = drawLabel
+    this.drawCtrl['label'] = drawLabel as unknown as DrawController
 
     // 线绘制
     const drawPolyline = new DrawPolyline(opts)
     drawPolyline.setFireFunction(fire).setTooltip(this.tooltip)
-    this.drawCtrl['polyline'] = drawPolyline
+    this.drawCtrl['polyline'] = drawPolyline as unknown as DrawController
 
     // 面绘制
     const drawPolygon = new DrawPolygon(opts)
     drawPolygon.setFireFunction(fire).setTooltip(this.tooltip)
-    this.drawCtrl['polygon'] = drawPolygon
+    this.drawCtrl['polygon'] = drawPolygon as unknown as DrawController
 
     // 圆形绘制
     const drawCircle = new DrawCircle(opts)
     drawCircle.setFireFunction(fire).setTooltip(this.tooltip)
-    this.drawCtrl['circle'] = drawCircle
-    this.drawCtrl['ellipse'] = drawCircle
+    this.drawCtrl['circle'] = drawCircle as unknown as DrawController
+    this.drawCtrl['ellipse'] = drawCircle as unknown as DrawController
 
     // 矩形绘制
     const drawRectangle = new DrawRectangle(opts)
     drawRectangle.setFireFunction(fire).setTooltip(this.tooltip)
-    this.drawCtrl['rectangle'] = drawRectangle
+    this.drawCtrl['rectangle'] = drawRectangle as unknown as DrawController
 
     // 走廊绘制
     const drawCorridor = new DrawCorridor(opts)
     drawCorridor.setFireFunction(fire).setTooltip(this.tooltip)
-    this.drawCtrl['corridor'] = drawCorridor
+    this.drawCtrl['corridor'] = drawCorridor as unknown as DrawController
 
     // 墙体绘制
     const drawWall = new DrawWall(opts)
     drawWall.setFireFunction(fire).setTooltip(this.tooltip)
-    this.drawCtrl['wall'] = drawWall
+    this.drawCtrl['wall'] = drawWall as unknown as DrawController
 
     // 立方体绘制
     const drawBox = new DrawBox(opts)
     drawBox.setFireFunction(fire).setTooltip(this.tooltip)
-    this.drawCtrl['box'] = drawBox
+    this.drawCtrl['box'] = drawBox as unknown as DrawController
 
     // 圆柱体绘制
     const drawCylinder = new DrawCylinder(opts)
     drawCylinder.setFireFunction(fire).setTooltip(this.tooltip)
-    this.drawCtrl['cylinder'] = drawCylinder
+    this.drawCtrl['cylinder'] = drawCylinder as unknown as DrawController
 
     // 椭球体绘制
     const drawEllipsoid = new DrawEllipsoid(opts)
     drawEllipsoid.setFireFunction(fire).setTooltip(this.tooltip)
-    this.drawCtrl['ellipsoid'] = drawEllipsoid
+    this.drawCtrl['ellipsoid'] = drawEllipsoid as unknown as DrawController
 
     // 曲线绘制
     const drawCurve = new DrawCurve(opts)
     drawCurve.setFireFunction(fire).setTooltip(this.tooltip)
-    this.drawCtrl['curve'] = drawCurve
+    this.drawCtrl['curve'] = drawCurve as unknown as DrawController
 
     // 平面绘制
     const drawPlane = new DrawPlane(opts)
     drawPlane.setFireFunction(fire).setTooltip(this.tooltip)
-    this.drawCtrl['plane'] = drawPlane
+    this.drawCtrl['plane'] = drawPlane as unknown as DrawController
 
     // 3D模型加载
     const drawModel = new DrawModel(opts)
     drawModel.setFireFunction(fire).setTooltip(this.tooltip)
-    this.drawCtrl['model'] = drawModel
+    this.drawCtrl['model'] = drawModel as unknown as DrawController
 
     // 管道体绘制
     const drawPolylineVolume = new DrawPolylineVolume(opts)
     drawPolylineVolume.setFireFunction(fire).setTooltip(this.tooltip)
-    this.drawCtrl['polylineVolume'] = drawPolylineVolume
+    this.drawCtrl['polylineVolume'] = drawPolylineVolume as unknown as DrawController
 
     // 高级面绘制
     const drawPolygonEx = new DrawPolygonEx(opts)
     drawPolygonEx.setFireFunction(fire).setTooltip(this.tooltip)
-    this.drawCtrl['polygonEx'] = drawPolygonEx
+    this.drawCtrl['polygonEx'] = drawPolygonEx as unknown as DrawController
 
     // Primitive 模型绘制
     const drawPModel = new DrawPModel(opts)
     drawPModel.setFireFunction(fire).setTooltip(this.tooltip)
-    this.drawCtrl['model-p'] = drawPModel
+    this.drawCtrl['model-p'] = drawPModel as unknown as DrawController
+
+    // 粒子系统绘制
+    const drawParticle = new DrawParticle(opts)
+    drawParticle.setFireFunction(fire).setTooltip(this.tooltip)
+    this.drawCtrl['particle'] = drawParticle as unknown as DrawController
 
     // 外部扩展的绘制类
     for (const type in exDraw) {

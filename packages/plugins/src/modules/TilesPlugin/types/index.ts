@@ -282,6 +282,9 @@ export interface TilesLayerInstance {
   /** 启用平面剖切 */
   enableClipping(config: ClippingPlanesConfig): void
 
+  /** 启用基于实体的剖切（使用 GraphicsPlugin 绘制的实体） */
+  enableEntityClipping(config: EntityClippingConfig): void
+
   /** 更新剖切平面 */
   updateClipping(config: Partial<ClippingPlanesConfig>): void
 
@@ -311,8 +314,11 @@ export interface TilesLayerInstance {
   disableModelClip(): void
 
   // ========== 淹没分析 ==========
-  /** 启用淹没分析 */
+  /** 启用淹没分析（全局模式） */
   enableFloodAnalysis(config: FloodAnalysisConfig): void
+
+  /** 启用区域淹没分析（局部模式，基于 polygon） */
+  enableRegionalFlood(polygon: import('cesium').Entity, config: RegionalFloodConfig): void
 
   /** 更新水位高度 */
   updateFloodHeight(height: number): void
@@ -329,6 +335,9 @@ export interface TilesLayerInstance {
   // ========== 压平功能 ==========
   /** 启用压平 */
   enableFlatten(config: FlattenConfig): void
+
+  /** 启用基于实体的压平（使用 GraphicsPlugin 绘制的 polygon） */
+  enableEntityFlatten(config: EntityFlattenConfig): void
 
   /** 更新压平高度 */
   updateFlattenHeight(height: number): void
@@ -378,6 +387,25 @@ export interface TilesLayerInstance {
 
   /** 禁用地震分析 */
   disableSeismicAnalysis(): void
+
+  // ========== 天气效果 ==========
+  /** 启用雨水滴效果 */
+  enableRainDrops(config?: RainDropsConfig): void
+
+  /** 更新雨水滴强度 */
+  updateRainIntensity(intensity: number): void
+
+  /** 启用积雪效果 */
+  enableSnowAccumulation(config?: SnowAccumulationConfig): void
+
+  /** 更新积雪厚度 */
+  updateSnowThickness(thickness: number): void
+
+  /** 禁用天气效果 */
+  disableWeatherEffect(): void
+
+  /** 获取当前天气效果类型 */
+  getCurrentWeatherEffect(): WeatherEffectType | null
 
   /** 销毁图层 */
   destroy(): void
@@ -534,6 +562,26 @@ export interface ClippingPlanesConfig {
 }
 
 /**
+ * 基于实体的剖切配置（使用 GraphicsPlugin 绘制的实体进行剖切）
+ */
+export interface EntityClippingConfig {
+  /** 实体 ID 或实体对象（来自 GraphicsPlugin） */
+  entity: string | import('cesium').Entity
+
+  /** 是否联合剖切（true: 所有平面联合, false: 所有平面相交） */
+  unionClippingRegions?: boolean
+
+  /** 边缘颜色 */
+  edgeColor?: Color
+
+  /** 边缘宽度 */
+  edgeWidth?: number
+
+  /** 是否启用 */
+  enabled?: boolean
+}
+
+/**
  * 盒子裁剪配置
  */
 export interface BoxClipConfig {
@@ -571,7 +619,7 @@ export interface ModelClipConfig {
 }
 
 /**
- * 淹没分析配置
+ * 淹没分析配置（全局模式）
  */
 export interface FloodAnalysisConfig {
   /** 最小水位高度 */
@@ -600,11 +648,57 @@ export interface FloodAnalysisConfig {
 }
 
 /**
+ * 区域淹没分析配置（局部模式，基于 polygon）
+ */
+export interface RegionalFloodConfig {
+  /** 定义淹没区域的 polygon 实体（由 GraphicsPlugin 绘制） */
+  polygon: import('cesium').Entity
+
+  /** 最小水位高度 */
+  minHeight: number
+
+  /** 最大水位高度 */
+  maxHeight: number
+
+  /** 当前水位高度 */
+  currentHeight: number
+
+  /** 水体颜色 */
+  waterColor?: Color
+
+  /** 水体透明度 */
+  waterAlpha?: number
+
+  /** 淹没速度（米/秒，用于动画） */
+  floodSpeed?: number
+
+  /** 高度变化回调 */
+  onHeightChange?: (height: number) => void
+}
+
+/**
  * 压平配置
  */
 export interface FlattenConfig {
   /** 压平区域多边形坐标 [[lon, lat, height], ...] */
   positions: Array<[number, number, number]>
+
+  /** 压平高度 */
+  height: number
+
+  /** 是否显示压平区域边界 */
+  showBoundary?: boolean
+
+  /** 边界颜色 */
+  boundaryColor?: Color
+}
+
+/**
+ * 基于实体的压平配置（使用 GraphicsPlugin 绘制的 polygon）
+ */
+export interface EntityFlattenConfig {
+  /** 实体 ID 或实体对象（来自 GraphicsPlugin） */
+  entity: string | import('cesium').Entity
 
   /** 压平高度 */
   height: number
@@ -746,3 +840,38 @@ export interface SeismicAnalysisConfig {
   /** 动画结束回调 */
   onAnimationEnd?: () => void
 }
+
+/**
+ * 雨水滴效果配置
+ */
+export interface RainDropsConfig {
+  /** 水滴强度 0-1 */
+  intensity?: number
+  /** 水滴大小 */
+  dropSize?: number
+  /** 水滴颜色 */
+  dropColor?: Color
+  /** 流淌速度 */
+  flowSpeed?: number
+  /** 是否启用法线贴图 */
+  enableNormalMap?: boolean
+}
+
+/**
+ * 积雪效果配置
+ */
+export interface SnowAccumulationConfig {
+  /** 积雪厚度 0-1 */
+  thickness?: number
+  /** 积雪颜色 */
+  snowColor?: Color
+  /** 积雪粗糙度 */
+  roughness?: number
+  /** 积雪覆盖阈值（根据法线 Y 值判断） */
+  coverageThreshold?: number
+}
+
+/**
+ * 天气效果类型
+ */
+export type WeatherEffectType = 'rainDrops' | 'snowAccumulation'

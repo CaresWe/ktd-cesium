@@ -351,6 +351,7 @@ export interface DrawAttribute {
   attr?: Record<string, unknown>
   config?: DrawConfig
   success?: (entity: Cesium.Entity) => void
+  [key: string]: unknown
 }
 
 /**
@@ -451,7 +452,8 @@ export interface DrawController {
   editClass?: unknown
   activate: (attribute: DrawAttribute, callback: (entity: Cesium.Entity) => void) => Cesium.Entity
   disable: (isDelete?: boolean) => void
-  jsonToEntity?: (feature: GeoJSONFeature) => Cesium.Entity | undefined
+  endDraw?: () => void
+  jsonToEntity?: (feature: GeoJSONFeature) => Cesium.Entity | null | undefined
   style2Entity?: (style: DrawStyle, entity: Cesium.Entity) => unknown
 }
 
@@ -507,6 +509,47 @@ export interface EditController {
 export interface TooltipOptions {
   offsetX?: number
   offsetY?: number
+}
+
+/**
+ * 聚合样式配置
+ */
+export interface ClusterStyle {
+  /** 聚合点颜色 */
+  color?: string
+  /** 聚合点大小 */
+  pixelSize?: number
+  /** 轮廓颜色 */
+  outlineColor?: string
+  /** 轮廓宽度 */
+  outlineWidth?: number
+  /** 字体样式 */
+  font?: string
+  /** 标签颜色 */
+  labelColor?: string
+  /** 标签轮廓颜色 */
+  labelOutlineColor?: string
+  /** 标签轮廓宽度 */
+  labelOutlineWidth?: number
+  [key: string]: unknown
+}
+
+/**
+ * 聚合配置选项
+ */
+export interface ClusterOptions {
+  /** 是否启用聚合 */
+  enabled?: boolean
+  /** 聚合像素范围 */
+  pixelRange?: number
+  /** 最小聚合数量 */
+  minimumClusterSize?: number
+  /** 是否显示标签 */
+  showLabel?: boolean
+  /** 聚合样式 */
+  clusterStyle?: ClusterStyle
+  /** 聚合事件回调 */
+  clusterEvent?: (clusteredEntities: Cesium.Entity[], cluster: { billboard: Cesium.Billboard; label: Cesium.Label }) => void
 }
 
 /**
