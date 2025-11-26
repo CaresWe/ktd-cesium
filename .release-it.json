@@ -1,0 +1,27 @@
+{
+  "git": {
+    "commitMessage": "chore: release v${version}",
+    "tagName": "v${version}",
+    "requireCleanWorkingDir": false,
+    "requireUpstream": false
+  },
+  "github": {
+    "release": false
+  },
+  "npm": {
+    "publish": false
+  },
+  "hooks": {
+    "before:init": ["pnpm lint", "pnpm type-check"],
+    "after:bump": "pnpm run changelog"
+  },
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "preset": {
+        "name": "angular"
+      },
+      "infile": "CHANGELOG.md",
+      "header": "# Changelog\n\nAll notable changes to this project will be documented in this file.\n\n"
+    }
+  }
+}

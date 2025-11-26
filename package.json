@@ -2,16 +2,33 @@
   "name": "ktd-cesium",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "Cesium二次封装库",
   "scripts": {
     "dev": "pnpm -r --parallel dev",
     "build": "pnpm -r --filter=\"!@ktd-cesium/vue\" build && pnpm --filter @ktd-cesium/vue build",
     "clean": "pnpm -r exec rm -rf dist node_modules",
-    "lint": "pnpm -r lint",
+    "lint": "pnpm lint:eslint && pnpm lint:prettier && pnpm lint:stylelint",
+    "lint:eslint": "eslint . --ext .js,.jsx,.ts,.tsx,.vue --fix",
+    "lint:prettier": "prettier --write \"**/*.{js,jsx,ts,tsx,vue,json,css,scss,md}\"",
+    "lint:stylelint": "stylelint \"**/*.{css,scss,vue}\" --fix",
     "type-check": "pnpm -r type-check",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "prepare": "husky install",
+    "commit": "git-cz",
+    "release": "node scripts/release.js",
+    "release:pkg": "node scripts/release-package.js",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-customizable"
+    },
+    "cz-customizable": {
+      "config": ".cz-config.cjs"
+    }
   },
   "keywords": [
     "cesium",
@@ -26,7 +43,32 @@
     "pnpm": ">=8.0.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^18.4.3",
+    "@commitlint/config-conventional": "^18.4.3",
+    "@release-it/conventional-changelog": "^8.0.0",
     "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.2",
+    "@typescript-eslint/parser": "^6.13.2",
+    "chalk": "^5.3.0",
+    "commitizen": "^4.3.0",
+    "conventional-changelog-cli": "^4.1.0",
+    "cz-customizable": "^7.0.0",
+    "enquirer": "^2.4.1",
+    "eslint": "^8.55.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "eslint-plugin-vue": "^9.19.2",
+    "execa": "^8.0.1",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.1.1",
+    "release-it": "^17.0.0",
+    "semver": "^7.5.4",
+    "stylelint": "^16.0.2",
+    "stylelint-config-prettier": "^9.0.5",
+    "stylelint-config-standard": "^36.0.0",
+    "stylelint-config-standard-scss": "^12.0.0",
+    "stylelint-order": "^6.0.4",
     "typescript": "^5.3.0",
     "vite": "^5.0.0",
     "vitepress": "^1.6.4",
@@ -34,5 +76,18 @@
   },
   "dependencies": {
     "@turf/turf": "^7.2.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,vue}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,scss,vue}": [
+      "stylelint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
   }
 }
