@@ -8,9 +8,9 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: '指南', link: '/guide/introduction' },
-      { text: 'Shared', link: '/packages/shared/overview' },
-      { text: 'Core', link: '/packages/core/overview' },
-      { text: 'Plugins', link: '/packages/plugins/overview' },
+      { text: '地图公共方法包', link: '/packages/shared/overview' },
+      { text: '核心包', link: '/packages/core/overview' },
+      { text: '插件', link: '/packages/plugins/overview' },
     ],
 
     sidebar: {
@@ -27,7 +27,7 @@ export default defineConfig({
 
       '/packages/shared/': [
         {
-          text: 'Shared 包',
+          text: '地图公共方法包',
           items: [
             { text: '概述', link: '/packages/shared/overview' },
             { text: '坐标转换', link: '/packages/shared/coordinate' },
@@ -40,7 +40,7 @@ export default defineConfig({
 
       '/packages/core/': [
         {
-          text: 'Core 包',
+          text: '核心包',
           items: [
             { text: '概述', link: '/packages/core/overview' },
             { text: 'KtdViewer', link: '/packages/core/viewer' },
@@ -50,16 +50,16 @@ export default defineConfig({
 
       '/packages/plugins/': [
         {
-          text: 'Plugins 包',
+          text: '插件包',
           items: [
             { text: '概述', link: '/packages/plugins/overview' },
-            { text: 'BasePlugin', link: '/packages/plugins/base-plugin' },
-            { text: 'BaseLayerPlugin', link: '/packages/plugins/base-layer' },
-            { text: 'CameraPlugin', link: '/packages/plugins/camera' },
-            { text: 'DataLayerPlugin', link: '/packages/plugins/data-layer' },
-            { text: 'EventPlugin', link: '/packages/plugins/event' },
-            { text: 'GraphicsPlugin', link: '/packages/plugins/graphics' },
-            { text: 'PopupPlugin', link: '/packages/plugins/popup' },
+            { text: '基础插件', link: '/packages/plugins/base-plugin' },
+            { text: '底图图层插件', link: '/packages/plugins/base-layer' },
+            { text: '相机插件', link: '/packages/plugins/camera' },
+            { text: '数据图层插件', link: '/packages/plugins/data-layer' },
+            { text: '地图事件插件', link: '/packages/plugins/event' },
+            { text: '图形插件', link: '/packages/plugins/graphics' },
+            { text: '地图弹窗插件', link: '/packages/plugins/popup' },
           ]
         }
       ],
