@@ -1,6 +1,6 @@
 # Plugins 包概述
 
-`@auto-cesium/plugins` 是 KTD-Cesium 的插件系统包，提供了一系列功能扩展插件，用于增强 AutoViewer 的能力。
+`@auto-cesium/plugins` 是 Auto-Cesium 的插件系统包，提供了一系列功能扩展插件，用于增强 AutoViewer 的能力。
 
 ## 安装
 

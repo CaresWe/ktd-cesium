@@ -7,7 +7,7 @@
 
 ## 安装依赖
 
-KTD-Cesium 采用 Monorepo 架构，你可以根据需求选择安装不同的包。
+Auto-Cesium 采用 Monorepo 架构，你可以根据需求选择安装不同的包。
 
 ### 完整安装（推荐）
 
@@ -129,7 +129,7 @@ module.exports = {
 <link href="https://cesium.com/downloads/cesiumjs/releases/1.135/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
 <script src="https://cesium.com/downloads/cesiumjs/releases/1.135/Build/Cesium/Cesium.js"></script>
 
-<!-- KTD-Cesium（需要自行构建和托管）-->
+<!-- Auto-Cesium（需要自行构建和托管）-->
 <script src="path/to/auto-cesium.umd.js"></script>
 ```
 
@@ -142,7 +142,7 @@ import { AutoViewer } from '@auto-cesium/core'
 import { degreesToCartesian } from '@auto-cesium/shared'
 import * as Cesium from 'cesium'
 
-console.log('KTD-Cesium 安装成功！')
+console.log('Auto-Cesium 安装成功！')
 
 // 测试工具函数
 const cartesian = degreesToCartesian(116.4, 39.9, 0)

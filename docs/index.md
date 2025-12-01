@@ -2,7 +2,7 @@
 layout: home
 
 hero:
-  name: KTD-Cesium
+  name: Auto-Cesium
   text: Cesium 二次封装库
   tagline: 简洁、高效、易用的 Cesium 开发工具包
   actions:

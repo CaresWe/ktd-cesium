@@ -1,10 +1,10 @@
 # 常见问题
 
-本文档收集了使用 KTD-Cesium 时常见的问题和解决方案。
+本文档收集了使用 Auto-Cesium 时常见的问题和解决方案。
 
 ## 安装和配置
 
-### Q: 如何正确安装 KTD-Cesium？
+### Q: 如何正确安装 Auto-Cesium？
 
 A: 使用 pnpm（推荐）或 npm/yarn 安装：
 

@@ -1,6 +1,6 @@
 # Shared 包概述
 
-`@auto-cesium/shared` 是 KTD-Cesium 的共享基础库，提供了一系列常用的工具函数，帮助开发者更高效地处理 Cesium 开发中的常见任务。
+`@auto-cesium/shared` 是 Auto-Cesium 的共享基础库，提供了一系列常用的工具函数，帮助开发者更高效地处理 Cesium 开发中的常见任务。
 
 ## 安装
 

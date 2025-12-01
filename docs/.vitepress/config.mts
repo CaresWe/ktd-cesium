@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  title: 'KTD-Cesium',
+  title: 'Auto-Cesium',
   description: 'Cesium 二次封装库',
   base: '/',
 
@@ -52,7 +52,7 @@ export default defineConfig({
           text: '核心包',
           items: [
             { text: '概述', link: '/packages/core/overview' },
-            { text: 'KtdViewer', link: '/packages/core/viewer' },
+            { text: 'AutpViewer', link: '/packages/core/viewer' },
           ]
         }
       ],

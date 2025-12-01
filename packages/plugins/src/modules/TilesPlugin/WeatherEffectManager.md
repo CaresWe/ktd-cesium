@@ -40,7 +40,7 @@
 ## 快速开始
 
 ```typescript
-import { TilesPlugin } from '@ktd-cesium/plugins'
+import { TilesPlugin } from '@auto-cesium/plugins'
 
 const tiles = viewer.use(TilesPlugin)
 
@@ -255,7 +255,7 @@ if (effect === 'rainDrops') {
 ### 动态天气切换
 
 ```typescript
-import { TilesPlugin } from '@ktd-cesium/plugins'
+import { TilesPlugin } from '@auto-cesium/plugins'
 
 const tiles = viewer.use(TilesPlugin)
 
@@ -294,15 +294,15 @@ function changeWeather(type: 'clear' | 'rain' | 'snow') {
 }
 
 // 使用
-changeWeather('rain')  // 切换到雨天
-changeWeather('snow')  // 切换到雪天
+changeWeather('rain') // 切换到雨天
+changeWeather('snow') // 切换到雪天
 changeWeather('clear') // 切换到晴天
 ```
 
 ### 结合场景插件的全屏天气
 
 ```typescript
-import { TilesPlugin, ScenePlugin } from '@ktd-cesium/plugins'
+import { TilesPlugin, ScenePlugin } from '@auto-cesium/plugins'
 
 const tiles = viewer.use(TilesPlugin)
 const scene = viewer.use(ScenePlugin)
@@ -470,7 +470,7 @@ void fragmentMain(FragmentInput fsInput, inout czm_modelMaterial material) {
 
 ## 作者
 
-ktd-cesium 团队
+auto-cesium 团队
 
 ## 许可
 

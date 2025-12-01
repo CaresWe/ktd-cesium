@@ -1,6 +1,6 @@
 # 快速开始
 
-本指南将帮助你快速上手 KTD-Cesium。
+本指南将帮助你快速上手 Auto-Cesium。
 
 ## 安装
 
@@ -95,7 +95,7 @@ camera.flyTo({
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>KTD-Cesium 示例</title>
+    <title>Auto-Cesium 示例</title>
     <style>
       #cesiumContainer {
         width: 100vw;

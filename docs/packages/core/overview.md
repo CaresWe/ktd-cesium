@@ -1,6 +1,6 @@
 # Core 包概述
 
-`@auto-cesium/core` 是 KTD-Cesium 的核心功能包，提供了对 Cesium Viewer 的封装，并实现了强大的插件系统。
+`@auto-cesium/core` 是 Auto-Cesium的核心功能包，提供了对 Cesium Viewer 的封装，并实现了强大的插件系统。
 
 ## 安装
 

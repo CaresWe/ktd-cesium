@@ -1,6 +1,6 @@
 # 最佳实践
 
-本文档介绍使用 KTD-Cesium 的最佳实践和推荐做法。
+本文档介绍使用 Auto-Cesium 的最佳实践和推荐做法。
 
 ## 项目结构
 
@@ -292,11 +292,11 @@ export function useCesium() {
   useEffect(() => {
     if (containerRef.current) {
       const cesiumViewer = new Cesium.Viewer(containerRef.current)
-      const ktdViewer = new AutoViewer(cesiumViewer)
-      setViewer(ktdViewer)
+      const AutoViewer = new AutoViewer(cesiumViewer)
+      setViewer(AutoViewer)
 
       return () => {
-        ktdViewer.destroy()
+        AutoViewer.destroy()
       }
     }
   }, [])

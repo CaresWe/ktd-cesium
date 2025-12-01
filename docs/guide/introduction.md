@@ -1,6 +1,6 @@
 # 介绍
 
-KTD-Cesium 是一个基于 [Cesium](https://cesium.com/) 的二次封装库，旨在提供更简洁、易用的 API，帮助开发者快速构建 3D 地图应用。
+Auto-Cesium 是一个基于 [Cesium](https://cesium.com/) 的二次封装库，旨在提供更简洁、易用的 API，帮助开发者快速构建 3D 地图应用。
 
 ## 特性
 
@@ -13,7 +13,7 @@ KTD-Cesium 是一个基于 [Cesium](https://cesium.com/) 的二次封装库，�
 
 ## 包结构
 
-KTD-Cesium 采用 Monorepo 架构，包含以下三个核心包：
+Auto-Cesium 采用 Monorepo 架构，包含以下三个核心包：
 
 ### [@auto-cesium/shared](/packages/shared/overview)
 
@@ -56,7 +56,7 @@ KTD-Cesium 采用 Monorepo 架构，包含以下三个核心包：
 - **ScenePlugin**：场景特效（雨、雪、雾等）
 - **ParticleSystemPlugin**：粒子系统
 
-## 为什么选择 KTD-Cesium？
+## 为什么选择 Auto-Cesium？
 
 1. **简化开发流程**：封装了 Cesium 常用功能，减少重复代码
 2. **类型安全**：完整的 TypeScript 类型定义，避免运行时错误

@@ -107,7 +107,7 @@ const localRain2 = scene.addLocalRain({
 
 ## 作者
 
-ktd-cesium 团队
+Auto-Cesium 团队
 
 ## 许可
 
