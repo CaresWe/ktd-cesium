@@ -58,9 +58,7 @@ export class EditModel extends EditPoint {
       const hpr = new Cesium.HeadingPitchRoll(headingRad, pitchRad, rollRad)
       const orientation = Cesium.Transforms.headingPitchRollQuaternion(position, hpr)
 
-      this.entity.orientation = new Cesium.ConstantProperty(
-        orientation
-      ) as unknown as Cesium.Property
+      this.entity.orientation = new Cesium.ConstantProperty(orientation) as unknown as Cesium.Property
 
       // 更新 attribute 中的值
       if (this.entity.attribute?.style) {
@@ -91,10 +89,7 @@ export class EditModel extends EditPoint {
         throw new Error('无法获取当前位置或方向')
       }
 
-      const matrix = Cesium.Matrix4.fromRotationTranslation(
-        Cesium.Matrix3.fromQuaternion(orientation),
-        position
-      )
+      const matrix = Cesium.Matrix4.fromRotationTranslation(Cesium.Matrix3.fromQuaternion(orientation), position)
 
       const hpr = Cesium.Transforms.fixedFrameToHeadingPitchRoll(matrix)
 
@@ -119,9 +114,7 @@ export class EditModel extends EditPoint {
         throw new Error('实体对象或模型属性不存在')
       }
 
-      this.entity.model.scale = new Cesium.ConstantProperty(
-        scale
-      ) as unknown as Cesium.Property
+      this.entity.model.scale = new Cesium.ConstantProperty(scale) as unknown as Cesium.Property
 
       // 更新 attribute 中的值
       if (this.entity.attribute?.style) {
@@ -160,11 +153,7 @@ export class EditModel extends EditPoint {
   rotate(deltaHeading: number = 0, deltaPitch: number = 0, deltaRoll: number = 0): void {
     try {
       const current = this.getOrientation()
-      this.setOrientation(
-        current.heading + deltaHeading,
-        current.pitch + deltaPitch,
-        current.roll + deltaRoll
-      )
+      this.setOrientation(current.heading + deltaHeading, current.pitch + deltaPitch, current.roll + deltaRoll)
     } catch (error) {
       console.error('EditModel.rotate: 旋转模型失败', error)
       throw error

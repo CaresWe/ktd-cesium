@@ -108,13 +108,13 @@ describe('fineArrow', () => {
 
     describe('Boundary conditions', () => {
       it('should return empty array for null positions', () => {
-        const result = computeFineArrowPositions(null as any)
+        const result = computeFineArrowPositions(null as unknown as Cartesian3[])
 
         expect(result).toEqual([])
       })
 
       it('should return empty array for undefined positions', () => {
-        const result = computeFineArrowPositions(undefined as any)
+        const result = computeFineArrowPositions(undefined as unknown as Cartesian3[])
 
         expect(result).toEqual([])
       })
@@ -392,13 +392,13 @@ describe('fineArrow', () => {
 
     describe('Boundary conditions', () => {
       it('should return empty array for null positions', () => {
-        const result = computeFineArrowYWPositions(null as any)
+        const result = computeFineArrowYWPositions(null as unknown as Cartesian3[])
 
         expect(result).toEqual([])
       })
 
       it('should return empty array for undefined positions', () => {
-        const result = computeFineArrowYWPositions(undefined as any)
+        const result = computeFineArrowYWPositions(undefined as unknown as Cartesian3[])
 
         expect(result).toEqual([])
       })

@@ -21,8 +21,6 @@ export class ColorCorrectionManager {
 
       // 应用颜色校正
       this.applyCorrection()
-
-      console.log('Color correction enabled')
     } catch (error) {
       console.error('Failed to enable color correction:', error)
       throw error
@@ -43,8 +41,6 @@ export class ColorCorrectionManager {
 
       // 重新应用
       this.applyCorrection()
-
-      console.log('Color correction updated')
     } catch (error) {
       console.error('Failed to update color correction:', error)
       throw error
@@ -65,16 +61,15 @@ export class ColorCorrectionManager {
 
       // 注意：Cesium3DTileset.customShader 需要 Cesium 1.97+ 版本
       // 这里展示基本结构，实际使用需要根据 Cesium 版本调整
-      console.warn(
-        'Color correction requires Cesium3DTileset.customShader API (Cesium 1.97+)'
-      )
+      console.warn('Color correction requires Cesium3DTileset.customShader API (Cesium 1.97+)')
 
       // 示例代码（需要适配实际 Cesium 版本）:
       // this.tileset.customShader = new CustomShader({
       //   fragmentShaderText: fragmentShader
       // })
 
-      console.log('Color correction shader:', fragmentShader)
+      // Shader built successfully
+      void fragmentShader
     } catch (error) {
       console.error('Failed to apply color correction:', error)
       throw error
@@ -155,7 +150,6 @@ export class ColorCorrectionManager {
       // this.tileset.customShader = undefined
 
       this.config = null
-      console.log('Color correction disabled')
     } catch (error) {
       console.error('Failed to disable color correction:', error)
       throw error

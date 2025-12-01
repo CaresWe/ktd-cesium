@@ -54,8 +54,6 @@ export class PopupPlugin extends BasePlugin {
       this.removeRenderListener = viewer.cesiumViewer.scene.postRender.addEventListener(() => {
         this.updateWorldPopups()
       })
-
-      console.log('Popup plugin installed')
     } catch (error) {
       console.error('Failed to install popup plugin:', error)
       throw error
@@ -103,7 +101,7 @@ export class PopupPlugin extends BasePlugin {
       'top-center': 'transform-origin: top center; transform: translateX(-50%);',
       'top-right': 'transform-origin: top right; transform: translateX(-100%);',
       'middle-left': 'transform-origin: center left; transform: translateY(-50%);',
-      'center': 'transform-origin: center; transform: translate(-50%, -50%);',
+      center: 'transform-origin: center; transform: translate(-50%, -50%);',
       'middle-right': 'transform-origin: center right; transform: translate(-100%, -50%);',
       'bottom-left': 'transform-origin: bottom left; transform: translateY(-100%);',
       'bottom-center': 'transform-origin: bottom center; transform: translate(-50%, -100%);',
@@ -136,10 +134,10 @@ export class PopupPlugin extends BasePlugin {
   /**
    * 渲染Vue组件
    */
-  private async renderVue(container: HTMLElement, config: VueComponentConfig): Promise<any> {
+  private async renderVue(container: HTMLElement, config: VueComponentConfig): Promise<unknown> {
     try {
       // 动态导入 Vue
-      // @ts-ignore - Vue is an optional peer dependency
+      // @ts-expect-error - Vue is an optional peer dependency
       const { createApp, h } = await import('vue')
 
       // 创建 Vue 应用
@@ -163,12 +161,12 @@ export class PopupPlugin extends BasePlugin {
   /**
    * 渲染React组件
    */
-  private async renderReact(container: HTMLElement, config: ReactComponentConfig): Promise<any> {
+  private async renderReact(container: HTMLElement, config: ReactComponentConfig): Promise<unknown> {
     try {
       // 动态导入 React 和 ReactDOM
-      // @ts-ignore - React is an optional peer dependency
+      // @ts-expect-error - React is an optional peer dependency
       const React = await import('react')
-      // @ts-ignore - React DOM is an optional peer dependency
+      // @ts-expect-error - React DOM is an optional peer dependency
       const ReactDOM = await import('react-dom/client')
 
       // 创建 React 元素
@@ -193,9 +191,9 @@ export class PopupPlugin extends BasePlugin {
     container: HTMLElement,
     content: PopupContent,
     type: PopupType
-  ): Promise<{ vueApp?: any; reactRoot?: any }> {
+  ): Promise<{ vueApp?: unknown; reactRoot?: unknown }> {
     try {
-      const result: { vueApp?: any; reactRoot?: any } = {}
+      const result: { vueApp?: unknown; reactRoot?: unknown } = {}
 
       switch (type) {
         case 'html':
@@ -257,10 +255,7 @@ export class PopupPlugin extends BasePlugin {
       }
 
       // 转换为屏幕坐标
-      const screenPosition = SceneTransforms.worldToWindowCoordinates(
-        this.cesiumViewer.scene,
-        cartesian
-      )
+      const screenPosition = SceneTransforms.worldToWindowCoordinates(this.cesiumViewer.scene, cartesian)
 
       if (!screenPosition) {
         return null
@@ -287,15 +282,9 @@ export class PopupPlugin extends BasePlugin {
     let position: { left: string; top: string } | null = null
 
     if (options.positionType === 'screen') {
-      position = this.calculateScreenPosition(
-        (options as ScreenPopupOptions).position,
-        options.offset
-      )
+      position = this.calculateScreenPosition((options as ScreenPopupOptions).position, options.offset)
     } else if (options.positionType === 'world') {
-      position = this.calculateWorldPosition(
-        (options as WorldPopupOptions).position,
-        options.offset
-      )
+      position = this.calculateWorldPosition((options as WorldPopupOptions).position, options.offset)
     }
 
     if (position) {
@@ -314,10 +303,7 @@ export class PopupPlugin extends BasePlugin {
   private updateWorldPopups(): void {
     try {
       for (const popup of this.popups.values()) {
-        if (
-          popup.options.positionType === 'world' &&
-          (popup.options as WorldPopupOptions).autoUpdate !== false
-        ) {
+        if (popup.options.positionType === 'world' && (popup.options as WorldPopupOptions).autoUpdate !== false) {
           this.updatePopupPosition(popup)
         }
       }
@@ -382,7 +368,10 @@ export class PopupPlugin extends BasePlugin {
       container.addEventListener('mousedown', onMouseDown)
 
       // 保存清理函数
-      ;(container as any)._removeDraggable = () => {
+      interface ContainerWithCleanup extends HTMLElement {
+        _removeDraggable?: () => void
+      }
+      ;(container as ContainerWithCleanup)._removeDraggable = () => {
         try {
           container.removeEventListener('mousedown', onMouseDown)
           document.removeEventListener('mousemove', onMouseMove)
@@ -421,7 +410,10 @@ export class PopupPlugin extends BasePlugin {
       }, 100)
 
       // 保存清理函数
-      ;(container as any)._removeClickOutside = () => {
+      interface ContainerWithClickOutside extends HTMLElement {
+        _removeClickOutside?: () => void
+      }
+      ;(container as ContainerWithClickOutside)._removeClickOutside = () => {
         try {
           document.removeEventListener('click', onClickOutside)
         } catch (error) {
@@ -446,11 +438,7 @@ export class PopupPlugin extends BasePlugin {
       const container = this.createPopupContainer(id, options)
 
       // 渲染内容
-      const { vueApp, reactRoot } = await this.renderContent(
-        container,
-        options.content,
-        options.type
-      )
+      const { vueApp, reactRoot } = await this.renderContent(container, options.content, options.type)
 
       // 添加到容器
       this.containerElement!.appendChild(container)
@@ -553,15 +541,13 @@ export class PopupPlugin extends BasePlugin {
     position: [number, number] | Cartesian3 | [number, number, number?],
     options?: Partial<PopupOptions>
   ): Promise<string> {
-    const positionType = Array.isArray(position) && position.length === 2
-      ? 'screen'
-      : 'world'
+    const positionType = Array.isArray(position) && position.length === 2 ? 'screen' : 'world'
 
     return this.create({
       content,
       type: 'html',
-      positionType: positionType as any,
-      position: position as any,
+      positionType,
+      position,
       ...options
     } as PopupOptions)
   }
@@ -574,15 +560,13 @@ export class PopupPlugin extends BasePlugin {
     position: [number, number] | Cartesian3 | [number, number, number?],
     options?: Partial<PopupOptions>
   ): Promise<string> {
-    const positionType = Array.isArray(position) && position.length === 2
-      ? 'screen'
-      : 'world'
+    const positionType = Array.isArray(position) && position.length === 2 ? 'screen' : 'world'
 
     return this.create({
       content: config,
       type: 'vue',
-      positionType: positionType as any,
-      position: position as any,
+      positionType,
+      position,
       ...options
     } as PopupOptions)
   }
@@ -595,15 +579,13 @@ export class PopupPlugin extends BasePlugin {
     position: [number, number] | Cartesian3 | [number, number, number?],
     options?: Partial<PopupOptions>
   ): Promise<string> {
-    const positionType = Array.isArray(position) && position.length === 2
-      ? 'screen'
-      : 'world'
+    const positionType = Array.isArray(position) && position.length === 2 ? 'screen' : 'world'
 
     return this.create({
       content: config,
       type: 'react',
-      positionType: positionType as any,
-      position: position as any,
+      positionType,
+      position,
       ...options
     } as PopupOptions)
   }
@@ -644,18 +626,24 @@ export class PopupPlugin extends BasePlugin {
       }
 
       // 清理拖拽监听器
-      if ((popup.container as any)._removeDraggable) {
+      interface ContainerWithCleanup extends HTMLElement {
+        _removeDraggable?: () => void
+      }
+      if ((popup.container as ContainerWithCleanup)._removeDraggable) {
         try {
-          ;(popup.container as any)._removeDraggable()
+          ;(popup.container as ContainerWithCleanup)._removeDraggable()
         } catch (error) {
           console.error('Failed to remove draggable listeners:', error)
         }
       }
 
       // 清理点击外部监听器
-      if ((popup.container as any)._removeClickOutside) {
+      interface ContainerWithClickOutside extends HTMLElement {
+        _removeClickOutside?: () => void
+      }
+      if ((popup.container as ContainerWithClickOutside)._removeClickOutside) {
         try {
-          ;(popup.container as any)._removeClickOutside()
+          ;(popup.container as ContainerWithClickOutside)._removeClickOutside()
         } catch (error) {
           console.error('Failed to remove click outside listener:', error)
         }
@@ -710,10 +698,7 @@ export class PopupPlugin extends BasePlugin {
   /**
    * 更新弹窗位置
    */
-  updatePosition(
-    id: string,
-    position: [number, number] | Cartesian3 | [number, number, number?]
-  ): void {
+  updatePosition(id: string, position: [number, number] | Cartesian3 | [number, number, number?]): void {
     const popup = this.popups.get(id)
     if (popup) {
       popup.updatePosition(position)
@@ -741,7 +726,7 @@ export class PopupPlugin extends BasePlugin {
   removeAll(): void {
     try {
       const ids = Array.from(this.popups.keys())
-      ids.forEach(id => this.remove(id))
+      ids.forEach((id) => this.remove(id))
     } catch (error) {
       console.error('Failed to remove all popups:', error)
     }
@@ -783,8 +768,6 @@ export class PopupPlugin extends BasePlugin {
           console.error('Failed to remove container element:', error)
         }
       }
-
-      console.log('Popup plugin destroyed')
     } catch (error) {
       console.error('Failed to destroy popup plugin:', error)
     }

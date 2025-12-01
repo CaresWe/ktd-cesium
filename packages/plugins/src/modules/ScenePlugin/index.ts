@@ -10,14 +10,7 @@ import type {
   HeightFogEffectOptions,
   LocalRainEffectOptions
 } from './types'
-import {
-  RainEffect,
-  SnowEffect,
-  FogEffect,
-  LightningEffect,
-  HeightFogEffect,
-  LocalRainEffect
-} from './effects'
+import { RainEffect, SnowEffect, FogEffect, LightningEffect, HeightFogEffect, LocalRainEffect } from './effects'
 
 /**
  * 场景插件选项接口
@@ -71,7 +64,7 @@ export class ScenePlugin extends BasePlugin {
   private effects: Map<string, SceneEffect> = new Map()
 
   protected onInstall(_viewer: KtdViewer, _options?: ScenePluginOptions): void {
-    console.log('Scene plugin installed')
+    // Plugin installed
   }
 
   /**
@@ -251,17 +244,9 @@ export class ScenePlugin extends BasePlugin {
 
   protected onDestroy(): void {
     this.removeAllEffects()
-    console.log('Scene plugin destroyed')
   }
 }
 
 // 导出类型和效果类
 export * from './types'
-export {
-  RainEffect,
-  SnowEffect,
-  FogEffect,
-  LightningEffect,
-  HeightFogEffect,
-  LocalRainEffect
-} from './effects'
+export { RainEffect, SnowEffect, FogEffect, LightningEffect, HeightFogEffect, LocalRainEffect } from './effects'

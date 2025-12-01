@@ -45,10 +45,7 @@ export class EditPolygonEx extends EditPolygon {
       }
 
       // 验证绘制点数量
-      if (
-        this._positions_draw == null ||
-        this._positions_draw.length < this._minPointNum
-      ) {
+      if (this._positions_draw == null || this._positions_draw.length < this._minPointNum) {
         this._positions_show = this._positions_draw
         return
       }
@@ -88,10 +85,7 @@ export class EditPolygonEx extends EditPolygon {
    * @param attribute 属性
    * @returns 显示点位
    */
-  protected getShowPositions(
-    positions: Cesium.Cartesian3[],
-    _attribute: Record<string, unknown>
-  ): Cesium.Cartesian3[] {
+  protected getShowPositions(positions: Cesium.Cartesian3[], _attribute: Record<string, unknown>): Cesium.Cartesian3[] {
     try {
       // 验证输入参数
       if (!positions || !Array.isArray(positions)) {

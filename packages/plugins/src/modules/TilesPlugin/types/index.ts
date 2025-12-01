@@ -1,10 +1,4 @@
-import type {
-  Cesium3DTileset,
-  Cesium3DTileStyle,
-  Cesium3DTileFeature,
-  Color,
-  Matrix4
-} from 'cesium'
+import type { Cesium3DTileset, Cesium3DTileStyle, Cesium3DTileFeature, Color, Matrix4 } from 'cesium'
 
 /**
  * 3D Tiles 图层配置

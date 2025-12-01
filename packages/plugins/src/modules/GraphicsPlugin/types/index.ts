@@ -20,8 +20,16 @@ export interface EnableablePlugin {
  * EventPlugin 接口
  */
 export interface EventPluginInterface {
-  on: (types: string | Record<string, Function>, fn?: Function, context?: unknown) => unknown
-  off: (types?: string | Record<string, Function>, fn?: Function, context?: unknown) => unknown
+  on: (
+    types: string | Record<string, (...args: unknown[]) => unknown>,
+    fn?: (...args: unknown[]) => unknown,
+    context?: unknown
+  ) => unknown
+  off: (
+    types?: string | Record<string, (...args: unknown[]) => unknown>,
+    fn?: (...args: unknown[]) => unknown,
+    context?: unknown
+  ) => unknown
   fire: (type: string, data?: Record<string, unknown>, propagate?: boolean) => unknown
 }
 
@@ -549,7 +557,10 @@ export interface ClusterOptions {
   /** 聚合样式 */
   clusterStyle?: ClusterStyle
   /** 聚合事件回调 */
-  clusterEvent?: (clusteredEntities: Cesium.Entity[], cluster: { billboard: Cesium.Billboard; label: Cesium.Label }) => void
+  clusterEvent?: (
+    clusteredEntities: Cesium.Entity[],
+    cluster: { billboard: Cesium.Billboard; label: Cesium.Label }
+  ) => void
 }
 
 /**
@@ -2080,9 +2091,10 @@ export interface PointPrimitiveAttribute {
 /**
  * 扩展的 PointPrimitive 类型 (用于 DrawPPoint)
  */
-export type ExtendedPointPrimitive = Cesium.PointPrimitive & PrimitiveObject & {
-  attribute?: PointPrimitiveAttribute
-}
+export type ExtendedPointPrimitive = Cesium.PointPrimitive &
+  PrimitiveObject & {
+    attribute?: PointPrimitiveAttribute
+  }
 
 /**
  * Polygon Primitive 样式接口 (用于 DrawPPolygon)
@@ -2143,9 +2155,10 @@ export interface PolylinePrimitiveAttribute {
 /**
  * 扩展的 Polyline 类型 (用于 DrawPPolyline)
  */
-export type ExtendedPolyline = Cesium.Polyline & PrimitiveObject & {
-  attribute?: PolylinePrimitiveAttribute
-}
+export type ExtendedPolyline = Cesium.Polyline &
+  PrimitiveObject & {
+    attribute?: PolylinePrimitiveAttribute
+  }
 
 /**
  * PolylineVolume Primitive 样式接口 (用于 DrawPPolylineVolume)
@@ -2586,12 +2599,12 @@ export interface VideoPlaybackState {
  * 视频融合编辑控制点类型
  */
 export type VideoEditPointType =
-  | 'corner'      // 角点
-  | 'edge'        // 边中点
-  | 'center'      // 中心点
-  | 'rotation'    // 旋转控制点
-  | 'camera'      // 相机位置点 (3D投射)
-  | 'target'      // 投射目标点
+  | 'corner' // 角点
+  | 'edge' // 边中点
+  | 'center' // 中心点
+  | 'rotation' // 旋转控制点
+  | 'camera' // 相机位置点 (3D投射)
+  | 'target' // 投射目标点
 
 /**
  * 视频融合编辑控制点
@@ -2632,13 +2645,16 @@ export interface VideoFusionEventData {
  * Cesium Material 缓存接口
  */
 export interface MaterialCache {
-  addMaterial: (type: string, materialTemplate: {
-    fabric: {
-      type: string
-      uniforms?: Record<string, unknown>
-      source?: string
+  addMaterial: (
+    type: string,
+    materialTemplate: {
+      fabric: {
+        type: string
+        uniforms?: Record<string, unknown>
+        source?: string
+      }
     }
-  }) => void
+  ) => void
 }
 
 /**

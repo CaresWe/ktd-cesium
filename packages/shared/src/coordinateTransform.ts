@@ -22,7 +22,7 @@ export enum CoordinateOffset {
 const X_PI = (Math.PI * 3000.0) / 180.0
 const PI = Math.PI
 const A = 6378245.0 // 长半轴
-const EE = 0.00669342162296594323 // 偏心率平方
+const EE = 0.006693421622965943 // 偏心率平方
 
 /**
  * 判断坐标是否在中国境内
@@ -213,7 +213,7 @@ export function cartesians2lonlats(cartesians: Cesium.Cartesian3[]): number[][] 
     return []
   }
 
-  return cartesians.map(cartesian => {
+  return cartesians.map((cartesian) => {
     const cartographic = Cesium.Cartographic.fromCartesian(cartesian)
     return [
       Cesium.Math.toDegrees(cartographic.longitude),
@@ -248,10 +248,10 @@ export function lonlats2cartesians(lonlats: number[][], defHeight?: number): Ces
     return []
   }
 
-  return lonlats.map(lonlat => {
+  return lonlats.map((lonlat) => {
     const lon = lonlat[0]
     const lat = lonlat[1]
-    const height = lonlat[2] !== undefined ? lonlat[2] : (defHeight || 0)
+    const height = lonlat[2] !== undefined ? lonlat[2] : defHeight || 0
     return Cesium.Cartesian3.fromDegrees(lon, lat, height)
   })
 }
@@ -265,6 +265,6 @@ export function lonlats2cartesians(lonlats: number[][], defHeight?: number): Ces
 export function lonlat2cartesian(lonlat: number[], defHeight?: number): Cesium.Cartesian3 {
   const lon = lonlat[0]
   const lat = lonlat[1]
-  const height = lonlat[2] !== undefined ? lonlat[2] : (defHeight || 0)
+  const height = lonlat[2] !== undefined ? lonlat[2] : defHeight || 0
   return Cesium.Cartesian3.fromDegrees(lon, lat, height)
 }

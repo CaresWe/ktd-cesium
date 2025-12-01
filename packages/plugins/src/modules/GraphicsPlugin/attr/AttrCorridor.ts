@@ -6,7 +6,10 @@ import type { GeoJSONFeature } from '../types'
 /**
  * 样式赋值到 Entity
  */
-export function style2Entity(style: Record<string, unknown>, entityattr?: Cesium.CorridorGraphics.ConstructorOptions): Cesium.CorridorGraphics.ConstructorOptions {
+export function style2Entity(
+  style: Record<string, unknown>,
+  entityattr?: Cesium.CorridorGraphics.ConstructorOptions
+): Cesium.CorridorGraphics.ConstructorOptions {
   style = style || {}
 
   if (entityattr == null) {
@@ -17,8 +20,8 @@ export function style2Entity(style: Record<string, unknown>, entityattr?: Cesium
 
   // 贴地时，剔除高度相关属性
   if (style.clampToGround) {
-    if (style.hasOwnProperty('height')) delete style.height
-    if (style.hasOwnProperty('extrudedHeight')) delete style.extrudedHeight
+    if (Object.prototype.hasOwnProperty.call(style, 'height')) delete style.height
+    if (Object.prototype.hasOwnProperty.call(style, 'extrudedHeight')) delete style.extrudedHeight
   }
 
   // Style 赋值到 Entity

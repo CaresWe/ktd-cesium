@@ -16,12 +16,7 @@ export function hexToColor(hex: string, alpha: number = 1): Color {
  * @param b 蓝色 (0-255)
  * @param a 透明度 (0-1)
  */
-export function rgbToColor(
-  r: number,
-  g: number,
-  b: number,
-  a: number = 1
-): Color {
+export function rgbToColor(r: number, g: number, b: number, a: number = 1): Color {
   return Color.fromBytes(r, g, b, a * 255)
 }
 
@@ -31,11 +26,7 @@ export function rgbToColor(
  * @param endColor 结束颜色
  * @param t 插值因子 (0-1)
  */
-export function lerpColor(
-  startColor: Color,
-  endColor: Color,
-  t: number
-): Color {
+export function lerpColor(startColor: Color, endColor: Color, t: number): Color {
   const result = new Color()
   return Color.lerp(startColor, endColor, t, result)
 }

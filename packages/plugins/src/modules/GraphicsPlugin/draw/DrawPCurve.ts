@@ -34,7 +34,9 @@ export class DrawPCurve extends DrawPPolyline {
       this._positions_show = positions
     } else {
       // 将折线转换为曲线
-      const polylineAttr = (this.currentPolyline as unknown as Record<string, unknown>)?.attribute as CurvePrimitiveAttribute | undefined
+      const polylineAttr = (this.currentPolyline as unknown as Record<string, unknown>)?.attribute as
+        | CurvePrimitiveAttribute
+        | undefined
       const closure = polylineAttr?.style?.closure || false
       this._positions_show = line2curve(positions, closure)
     }

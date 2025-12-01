@@ -78,9 +78,9 @@ export interface PickInfo {
   /** 屏幕坐标 */
   position: Cartesian2
   /** 拾取到的对象 */
-  pickedObject?: any
+  pickedObject?: unknown
   /** 拾取到的特征 */
-  pickedFeature?: any
+  pickedFeature?: unknown
   /** 世界坐标 */
   cartesian?: Cartesian3
   /** 经纬度高度 */
@@ -128,13 +128,13 @@ export type KeyboardEventCallback = (info: KeyboardEventInfo) => void
 /**
  * 场景事件回调
  */
-export type SceneEventCallback = (scene: any, time?: any) => void
+export type SceneEventCallback = (scene: unknown, time?: unknown) => void
 
 /**
  * 图层事件信息
  */
 export interface LayerEventInfo {
-  layer: any
+  layer: unknown
   index?: number
 }
 
@@ -149,8 +149,8 @@ export type LayerEventCallback = (info: LayerEventInfo) => void
 export interface EventListener {
   id: string
   type: string
-  callback: Function
-  handler?: ScreenSpaceEventHandler | Function
+  callback: (...args: unknown[]) => void
+  handler?: ScreenSpaceEventHandler | ((...args: unknown[]) => void)
 }
 
 /**

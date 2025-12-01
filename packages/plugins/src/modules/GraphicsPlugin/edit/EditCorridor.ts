@@ -40,9 +40,7 @@ export class EditCorridor extends EditPolyline {
       const graphic = this.getGraphic()
 
       if (graphic.height !== undefined && graphic.height) {
-        const newHeight = (graphic.height as Cesium.Property).getValue(
-          this.viewer.clock.currentTime
-        ) as number
+        const newHeight = (graphic.height as Cesium.Property).getValue(this.viewer.clock.currentTime) as number
 
         if (Number.isFinite(newHeight)) {
           // 使用 shared 中的 setPositionsHeight 函数

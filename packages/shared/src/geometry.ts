@@ -49,12 +49,7 @@ export function getHeadingPitchRollByMatrix(
   fixedFrameTransform?: Cesium.Transforms.LocalFrameToFixedFrame,
   result?: Cesium.HeadingPitchRoll
 ): Cesium.HeadingPitchRoll {
-  return Cesium.Transforms.fixedFrameToHeadingPitchRoll(
-    matrix,
-    ellipsoid,
-    fixedFrameTransform,
-    result
-  )
+  return Cesium.Transforms.fixedFrameToHeadingPitchRoll(matrix, ellipsoid, fixedFrameTransform, result)
 }
 
 /**
@@ -162,32 +157,17 @@ export function getPositionTranslation(
   const quaternion = Cesium.Quaternion.fromAxisAngle(normal, rotate)
   const rotateMatrix3 = Cesium.Matrix3.fromQuaternion(quaternion)
 
-  const pointCartesian3 = new Cesium.Cartesian3(
-    offset.x ?? 0,
-    offset.y ?? 0,
-    offset.z ?? 0
-  )
+  const pointCartesian3 = new Cesium.Cartesian3(offset.x ?? 0, offset.y ?? 0, offset.z ?? 0)
 
-  let rotateTranslationMatrix4 = Cesium.Matrix4.fromRotationTranslation(
-    rotateMatrix3,
-    Cesium.Cartesian3.ZERO
-  )
-  Cesium.Matrix4.multiplyByTranslation(
-    rotateTranslationMatrix4,
-    pointCartesian3,
-    rotateTranslationMatrix4
-  )
+  const rotateTranslationMatrix4 = Cesium.Matrix4.fromRotationTranslation(rotateMatrix3, Cesium.Cartesian3.ZERO)
+  Cesium.Matrix4.multiplyByTranslation(rotateTranslationMatrix4, pointCartesian3, rotateTranslationMatrix4)
 
   const originPositionCartesian3 = Cesium.Ellipsoid.WGS84.cartographicToCartesian(
     Cesium.Cartographic.fromCartesian(position)
   )
   const originPositionTransform = fixedFrameTransform(originPositionCartesian3)
 
-  Cesium.Matrix4.multiplyTransformation(
-    originPositionTransform,
-    rotateTranslationMatrix4,
-    rotateTranslationMatrix4
-  )
+  Cesium.Matrix4.multiplyTransformation(originPositionTransform, rotateTranslationMatrix4, rotateTranslationMatrix4)
 
   const pointCartesian = new Cesium.Cartesian3()
   Cesium.Matrix4.getTranslation(rotateTranslationMatrix4, pointCartesian)

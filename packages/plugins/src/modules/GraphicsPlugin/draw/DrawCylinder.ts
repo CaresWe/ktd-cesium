@@ -33,9 +33,10 @@ export class DrawCylinder extends DrawPolyline {
 
     if (positions && positions.length > 1 && extEntity?.cylinder) {
       const lengthProp = extEntity.cylinder.length
-      const length = lengthProp && typeof lengthProp.getValue === 'function'
-        ? lengthProp.getValue(time || Cesium.JulianDate.now())
-        : lengthProp
+      const length =
+        lengthProp && typeof lengthProp.getValue === 'function'
+          ? lengthProp.getValue(time || Cesium.JulianDate.now())
+          : lengthProp
 
       if (length) {
         const offset = Number(length) / 2
@@ -52,11 +53,10 @@ export class DrawCylinder extends DrawPolyline {
     this._positions_draw = []
 
     const cylinderAttr = attribute as CylinderDrawAttribute
-    const that = this
 
     const addattr: Cesium.Entity.ConstructorOptions & { attribute: CylinderDrawAttribute } = {
       position: new Cesium.CallbackProperty((time?: Cesium.JulianDate) => {
-        return that.getShowPosition(time)
+        return this.getShowPosition(time)
       }, false) as unknown as Cesium.PositionProperty,
       cylinder: attr.style2Entity(cylinderAttr.style),
       attribute: cylinderAttr
@@ -69,7 +69,10 @@ export class DrawCylinder extends DrawPolyline {
   /**
    * 样式转 Entity
    */
-  protected override style2Entity(style: Record<string, unknown>, entity: Cesium.Entity): Cesium.CylinderGraphics.ConstructorOptions {
+  protected override style2Entity(
+    style: Record<string, unknown>,
+    entity: Cesium.Entity
+  ): Cesium.CylinderGraphics.ConstructorOptions {
     const extEntity = entity as CylinderExtendedEntity
     return attr.style2Entity(style, extEntity.cylinder)
   }
@@ -97,19 +100,17 @@ export class DrawCylinder extends DrawPolyline {
     const style = extEntity.attribute.style
 
     // 半径处理
-    const radius = this.formatNum(
-      Cesium.Cartesian3.distance(positions[0], positions[1]),
-      2
-    )
+    const radius = this.formatNum(Cesium.Cartesian3.distance(positions[0], positions[1]), 2)
 
     if (extEntity.cylinder) {
       extEntity.cylinder.bottomRadius = new Cesium.ConstantProperty(radius)
 
       // 获取 topRadius
       const topRadiusProp = extEntity.cylinder.topRadius
-      const topRadius = topRadiusProp && typeof topRadiusProp.getValue === 'function'
-        ? topRadiusProp.getValue(this.viewer!.clock.currentTime)
-        : topRadiusProp
+      const topRadius =
+        topRadiusProp && typeof topRadiusProp.getValue === 'function'
+          ? topRadiusProp.getValue(this.viewer!.clock.currentTime)
+          : topRadiusProp
 
       style.topRadius = Number(topRadius ?? 0)
       style.bottomRadius = radius
@@ -129,7 +130,7 @@ export class DrawCylinder extends DrawPolyline {
     const outerPositions = getEllipseOuterPositions({
       position: position,
       semiMajorAxis: Number(style.bottomRadius ?? 100), // 长半轴
-      semiMinorAxis: Number(style.bottomRadius ?? 100)  // 短半轴
+      semiMinorAxis: Number(style.bottomRadius ?? 100) // 短半轴
     })
 
     // 长半轴上的坐标点
@@ -152,9 +153,10 @@ export class DrawCylinder extends DrawPolyline {
     entity.position = new Cesium.CallbackProperty((time?: Cesium.JulianDate) => {
       if (entity._positions_draw && entity._positions_draw.length > 0 && entity.cylinder) {
         const lengthProp = entity.cylinder.length
-        const length = lengthProp && typeof lengthProp.getValue === 'function'
-          ? lengthProp.getValue(time || Cesium.JulianDate.now())
-          : lengthProp
+        const length =
+          lengthProp && typeof lengthProp.getValue === 'function'
+            ? lengthProp.getValue(time || Cesium.JulianDate.now())
+            : lengthProp
 
         if (length) {
           const offset = Number(length) / 2

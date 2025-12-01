@@ -3,7 +3,7 @@
  * 支持 Vue 3 组件渲染
  */
 
-import type { TooltipRenderer, TooltipVNode, TooltipReactNode, TooltipContent } from '../types'
+import type { TooltipRenderer, TooltipVNode, TooltipContent } from '../types'
 
 /**
  * Vue App 实例接口

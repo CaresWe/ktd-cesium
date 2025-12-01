@@ -100,7 +100,7 @@ export class DrawBase {
   /**
    * 监听事件
    */
-  on(type: string, fn: Function, context?: unknown): this {
+  on(type: string, fn: (...args: unknown[]) => unknown, context?: unknown): this {
     if (this.eventPlugin) {
       this.eventPlugin.on(type, fn, context)
     }
@@ -110,7 +110,7 @@ export class DrawBase {
   /**
    * 移除事件监听
    */
-  off(type?: string, fn?: Function, context?: unknown): this {
+  off(type?: string, fn?: (...args: unknown[]) => unknown, context?: unknown): this {
     if (this.eventPlugin) {
       this.eventPlugin.off(type, fn, context)
     }
@@ -160,7 +160,7 @@ export class DrawBase {
 
     this.createFeature(attribute)
     if (this.entity) {
-      (this.entity as ExtendedEntity).inProgress = true
+      ;(this.entity as ExtendedEntity).inProgress = true
     }
 
     this.setCursor(true)
@@ -195,7 +195,7 @@ export class DrawBase {
         this.primitives.remove(this.entity as unknown as Cesium.Primitive)
       }
     } else if (this.entity) {
-      (this.entity as ExtendedEntity).inProgress = false
+      ;(this.entity as ExtendedEntity).inProgress = false
       this.finish()
 
       if (this.drawOkCallback) {

@@ -112,13 +112,13 @@ describe('isoscelesTriangle', () => {
 
     describe('Boundary conditions', () => {
       it('should return empty array for null positions', () => {
-        const result = computeIsoscelesTrianglePositions(null as any)
+        const result = computeIsoscelesTrianglePositions(null as unknown as Cartesian3[])
 
         expect(result).toEqual([])
       })
 
       it('should return empty array for undefined positions', () => {
-        const result = computeIsoscelesTrianglePositions(undefined as any)
+        const result = computeIsoscelesTrianglePositions(undefined as unknown as Cartesian3[])
 
         expect(result).toEqual([])
       })
@@ -524,13 +524,13 @@ describe('isoscelesTriangle', () => {
 
     describe('Boundary conditions', () => {
       it('should return null for null positions', () => {
-        const params = getIsoscelesTriangleParams(null as any)
+        const params = getIsoscelesTriangleParams(null as unknown as Cartesian3[])
 
         expect(params).toBeNull()
       })
 
       it('should return null for undefined positions', () => {
-        const params = getIsoscelesTriangleParams(undefined as any)
+        const params = getIsoscelesTriangleParams(undefined as unknown as Cartesian3[])
 
         expect(params).toBeNull()
       })

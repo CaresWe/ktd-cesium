@@ -13,10 +13,7 @@ import { getRotateCenterPoint } from './geometry'
  * @param sides 边数(默认6,即正六边形)
  * @returns 正多边形的顶点数组
  */
-export function computeRegularPositions(
-  positions: Cesium.Cartesian3[],
-  sides: number = 6
-): Cesium.Cartesian3[] {
+export function computeRegularPositions(positions: Cesium.Cartesian3[], sides: number = 6): Cesium.Cartesian3[] {
   if (!positions || positions.length < 2) {
     return positions || []
   }

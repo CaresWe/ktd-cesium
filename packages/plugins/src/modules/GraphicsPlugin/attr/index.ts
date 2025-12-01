@@ -41,7 +41,7 @@ export {
   AttrCylinder,
   AttrRectangle,
   AttrEllipsoid,
-  AttrParticle,
+  AttrParticle
 }
 
 // 别名
@@ -126,7 +126,10 @@ function getAttrClass(entity: Cesium.Entity): AttrModule {
       geometry: { type: 'Point', coordinates: [] },
       properties: {}
     }),
-    style2Entity: (_style: Record<string, unknown>, _entityattr?: Record<string, unknown>): Record<string, unknown> => ({}),
+    style2Entity: (
+      _style: Record<string, unknown>,
+      _entityattr?: Record<string, unknown>
+    ): Record<string, unknown> => ({})
   }
 }
 
@@ -162,7 +165,9 @@ export function getCenterPosition(entity: Cesium.Entity): Cesium.Cartesian3 | nu
   // 多边形取中心点，其他取中间点
   if (entity.polygon) {
     // 简单实现：取所有点的平均值
-    let x = 0, y = 0, z = 0
+    let x = 0,
+      y = 0,
+      z = 0
     for (const pos of positions) {
       x += pos.x
       y += pos.y

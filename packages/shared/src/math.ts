@@ -26,13 +26,7 @@ export function lerp(start: number, end: number, t: number): number {
  * @param outMin 输出最小值
  * @param outMax 输出最大值
  */
-export function mapRange(
-  value: number,
-  inMin: number,
-  inMax: number,
-  outMin: number,
-  outMax: number
-): number {
+export function mapRange(value: number, inMin: number, inMax: number, outMin: number, outMax: number): number {
   return ((value - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin
 }
 

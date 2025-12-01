@@ -104,8 +104,7 @@ export class LocalRainEffect implements ILocalRainEffect {
       const [xi, yi] = vertices[i]
       const [xj, yj] = vertices[j]
 
-      const intersect =
-        yi > lat !== yj > lat && lon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi
+      const intersect = yi > lat !== yj > lat && lon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi
 
       if (intersect) inside = !inside
     }
@@ -118,9 +117,7 @@ export class LocalRainEffect implements ILocalRainEffect {
    */
   private init(): void {
     // 创建 BillboardCollection
-    this.billboardCollection = this.viewer.scene.primitives.add(
-      new Cesium.BillboardCollection()
-    ) as BillboardCollection
+    this.billboardCollection = this.viewer.scene.primitives.add(new Cesium.BillboardCollection()) as BillboardCollection
 
     // 添加雨滴
     this.addRainDrops()
@@ -258,12 +255,7 @@ export class LocalRainEffect implements ILocalRainEffect {
   /**
    * 设置雨滴矩形区域
    */
-  setRainArea(
-    minLongitude: number,
-    minLatitude: number,
-    maxLongitude: number,
-    maxLatitude: number
-  ): void {
+  setRainArea(minLongitude: number, minLatitude: number, maxLongitude: number, maxLatitude: number): void {
     this.options.minLongitude = minLongitude
     this.options.minLatitude = minLatitude
     this.options.maxLongitude = maxLongitude

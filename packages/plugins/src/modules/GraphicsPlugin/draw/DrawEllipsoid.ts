@@ -1,6 +1,12 @@
 import * as Cesium from 'cesium'
 import { DrawPolyline } from './DrawPolyline'
-import type { AttrClass, EditClassConstructor, EllipsoidStyleConfig, EllipsoidDrawAttribute, EllipsoidExtendedEntity } from '../types'
+import type {
+  AttrClass,
+  EditClassConstructor,
+  EllipsoidStyleConfig,
+  EllipsoidDrawAttribute,
+  EllipsoidExtendedEntity
+} from '../types'
 import * as attr from '../attr/AttrEllipsoid'
 import { EditEllipsoid } from '../edit/EditEllipsoid'
 import { getEllipseOuterPositions } from '../attr/AttrCircle'

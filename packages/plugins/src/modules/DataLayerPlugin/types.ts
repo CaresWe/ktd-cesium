@@ -1,11 +1,4 @@
-import type {
-  Entity,
-  EntityCollection,
-  CustomDataSource,
-  PrimitiveCollection,
-  Cartesian3,
-  Color
-} from 'cesium'
+import type { Entity, EntityCollection, CustomDataSource, PrimitiveCollection, Cartesian3, Color } from 'cesium'
 
 /**
  * 数据图层类型
@@ -21,17 +14,17 @@ export type DataLayerMode = 'normal' | 'cluster'
  * 几何类型
  */
 export type GeometryType =
-  | 'point'      // 点
-  | 'polyline'   // 线
-  | 'polygon'    // 面
-  | 'model'      // 模型
-  | 'circle'     // 圆
-  | 'ellipse'    // 椭圆
-  | 'rectangle'  // 矩形
-  | 'corridor'   // 走廊
-  | 'wall'       // 墙
-  | 'cylinder'   // 圆柱
-  | 'box'        // 盒子
+  | 'point' // 点
+  | 'polyline' // 线
+  | 'polygon' // 面
+  | 'model' // 模型
+  | 'circle' // 圆
+  | 'ellipse' // 椭圆
+  | 'rectangle' // 矩形
+  | 'corridor' // 走廊
+  | 'wall' // 墙
+  | 'cylinder' // 圆柱
+  | 'box' // 盒子
 
 /**
  * 数据点位置类型
@@ -56,7 +49,7 @@ export interface DataItem {
   /** 多点位置（线、面、走廊、墙等） */
   positions?: PositionsType
   /** 自定义数据（可以是任意类型） */
-  data?: any
+  data?: unknown
   /** 样式配置 */
   style?: DataItemStyle
   /** 是否显示 */
@@ -284,7 +277,10 @@ export interface ClusterConfig {
   /** 是否显示标签 */
   showLabels?: boolean
   /** 自定义聚合样式 */
-  clusterStyle?: (clusteredEntities: Entity[], cluster: any) => {
+  clusterStyle?: (
+    clusteredEntities: Entity[],
+    cluster: { billboard: unknown; label: unknown; point: unknown }
+  ) => {
     image?: string
     label?: string
     scale?: number
@@ -300,7 +296,7 @@ export interface PopupFieldConfig {
   /** 显示标签 */
   label?: string
   /** 格式化函数 */
-  formatter?: (value: any, item: DataItem) => string
+  formatter?: (value: unknown, item: DataItem) => string
   /** 是否显示 */
   show?: boolean
 }
@@ -310,9 +306,9 @@ export interface PopupFieldConfig {
  */
 export interface VuePopupConfig {
   /** Vue 组件 */
-  component: any
+  component: unknown
   /** 组件属性 */
-  props?: Record<string, any>
+  props?: Record<string, unknown>
 }
 
 /**
@@ -320,9 +316,9 @@ export interface VuePopupConfig {
  */
 export interface ReactPopupConfig {
   /** React 组件 */
-  component: any
+  component: unknown
   /** 组件属性 */
-  props?: Record<string, any>
+  props?: Record<string, unknown>
 }
 
 /**
@@ -368,7 +364,7 @@ export interface DataLayerConfig {
   /** 默认样式 */
   defaultStyle?: DataItemStyle
   /** 点击回调 */
-  onClick?: (item: DataItem, event: any) => void
+  onClick?: (item: DataItem, event: unknown) => void
   /** 是否显示弹窗（简单模式） */
   showPopup?: boolean
   /** 弹窗配置（详细配置） */
@@ -425,7 +421,7 @@ export interface DataLayerInstance {
 export interface EntityItemOptions {
   id: string | number
   position: Cartesian3
-  data: Record<string, any>
+  data: Record<string, unknown>
   style?: DataItemStyle
   show?: boolean
 }
@@ -436,7 +432,7 @@ export interface EntityItemOptions {
 export interface PrimitiveItemOptions {
   id: string | number
   position: Cartesian3
-  data: any
+  data: unknown
   style?: DataItemStyle
   show?: boolean
 }
@@ -467,12 +463,12 @@ export interface DataMappingConfig {
   }
   /** 样式字段映射 */
   styleMapping?: {
-    [key: string]: string | ((item: any) => any)
+    [key: string]: string | ((item: unknown) => unknown)
   }
   /** 是否显示字段 */
   showField?: string
   /** 数据过滤函数 */
-  filter?: (item: any) => boolean
+  filter?: (item: unknown) => boolean
   /** 数据转换函数 */
-  transform?: (item: any) => any
+  transform?: (item: unknown) => unknown
 }

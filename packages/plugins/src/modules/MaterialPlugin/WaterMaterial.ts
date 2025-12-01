@@ -13,7 +13,8 @@ export type WaveType = 'calm' | 'ripple' | 'wave' | 'turbulent'
 /**
  * 默认法线贴图（1x1 透明图）
  */
-const DEFAULT_NORMAL_MAP = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFeAJ5gJqGJAAAAABJRU5ErkJggg=='
+const DEFAULT_NORMAL_MAP =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFeAJ5gJqGJAAAAABJRU5ErkJggg=='
 
 /**
  * 默认颜色

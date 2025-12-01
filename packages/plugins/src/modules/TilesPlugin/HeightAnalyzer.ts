@@ -24,8 +24,6 @@ export class HeightAnalyzer {
 
       // 应用限高样式
       this.updateStyle()
-
-      console.log('Height limit analysis enabled at:', config.limitHeight)
     } catch (error) {
       console.error('Failed to enable height limit analysis:', error)
       throw error
@@ -43,8 +41,6 @@ export class HeightAnalyzer {
 
       this.config.limitHeight = height
       this.updateStyle()
-
-      console.log('Height limit updated:', height)
     } catch (error) {
       console.error('Failed to update height limit:', error)
       throw error
@@ -58,10 +54,8 @@ export class HeightAnalyzer {
     try {
       if (!this.config) return
 
-      const exceedColor =
-        this.config.exceedColor ?? CesiumColor.fromCssColorString('rgba(255, 0, 0, 0.8)')
-      const normalColor =
-        this.config.normalColor ?? CesiumColor.fromCssColorString('rgba(255, 255, 255, 1.0)')
+      const exceedColor = this.config.exceedColor ?? CesiumColor.fromCssColorString('rgba(255, 0, 0, 0.8)')
+      const normalColor = this.config.normalColor ?? CesiumColor.fromCssColorString('rgba(255, 255, 255, 1.0)')
 
       const heightProperty = this.config.heightProperty ?? 'Height'
 
@@ -85,9 +79,7 @@ export class HeightAnalyzer {
 
       const style = new Cesium3DTileStyle({
         color: { conditions },
-        show: this.config.showOnlyExceeded
-          ? `\${${heightProperty}} > ${this.config.limitHeight}`
-          : true
+        show: this.config.showOnlyExceeded ? `\${${heightProperty}} > ${this.config.limitHeight}` : true
       })
 
       this.tileset.style = style
@@ -106,7 +98,6 @@ export class HeightAnalyzer {
       this.tileset.style = this.originalStyle
 
       this.config = null
-      console.log('Height limit analysis disabled')
     } catch (error) {
       console.error('Failed to disable height limit analysis:', error)
       throw error

@@ -164,15 +164,16 @@ export class DrawPrimitiveBase extends DrawBase {
   removePrimitive(): void {
     if (this.primitive && this.primitives) {
       // 根据类型判断如何删除
-      if (this.primitive instanceof Cesium.PointPrimitiveCollection ||
-          this.primitive instanceof Cesium.BillboardCollection ||
-          this.primitive instanceof Cesium.LabelCollection ||
-          this.primitive instanceof Cesium.PolylineCollection) {
+      if (
+        this.primitive instanceof Cesium.PointPrimitiveCollection ||
+        this.primitive instanceof Cesium.BillboardCollection ||
+        this.primitive instanceof Cesium.LabelCollection ||
+        this.primitive instanceof Cesium.PolylineCollection
+      ) {
         // Collection 类型，需要从 primitives 中移除整个 Collection
         // 但这会删除所有项，所以我们只移除单个项
         // 注意：这需要在子类中具体处理
-      } else if (this.primitive instanceof Cesium.Primitive ||
-                 this.primitive instanceof Cesium.GroundPrimitive) {
+      } else if (this.primitive instanceof Cesium.Primitive || this.primitive instanceof Cesium.GroundPrimitive) {
         // 单个 Primitive，直接从 primitives 中移除
         this.primitives.remove(this.primitive as Cesium.Primitive)
       }

@@ -78,13 +78,7 @@ export function bezierInterpolation(points: number[][], resolution: number = 20)
  * @param t 插值参数 [0, 1]
  * @returns 插值点
  */
-export function catmullRomSpline(
-  p0: number[],
-  p1: number[],
-  p2: number[],
-  p3: number[],
-  t: number
-): number[] {
+export function catmullRomSpline(p0: number[], p1: number[], p2: number[], p3: number[], t: number): number[] {
   const t2 = t * t
   const t3 = t2 * t
 
@@ -97,12 +91,8 @@ export function catmullRomSpline(
     const v2 = p2[i] || 0
     const v3 = p3[i] || 0
 
-    const value = 0.5 * (
-      2 * v1 +
-      (-v0 + v2) * t +
-      (2 * v0 - 5 * v1 + 4 * v2 - v3) * t2 +
-      (-v0 + 3 * v1 - 3 * v2 + v3) * t3
-    )
+    const value =
+      0.5 * (2 * v1 + (-v0 + v2) * t + (2 * v0 - 5 * v1 + 4 * v2 - v3) * t2 + (-v0 + 3 * v1 - 3 * v2 + v3) * t3)
 
     result.push(value)
   }
@@ -151,9 +141,7 @@ export function quadraticBezier(p0: number[], p1: number[], p2: number[], t: num
   const result: number[] = []
 
   for (let i = 0; i < Math.min(p0.length, 3); i++) {
-    const value = u * u * (p0[i] || 0) +
-                  2 * u * t * (p1[i] || 0) +
-                  t * t * (p2[i] || 0)
+    const value = u * u * (p0[i] || 0) + 2 * u * t * (p1[i] || 0) + t * t * (p2[i] || 0)
     result.push(value)
   }
 
@@ -169,21 +157,13 @@ export function quadraticBezier(p0: number[], p1: number[], p2: number[], t: num
  * @param t 参数 [0, 1]
  * @returns 曲线上的点
  */
-export function cubicBezier(
-  p0: number[],
-  p1: number[],
-  p2: number[],
-  p3: number[],
-  t: number
-): number[] {
+export function cubicBezier(p0: number[], p1: number[], p2: number[], p3: number[], t: number): number[] {
   const u = 1 - t
   const result: number[] = []
 
   for (let i = 0; i < Math.min(p0.length, 3); i++) {
-    const value = u * u * u * (p0[i] || 0) +
-                  3 * u * u * t * (p1[i] || 0) +
-                  3 * u * t * t * (p2[i] || 0) +
-                  t * t * t * (p3[i] || 0)
+    const value =
+      u * u * u * (p0[i] || 0) + 3 * u * u * t * (p1[i] || 0) + 3 * u * t * t * (p2[i] || 0) + t * t * t * (p3[i] || 0)
     result.push(value)
   }
 

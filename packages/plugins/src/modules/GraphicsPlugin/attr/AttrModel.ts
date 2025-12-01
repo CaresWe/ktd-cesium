@@ -95,9 +95,9 @@ export function style2Entity(style?: ModelStyleConfig, entityattr?: ModelEntityA
 
   // 轮廓
   if (finalStyle.silhouette) {
-    entityattr.silhouetteColor = Cesium.Color.fromCssColorString(
-      finalStyle.silhouetteColor || '#FFFFFF'
-    ).withAlpha(Number(finalStyle.silhouetteAlpha || 1.0))
+    entityattr.silhouetteColor = Cesium.Color.fromCssColorString(finalStyle.silhouetteColor || '#FFFFFF').withAlpha(
+      Number(finalStyle.silhouetteAlpha || 1.0)
+    )
     entityattr.silhouetteSize = Number(finalStyle.silhouetteSize || 1.0)
   } else {
     entityattr.silhouetteSize = 0.0

@@ -56,20 +56,14 @@ export class RoamingManager {
       frustumOptions
     } = options
 
-    this.waypoints = waypoints.map(([lon, lat, height]) =>
-      Cesium.Cartesian3.fromDegrees(lon, lat, height)
-    )
+    this.waypoints = waypoints.map(([lon, lat, height]) => Cesium.Cartesian3.fromDegrees(lon, lat, height))
     this.duration = duration
     this.speedMultiplier = speedMultiplier
     this.isLooping = loop
     this.clampToTileset = clampToTileset
 
     // 创建路径属性
-    const positionProperty = this.createPositionProperty(
-      this.waypoints,
-      duration,
-      loop
-    )
+    const positionProperty = this.createPositionProperty(this.waypoints, duration, loop)
 
     // 创建漫游实体
     this.entity = this.viewer.entities.add({
@@ -92,18 +86,12 @@ export class RoamingManager {
     })
 
     // 设置插值选项
-    if (
-      this.entity.position instanceof Cesium.SampledPositionProperty &&
-      interpolation === 'hermite'
-    ) {
+    if (this.entity.position instanceof Cesium.SampledPositionProperty && interpolation === 'hermite') {
       this.entity.position.setInterpolationOptions({
         interpolationDegree: interpolationDegree,
         interpolationAlgorithm: Cesium.HermitePolynomialApproximation
       })
-    } else if (
-      this.entity.position instanceof Cesium.SampledPositionProperty &&
-      interpolation === 'lagrange'
-    ) {
+    } else if (this.entity.position instanceof Cesium.SampledPositionProperty && interpolation === 'lagrange') {
       this.entity.position.setInterpolationOptions({
         interpolationDegree: Math.min(interpolationDegree, 5),
         interpolationAlgorithm: Cesium.LagrangePolynomialApproximation
@@ -167,20 +155,14 @@ export class RoamingManager {
       frustumOptions
     } = options
 
-    this.waypoints = waypoints.map(([lon, lat, height]) =>
-      Cesium.Cartesian3.fromDegrees(lon, lat, height)
-    )
+    this.waypoints = waypoints.map(([lon, lat, height]) => Cesium.Cartesian3.fromDegrees(lon, lat, height))
     this.duration = duration
     this.speedMultiplier = speedMultiplier
     this.isLooping = loop
     this.clampToTileset = clampToTileset
 
     // 创建路径属性
-    const positionProperty = this.createPositionProperty(
-      this.waypoints,
-      duration,
-      loop
-    )
+    const positionProperty = this.createPositionProperty(this.waypoints, duration, loop)
 
     // 创建模型实体
     this.entity = this.viewer.entities.add({
@@ -231,10 +213,7 @@ export class RoamingManager {
         interpolationDegree: 5,
         interpolationAlgorithm: Cesium.LagrangePolynomialApproximation
       })
-    } else if (
-      this.entity.position instanceof Cesium.SampledPositionProperty &&
-      interpolation === 'hermite'
-    ) {
+    } else if (this.entity.position instanceof Cesium.SampledPositionProperty && interpolation === 'hermite') {
       this.entity.position.setInterpolationOptions({
         interpolationDegree: 100,
         interpolationAlgorithm: Cesium.HermitePolynomialApproximation
@@ -289,8 +268,7 @@ export class RoamingManager {
             return 0
           }, false),
           material: cylinderOptions?.material || Cesium.Color.RED.withAlpha(0.3),
-          heightReference:
-            cylinderOptions?.heightReference || Cesium.HeightReference.CLAMP_TO_GROUND,
+          heightReference: cylinderOptions?.heightReference || Cesium.HeightReference.CLAMP_TO_GROUND,
           show: true
         }
       })
@@ -333,9 +311,7 @@ export class RoamingManager {
     this.viewer.clock.startTime = startTime.clone()
     this.viewer.clock.stopTime = stopTime.clone()
     this.viewer.clock.currentTime = startTime.clone()
-    this.viewer.clock.clockRange = loop
-      ? Cesium.ClockRange.LOOP_STOP
-      : Cesium.ClockRange.CLAMPED
+    this.viewer.clock.clockRange = loop ? Cesium.ClockRange.LOOP_STOP : Cesium.ClockRange.CLAMPED
     this.viewer.clock.shouldAnimate = true
 
     // 获取初始航向角
@@ -343,12 +319,8 @@ export class RoamingManager {
 
     // 更新航向角
     this.circleListener = this.viewer.clock.onTick.addEventListener(() => {
-      const delTime = Cesium.JulianDate.secondsDifference(
-        this.viewer.clock.currentTime,
-        startTime
-      )
-      const heading =
-        Cesium.Math.toRadians(delTime * angle * (clockwise ? 1 : -1)) + initialHeading
+      const delTime = Cesium.JulianDate.secondsDifference(this.viewer.clock.currentTime, startTime)
+      const heading = Cesium.Math.toRadians(delTime * angle * (clockwise ? 1 : -1)) + initialHeading
 
       this.viewer.scene.camera.setView({
         destination: position,
@@ -431,19 +403,12 @@ export class RoamingManager {
         this.viewer.trackedEntity = this.entity
         break
       case 2: // 俯视模式
-        this.viewer.zoomTo(
-          this.viewer.entities,
-          new Cesium.HeadingPitchRange(0, Cesium.Math.toRadians(-90))
-        )
+        this.viewer.zoomTo(this.viewer.entities, new Cesium.HeadingPitchRange(0, Cesium.Math.toRadians(-90)))
         break
       case 3: // 侧视模式
         this.viewer.zoomTo(
           this.viewer.entities,
-          new Cesium.HeadingPitchRange(
-            Cesium.Math.toRadians(-90),
-            Cesium.Math.toRadians(-15),
-            8000
-          )
+          new Cesium.HeadingPitchRange(Cesium.Math.toRadians(-90), Cesium.Math.toRadians(-15), 8000)
         )
         break
       case 4: // 自定义模式
@@ -493,19 +458,13 @@ export class RoamingManager {
     this.viewer.clock.startTime = start.clone()
     this.viewer.clock.stopTime = stop.clone()
     this.viewer.clock.currentTime = start.clone()
-    this.viewer.clock.clockRange = loop
-      ? Cesium.ClockRange.LOOP_STOP
-      : Cesium.ClockRange.CLAMPED
+    this.viewer.clock.clockRange = loop ? Cesium.ClockRange.LOOP_STOP : Cesium.ClockRange.CLAMPED
     this.viewer.clock.clockStep = Cesium.ClockStep.SYSTEM_CLOCK
     this.viewer.clock.shouldAnimate = true
     this.viewer.clock.multiplier = this.speedMultiplier
 
     for (let i = 0; i < lineLength; i++) {
-      let time = Cesium.JulianDate.addSeconds(
-        start,
-        (i * duration) / lineLength,
-        new Cesium.JulianDate()
-      )
+      let time = Cesium.JulianDate.addSeconds(start, (i * duration) / lineLength, new Cesium.JulianDate())
       if (i === lineLength - 1) {
         time = stop
       }
@@ -565,10 +524,7 @@ export class RoamingManager {
   private updateRealTimeData(position: Cesium.Cartesian3): void {
     const cartographic = Cesium.Cartographic.fromCartesian(position)
     const totalDistance = this.calculateDistance(this.waypoints)
-    const elapsedTime = Cesium.JulianDate.secondsDifference(
-      this.viewer.clock.currentTime,
-      this.startTime!
-    )
+    const elapsedTime = Cesium.JulianDate.secondsDifference(this.viewer.clock.currentTime, this.startTime!)
     const elapsedDistance = (totalDistance / this.duration) * elapsedTime
 
     this.data.isRoaming = this.viewer.clock.shouldAnimate
@@ -592,13 +548,9 @@ export class RoamingManager {
         Cesium.Cartographic.fromDegrees(this.data.longitude, this.data.latitude)
       ])
 
-      this.data.elevation = parseFloat(
-        (updatedPositions[0].height + cartographic.height).toFixed(2)
-      )
+      this.data.elevation = parseFloat((updatedPositions[0].height + cartographic.height).toFixed(2))
       this.data.terrainHeight = parseFloat(updatedPositions[0].height.toFixed(2))
-      this.data.heightAboveTerrain = parseFloat(
-        (this.data.elevation - this.data.terrainHeight).toFixed(2)
-      )
+      this.data.heightAboveTerrain = parseFloat((this.data.elevation - this.data.terrainHeight).toFixed(2))
 
       // 触发数据回调
       this.dataCallbacks.forEach((callback) => callback(this.data))
@@ -675,10 +627,7 @@ export class RoamingManager {
   /**
    * 创建视锥体
    */
-  private createFrustums(
-    options?: RoamingOptions['frustumOptions'],
-    defaultPitch: number = -30
-  ): void {
+  private createFrustums(options?: RoamingOptions['frustumOptions'], defaultPitch: number = -30): void {
     const length = options?.length ?? 100
     const fov = options?.fov ?? 60
     const color = options?.color ?? Cesium.Color.BLUE.withAlpha(0.3)
@@ -697,21 +646,11 @@ export class RoamingManager {
       const nextPoint = this.waypoints[i + 1]
 
       // 计算前方方向
-      const direction = Cesium.Cartesian3.subtract(
-        nextPoint,
-        currentPoint,
-        new Cesium.Cartesian3()
-      )
+      const direction = Cesium.Cartesian3.subtract(nextPoint, currentPoint, new Cesium.Cartesian3())
       Cesium.Cartesian3.normalize(direction, direction)
 
       // 创建视锥体几何
-      const frustumGeometry = this.createFrustumGeometry(
-        currentPoint,
-        direction,
-        length,
-        halfFov,
-        defaultPitch
-      )
+      const frustumGeometry = this.createFrustumGeometry(currentPoint, direction, length, halfFov, defaultPitch)
 
       if (frustumGeometry) {
         // 添加视锥体实体
@@ -759,11 +698,7 @@ export class RoamingManager {
       const sinPitch = Math.sin(pitchRadians)
 
       Cesium.Cartesian3.multiplyByScalar(direction, cosPitch, rotatedDirection)
-      const pitchOffset = Cesium.Cartesian3.multiplyByScalar(
-        actualUp,
-        sinPitch,
-        new Cesium.Cartesian3()
-      )
+      const pitchOffset = Cesium.Cartesian3.multiplyByScalar(actualUp, sinPitch, new Cesium.Cartesian3())
       Cesium.Cartesian3.add(rotatedDirection, pitchOffset, rotatedDirection)
       Cesium.Cartesian3.normalize(rotatedDirection, rotatedDirection)
 
@@ -784,11 +719,11 @@ export class RoamingManager {
 
       // 创建视锥体截面形状（矩形）
       const shape = [
-        new Cesium.Cartesian2(-endWidth / 2, -endHeight / 2),  // 左下
-        new Cesium.Cartesian2(endWidth / 2, -endHeight / 2),   // 右下
-        new Cesium.Cartesian2(endWidth / 2, endHeight / 2),    // 右上
-        new Cesium.Cartesian2(-endWidth / 2, endHeight / 2),   // 左上
-        new Cesium.Cartesian2(-endWidth / 2, -endHeight / 2)   // 闭合
+        new Cesium.Cartesian2(-endWidth / 2, -endHeight / 2), // 左下
+        new Cesium.Cartesian2(endWidth / 2, -endHeight / 2), // 右下
+        new Cesium.Cartesian2(endWidth / 2, endHeight / 2), // 右上
+        new Cesium.Cartesian2(-endWidth / 2, endHeight / 2), // 左上
+        new Cesium.Cartesian2(-endWidth / 2, -endHeight / 2) // 闭合
       ]
 
       return { positions, shape }

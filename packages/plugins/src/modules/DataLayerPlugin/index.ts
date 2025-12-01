@@ -42,6 +42,7 @@ import type {
   PopupConfig,
   DataMappingConfig
 } from './types'
+import type { PickInfo } from '../EventPlugin/types'
 
 /**
  * 数据图层管理插件
@@ -82,8 +83,6 @@ export class DataLayerPlugin extends BasePlugin {
           this.handleLayerClick(info)
         })
       }
-
-      console.log('DataLayer plugin installed')
     } catch (error) {
       console.error('Failed to install DataLayer plugin:', error)
       throw error
@@ -100,7 +99,7 @@ export class DataLayerPlugin extends BasePlugin {
   /**
    * 处理图层点击事件
    */
-  private handleLayerClick(info: any): void {
+  private handleLayerClick(info: PickInfo): void {
     try {
       if (!info.pickedObject) return
 
@@ -136,7 +135,7 @@ export class DataLayerPlugin extends BasePlugin {
   /**
    * 处理数据项点击
    */
-  private async handleItemClick(layer: DataLayerInstance, item: DataItem, info: any): Promise<void> {
+  private async handleItemClick(layer: DataLayerInstance, item: DataItem, info: PickInfo): Promise<void> {
     try {
       // 触发自定义点击回调
       if (layer.config.onClick) {
@@ -157,11 +156,7 @@ export class DataLayerPlugin extends BasePlugin {
   /**
    * 创建并显示弹窗
    */
-  private async createAndShowPopup(
-    layer: DataLayerInstance,
-    item: DataItem,
-    position: any
-  ): Promise<void> {
+  private async createAndShowPopup(layer: DataLayerInstance, item: DataItem, position: Cartesian3): Promise<void> {
     try {
       const popupOptions = {
         alignment: PopupAlignment.TOP_CENTER,
@@ -227,8 +222,7 @@ export class DataLayerPlugin extends BasePlugin {
   private createFieldBasedPopup(config: PopupConfig, item: DataItem): string {
     try {
       const style = config.style || {}
-      const title =
-        typeof config.title === 'function' ? config.title(item) : config.title || '数据详情'
+      const title = typeof config.title === 'function' ? config.title(item) : config.title || '数据详情'
 
       const rows = config
         .fields!.filter((field) => field.show !== false)
@@ -290,25 +284,23 @@ export class DataLayerPlugin extends BasePlugin {
       // 如果 data 是对象，显示所有字段
       if (typeof data === 'object' && !Array.isArray(data)) {
         const rows = Object.entries(data)
-          .map(
-            ([key, value]) => {
-              try {
-                return `
+          .map(([key, value]) => {
+            try {
+              return `
         <tr>
           <td style="padding: 4px 8px; font-weight: 500; color: #666;">${key}:</td>
           <td style="padding: 4px 8px; color: #333;">${String(value)}</td>
         </tr>
       `
-              } catch (error) {
-                return `
+            } catch (error) {
+              return `
         <tr>
           <td style="padding: 4px 8px; font-weight: 500; color: #666;">${key}:</td>
           <td style="padding: 4px 8px; color: #999;">-</td>
         </tr>
       `
-              }
             }
-          )
+          })
           .join('')
 
         return `
@@ -339,18 +331,18 @@ export class DataLayerPlugin extends BasePlugin {
    * @param obj 数据对象
    * @param path 字段路径，支持点号分隔，如 'user.name'
    */
-  private getFieldValue(obj: any, path: string): any {
+  private getFieldValue(obj: unknown, path: string): unknown {
     try {
       if (!obj || !path) return undefined
 
       const keys = path.split('.')
-      let value = obj
+      let value: unknown = obj
 
       for (const key of keys) {
         if (value === null || value === undefined) {
           return undefined
         }
-        value = value[key]
+        value = (value as Record<string, unknown>)[key]
       }
 
       return value
@@ -434,7 +426,7 @@ export class DataLayerPlugin extends BasePlugin {
           this.addEntityItem(layer, item)
         },
         addItems: (items: DataItem[]) => {
-          items.forEach(item => this.addEntityItem(layer, item))
+          items.forEach((item) => this.addEntityItem(layer, item))
         },
         removeItem: (itemId: string | number) => {
           this.removeEntityItem(layer, itemId)
@@ -507,7 +499,7 @@ export class DataLayerPlugin extends BasePlugin {
           }
         },
         addItems: (items: DataItem[]) => {
-          items.forEach(item => this.addPrimitiveItem(layer, item, pointCollection))
+          items.forEach((item) => this.addPrimitiveItem(layer, item, pointCollection))
           if (config.clustering?.enabled) {
             this.updatePrimitiveClustering(layer, pointCollection, clusterPointCollection, clusterLabelCollection)
           }
@@ -535,9 +527,7 @@ export class DataLayerPlugin extends BasePlugin {
         },
         flyTo: async (duration?: number) => {
           try {
-            const positions = Array.from(layer.dataMap.values()).map(item =>
-              this.normalizePosition(item.position)
-            )
+            const positions = Array.from(layer.dataMap.values()).map((item) => this.normalizePosition(item.position))
             if (positions.length > 0) {
               const boundingSphere = BoundingSphere.fromPoints(positions)
               await this.cesiumViewer.camera.flyToBoundingSphere(boundingSphere, { duration })
@@ -624,10 +614,7 @@ export class DataLayerPlugin extends BasePlugin {
         const point = pointCollection.get(i)
         if (!point.show) continue
 
-        const screenPos = SceneTransforms.worldToWindowCoordinates(
-          this.cesiumViewer.scene,
-          point.position
-        )
+        const screenPos = SceneTransforms.worldToWindowCoordinates(this.cesiumViewer.scene, point.position)
         points.push({ primitive: point, screenPos, clustered: false })
       }
 
@@ -690,7 +677,10 @@ export class DataLayerPlugin extends BasePlugin {
           // 创建聚合标签
           if (config.showLabels !== false) {
             const labelText = config.clusterStyle
-              ? config.clusterStyle(cluster.points.map(p => p.primitive as any), clusterPoint as any)?.label || `${cluster.points.length}`
+              ? config.clusterStyle(
+                  cluster.points.map((p) => p.primitive as unknown as Cesium.Entity),
+                  clusterPoint as unknown as Cesium.Billboard
+                )?.label || `${cluster.points.length}`
               : `${cluster.points.length}`
 
             clusterLabelCollection.add({
@@ -731,51 +721,61 @@ export class DataLayerPlugin extends BasePlugin {
 
       // 自定义聚合样式
       if (config.clusterStyle) {
-        dataSource.clustering.clusterEvent.addEventListener((clusteredEntities: any, cluster: any) => {
-          try {
-            const style = config.clusterStyle!(clusteredEntities, cluster)
+        dataSource.clustering.clusterEvent.addEventListener(
+          (
+            clusteredEntities: Cesium.Entity[],
+            cluster: { billboard: Cesium.Billboard; label: Cesium.Label; point: Cesium.PointGraphics }
+          ) => {
+            try {
+              const style = config.clusterStyle!(clusteredEntities, cluster)
 
-            cluster.label.show = config.showLabels !== false
-            cluster.label.text = style.label || `${clusteredEntities.length}`
-            cluster.label.font = '14px sans-serif'
-            cluster.label.fillColor = Color.WHITE
-            cluster.label.outlineColor = Color.BLACK
-            cluster.label.outlineWidth = 2
-            cluster.label.style = 2 // LabelStyle.FILL_AND_OUTLINE
+              cluster.label.show = config.showLabels !== false
+              cluster.label.text = style.label || `${clusteredEntities.length}`
+              cluster.label.font = '14px sans-serif'
+              cluster.label.fillColor = Color.WHITE
+              cluster.label.outlineColor = Color.BLACK
+              cluster.label.outlineWidth = 2
+              cluster.label.style = 2 // LabelStyle.FILL_AND_OUTLINE
 
-            if (style.image) {
-              cluster.billboard.show = true
-              cluster.billboard.image = style.image
-              cluster.billboard.scale = style.scale || 1.0
-            } else {
+              if (style.image) {
+                cluster.billboard.show = true
+                cluster.billboard.image = style.image
+                cluster.billboard.scale = style.scale || 1.0
+              } else {
+                cluster.billboard.show = false
+                cluster.point.show = true
+                cluster.point.pixelSize = 30
+                cluster.point.color = Color.BLUE.withAlpha(0.8)
+              }
+            } catch (error) {
+              console.error('Failed to apply cluster style:', error)
+            }
+          }
+        )
+      } else {
+        // 默认聚合样式
+        dataSource.clustering.clusterEvent.addEventListener(
+          (
+            _clusteredEntities: Cesium.Entity[],
+            cluster: { billboard: Cesium.Billboard; label: Cesium.Label; point: Cesium.PointGraphics }
+          ) => {
+            try {
+              cluster.label.show = config.showLabels !== false
+              cluster.label.text = `${_clusteredEntities.length}`
+              cluster.label.font = '14px sans-serif'
+              cluster.label.fillColor = Color.WHITE
+              cluster.label.outlineColor = Color.BLACK
+              cluster.label.outlineWidth = 2
+
               cluster.billboard.show = false
               cluster.point.show = true
               cluster.point.pixelSize = 30
               cluster.point.color = Color.BLUE.withAlpha(0.8)
+            } catch (error) {
+              console.error('Failed to apply default cluster style:', error)
             }
-          } catch (error) {
-            console.error('Failed to apply cluster style:', error)
           }
-        })
-      } else {
-        // 默认聚合样式
-        dataSource.clustering.clusterEvent.addEventListener((_clusteredEntities: any, cluster: any) => {
-          try {
-            cluster.label.show = config.showLabels !== false
-            cluster.label.text = `${_clusteredEntities.length}`
-            cluster.label.font = '14px sans-serif'
-            cluster.label.fillColor = Color.WHITE
-            cluster.label.outlineColor = Color.BLACK
-            cluster.label.outlineWidth = 2
-
-            cluster.billboard.show = false
-            cluster.point.show = true
-            cluster.point.pixelSize = 30
-            cluster.point.color = Color.BLUE.withAlpha(0.8)
-          } catch (error) {
-            console.error('Failed to apply default cluster style:', error)
-          }
-        })
+        )
       }
     } catch (error) {
       console.error('Failed to setup clustering:', error)
@@ -788,7 +788,7 @@ export class DataLayerPlugin extends BasePlugin {
   private addEntityItem(layer: DataLayerInstance, item: DataItem): void {
     try {
       const style = { ...layer.config.defaultStyle, ...item.style }
-      const entityConfig: any = {
+      const entityConfig: Cesium.Entity.ConstructorOptions = {
         id: String(item.id),
         show: item.show !== false,
         properties: item.data
@@ -836,9 +836,7 @@ export class DataLayerPlugin extends BasePlugin {
             outlineWidth: style.polygon?.outlineWidth || 1,
             height: style.polygon?.height,
             extrudedHeight: style.polygon?.extrudedHeight,
-            heightReference: style.polygon?.clampToGround
-              ? HeightReference.CLAMP_TO_GROUND
-              : undefined
+            heightReference: style.polygon?.clampToGround ? HeightReference.CLAMP_TO_GROUND : undefined
           })
           break
 
@@ -859,10 +857,7 @@ export class DataLayerPlugin extends BasePlugin {
           entityConfig.ellipse = new EllipseGraphics({
             semiMajorAxis: style.circle?.semiMajorAxis || style.ellipse?.semiMajorAxis || 100,
             semiMinorAxis:
-              style.ellipse?.semiMinorAxis ||
-              style.circle?.semiMajorAxis ||
-              style.ellipse?.semiMajorAxis ||
-              100,
+              style.ellipse?.semiMinorAxis || style.circle?.semiMajorAxis || style.ellipse?.semiMajorAxis || 100,
             material: style.circle?.material || style.ellipse?.material || Color.BLUE.withAlpha(0.5),
             outline: style.circle?.outline !== false || style.ellipse?.outline !== false,
             outlineColor: style.circle?.outlineColor || style.ellipse?.outlineColor || Color.BLACK,
@@ -927,11 +922,7 @@ export class DataLayerPlugin extends BasePlugin {
           entityConfig.position = this.normalizePosition(item.position)
           entityConfig.box = new BoxGraphics({
             dimensions: style.box?.dimensions
-              ? new Cartesian3(
-                  style.box.dimensions.x,
-                  style.box.dimensions.y,
-                  style.box.dimensions.z
-                )
+              ? new Cartesian3(style.box.dimensions.x, style.box.dimensions.y, style.box.dimensions.z)
               : new Cartesian3(100, 100, 100),
             material: style.box?.material || Color.BLUE.withAlpha(0.5),
             outline: style.box?.outline !== false,
@@ -1014,11 +1005,7 @@ export class DataLayerPlugin extends BasePlugin {
   /**
    * 更新 Entity 数据项
    */
-  private updateEntityItem(
-    layer: DataLayerInstance,
-    itemId: string | number,
-    updates: Partial<DataItem>
-  ): void {
+  private updateEntityItem(layer: DataLayerInstance, itemId: string | number, updates: Partial<DataItem>): void {
     try {
       const entity = layer.dataSource!.entities.getById(String(itemId))
       if (!entity) return
@@ -1031,7 +1018,7 @@ export class DataLayerPlugin extends BasePlugin {
 
       // 更新位置
       if (updates.position) {
-        entity.position = this.normalizePosition(updates.position) as any
+        entity.position = new Cesium.ConstantPositionProperty(this.normalizePosition(updates.position))
       }
 
       // 更新显示状态
@@ -1044,22 +1031,22 @@ export class DataLayerPlugin extends BasePlugin {
         const style = { ...layer.config.defaultStyle, ...item.style }
 
         if (style.icon && entity.billboard) {
-          entity.billboard.image = style.icon.image as any
-          entity.billboard.scale = style.icon.scale as any
-          entity.billboard.color = style.icon.color as any
+          entity.billboard.image = new Cesium.ConstantProperty(style.icon.image)
+          entity.billboard.scale = new Cesium.ConstantProperty(style.icon.scale)
+          entity.billboard.color = new Cesium.ConstantProperty(style.icon.color)
         }
 
         if (style.point && entity.point) {
-          entity.point.pixelSize = style.point.pixelSize as any
-          entity.point.color = style.point.color as any
-          entity.point.outlineColor = style.point.outlineColor as any
-          entity.point.outlineWidth = style.point.outlineWidth as any
+          entity.point.pixelSize = new Cesium.ConstantProperty(style.point.pixelSize)
+          entity.point.color = new Cesium.ConstantProperty(style.point.color)
+          entity.point.outlineColor = new Cesium.ConstantProperty(style.point.outlineColor)
+          entity.point.outlineWidth = new Cesium.ConstantProperty(style.point.outlineWidth)
         }
 
         if (style.label && entity.label) {
-          entity.label.text = style.label.text as any
-          entity.label.fillColor = style.label.fillColor as any
-          entity.label.show = style.label.show as any
+          entity.label.text = new Cesium.ConstantProperty(style.label.text)
+          entity.label.fillColor = new Cesium.ConstantProperty(style.label.fillColor)
+          entity.label.show = new Cesium.ConstantProperty(style.label.show)
         }
       }
 
@@ -1075,11 +1062,7 @@ export class DataLayerPlugin extends BasePlugin {
   /**
    * 添加 Primitive 数据项
    */
-  private addPrimitiveItem(
-    layer: DataLayerInstance,
-    item: DataItem,
-    pointCollection: PointPrimitiveCollection
-  ): void {
+  private addPrimitiveItem(layer: DataLayerInstance, item: DataItem, pointCollection: PointPrimitiveCollection): void {
     try {
       const position = this.normalizePosition(item.position)
       const style = { ...layer.config.defaultStyle, ...item.style }
@@ -1180,10 +1163,7 @@ export class DataLayerPlugin extends BasePlugin {
     try {
       this.ensureInstalled()
 
-      const layer =
-        config.type === 'entity'
-          ? this.createEntityLayer(config)
-          : this.createPrimitiveLayer(config)
+      const layer = config.type === 'entity' ? this.createEntityLayer(config) : this.createPrimitiveLayer(config)
 
       this.layers.set(layer.id, layer)
 
@@ -1206,7 +1186,7 @@ export class DataLayerPlugin extends BasePlugin {
    */
   getLayerByName(name: string): DataLayerInstance | undefined {
     try {
-      return Array.from(this.layers.values()).find(layer => layer.name === name)
+      return Array.from(this.layers.values()).find((layer) => layer.name === name)
     } catch (error) {
       console.error('Failed to get layer by name:', error)
       return undefined
@@ -1251,7 +1231,7 @@ export class DataLayerPlugin extends BasePlugin {
   removeAllLayers(): void {
     try {
       const ids = Array.from(this.layers.keys())
-      ids.forEach(id => this.removeLayer(id))
+      ids.forEach((id) => this.removeLayer(id))
     } catch (error) {
       console.error('Failed to remove all layers:', error)
     }
@@ -1277,7 +1257,7 @@ export class DataLayerPlugin extends BasePlugin {
    * @param mapping 数据映射配置
    * @returns DataItem 数组
    */
-  createDataItemsFromArray(dataArray: any[], mapping: DataMappingConfig): DataItem[] {
+  createDataItemsFromArray(dataArray: unknown[], mapping: DataMappingConfig): DataItem[] {
     try {
       return dataArray
         .filter((item) => !mapping.filter || mapping.filter(item))
@@ -1300,7 +1280,7 @@ export class DataLayerPlugin extends BasePlugin {
           // 构建 DataItem
           const dataItem: DataItem = {
             id,
-            geometryType: geometryType as any,
+            geometryType: geometryType as DataItem['geometryType'],
             data: item
           }
 
@@ -1308,9 +1288,7 @@ export class DataLayerPlugin extends BasePlugin {
           if (mapping.position) {
             const lon = this.getFieldValue(item, mapping.position.lonField)
             const lat = this.getFieldValue(item, mapping.position.latField)
-            const height = mapping.position.heightField
-              ? this.getFieldValue(item, mapping.position.heightField)
-              : 0
+            const height = mapping.position.heightField ? this.getFieldValue(item, mapping.position.heightField) : 0
 
             if (lon !== undefined && lat !== undefined) {
               dataItem.position = [Number(lon), Number(lat), Number(height || 0)]
@@ -1322,15 +1300,15 @@ export class DataLayerPlugin extends BasePlugin {
             const positionsData = this.getFieldValue(item, mapping.positions.field)
             if (Array.isArray(positionsData)) {
               const format = mapping.positions.format || 'lonlat'
-              dataItem.positions = positionsData.map((pos: any) => {
+              dataItem.positions = positionsData.map((pos: unknown) => {
                 if (Array.isArray(pos)) {
                   if (format === 'lonlat') {
-                    return [Number(pos[0]), Number(pos[1]), Number(pos[2] || 0)]
+                    return [Number(pos[0]), Number(pos[1]), Number(pos[2] || 0)] as [number, number, number]
                   } else {
-                    return [Number(pos[1]), Number(pos[0]), Number(pos[2] || 0)]
+                    return [Number(pos[1]), Number(pos[0]), Number(pos[2] || 0)] as [number, number, number]
                   }
                 }
-                return pos
+                return pos as [number, number, number]
               })
             }
           }
@@ -1340,11 +1318,11 @@ export class DataLayerPlugin extends BasePlugin {
             dataItem.style = {}
             for (const [styleKey, styleValue] of Object.entries(mapping.styleMapping)) {
               if (typeof styleValue === 'function') {
-                ;(dataItem.style as any)[styleKey] = styleValue(item)
+                ;(dataItem.style as Record<string, unknown>)[styleKey] = styleValue(item)
               } else {
                 const value = this.getFieldValue(item, styleValue)
                 if (value !== undefined) {
-                  ;(dataItem.style as any)[styleKey] = value
+                  ;(dataItem.style as Record<string, unknown>)[styleKey] = value
                 }
               }
             }
@@ -1370,7 +1348,7 @@ export class DataLayerPlugin extends BasePlugin {
    * @param dataArray 原始数据数组
    * @param mapping 数据映射配置
    */
-  importArrayData(layerId: string, dataArray: any[], mapping: DataMappingConfig): void {
+  importArrayData(layerId: string, dataArray: unknown[], mapping: DataMappingConfig): void {
     try {
       const layer = this.getLayer(layerId)
       if (!layer) {
@@ -1394,8 +1372,6 @@ export class DataLayerPlugin extends BasePlugin {
       if (this.clickListenerId && this.eventPlugin) {
         this.eventPlugin.off(this.clickListenerId)
       }
-
-      console.log('DataLayer plugin destroyed')
     } catch (error) {
       console.error('Failed to destroy DataLayer plugin:', error)
     }

@@ -14,11 +14,7 @@ export function formatNum(num: number, digits: number = 0): number {
  * @param latitude 纬度
  * @param precision 精度（小数位数）
  */
-export function formatCoordinate(
-  longitude: number,
-  latitude: number,
-  precision: number = 6
-): string {
+export function formatCoordinate(longitude: number, latitude: number, precision: number = 6): string {
   const lon = longitude.toFixed(precision)
   const lat = latitude.toFixed(precision)
   const lonDir = longitude >= 0 ? 'E' : 'W'

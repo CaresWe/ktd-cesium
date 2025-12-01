@@ -118,7 +118,7 @@ export interface ModelRoamingOptions extends Omit<RoamingOptions, 'showFrustum' 
     /** 最大缩放大小 */
     maximumScale?: number
     /** 其他模型选项 */
-    [key: string]: any
+    [key: string]: unknown
   }
   /** 是否显示标签，默认 false */
   showLabel?: boolean

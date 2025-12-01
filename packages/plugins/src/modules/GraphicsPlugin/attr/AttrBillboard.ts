@@ -87,9 +87,7 @@ export function style2Entity(
         break
       case 'opacity': // 透明度
         attr.color = new Cesium.ConstantProperty(
-          Cesium.Color.fromCssColorString('#FFFFFF').withAlpha(
-            typeof value === 'number' ? value : 1.0
-          )
+          Cesium.Color.fromCssColorString('#FFFFFF').withAlpha(typeof value === 'number' ? value : 1.0)
         )
         break
       case 'rotation': // 旋转角度

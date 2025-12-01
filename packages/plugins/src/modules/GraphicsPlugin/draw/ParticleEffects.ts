@@ -42,7 +42,7 @@ export function createWaterEffect(imagePath: string): ParticleSystemOptions {
   return {
     image: imagePath,
     startColor: new Cesium.Color(1, 1, 1, 0.6),
-    endColor: new Cesium.Color(0.80, 0.86, 1, 0.4),
+    endColor: new Cesium.Color(0.8, 0.86, 1, 0.4),
     startScale: 0.0,
     endScale: 10.0,
     minimumParticleLife: 1.0,
@@ -63,12 +63,7 @@ export function createWaterEffect(imagePath: string): ParticleSystemOptions {
       const gravityScratch = new Cesium.Cartesian3()
       const position = particle.position
       Cesium.Cartesian3.normalize(position, gravityScratch)
-      Cesium.Cartesian3.fromElements(
-        20 * dt,
-        gravityScratch.y * dt,
-        -30 * dt,
-        gravityScratch
-      )
+      Cesium.Cartesian3.fromElements(20 * dt, gravityScratch.y * dt, -30 * dt, gravityScratch)
       particle.velocity = Cesium.Cartesian3.add(particle.velocity, gravityScratch, particle.velocity)
     }
   }
@@ -130,12 +125,7 @@ export function createSprayEffect(imagePath: string): ParticleSystemOptions {
       const gravityScratch = new Cesium.Cartesian3()
       const position = particle.position
       Cesium.Cartesian3.normalize(position, gravityScratch)
-      Cesium.Cartesian3.fromElements(
-        15 * dt,
-        15 * dt,
-        -10 * dt,
-        gravityScratch
-      )
+      Cesium.Cartesian3.fromElements(15 * dt, 15 * dt, -10 * dt, gravityScratch)
       particle.velocity = Cesium.Cartesian3.add(particle.velocity, gravityScratch, particle.velocity)
     }
   }
@@ -170,12 +160,7 @@ export function createSmokeEffect(imagePath: string): ParticleSystemOptions {
       const gravityScratch = new Cesium.Cartesian3()
       const position = particle.position
       Cesium.Cartesian3.normalize(position, gravityScratch)
-      Cesium.Cartesian3.fromElements(
-        20 * dt,
-        30 * dt,
-        gravityScratch.y * dt,
-        gravityScratch
-      )
+      Cesium.Cartesian3.fromElements(20 * dt, 30 * dt, gravityScratch.y * dt, gravityScratch)
       particle.velocity = Cesium.Cartesian3.add(particle.velocity, gravityScratch, particle.velocity)
     }
   }

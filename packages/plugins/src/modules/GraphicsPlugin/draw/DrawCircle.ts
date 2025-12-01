@@ -47,10 +47,9 @@ export class DrawCircle extends DrawPolyline {
       this._maxPointNum = 2
     }
 
-    const that = this
     const addattr: Cesium.Entity.ConstructorOptions & { attribute: CircleDrawAttribute } = {
       position: new Cesium.CallbackProperty(() => {
-        return that.getShowPosition()
+        return this.getShowPosition()
       }, false) as unknown as Cesium.PositionProperty,
       ellipse: attr.style2Entity(circleAttr.style),
       attribute: circleAttr
@@ -71,7 +70,10 @@ export class DrawCircle extends DrawPolyline {
   /**
    * 样式转entity
    */
-  protected override style2Entity(style: Record<string, unknown>, entity: Cesium.Entity): Cesium.EllipseGraphics.ConstructorOptions {
+  protected override style2Entity(
+    style: Record<string, unknown>,
+    entity: Cesium.Entity
+  ): Cesium.EllipseGraphics.ConstructorOptions {
     const extEntity = entity as CircleExtendedEntity
     return attr.style2Entity(style, extEntity.ellipse)
   }
@@ -91,14 +93,11 @@ export class DrawCircle extends DrawPolyline {
       if (!extEntity.ellipse) return false
 
       const outline = extEntity.ellipse.outline
-      const outlineValue = outline && typeof outline.getValue === 'function'
-        ? outline.getValue(time)
-        : outline
+      const outlineValue = outline && typeof outline.getValue === 'function' ? outline.getValue(time) : outline
 
       const outlineWidth = extEntity.ellipse.outlineWidth
-      const widthValue = outlineWidth && typeof outlineWidth.getValue === 'function'
-        ? outlineWidth.getValue(time)
-        : outlineWidth
+      const widthValue =
+        outlineWidth && typeof outlineWidth.getValue === 'function' ? outlineWidth.getValue(time) : outlineWidth
 
       return Boolean(outlineValue && widthValue && Number(widthValue) > 1)
     }, false)
@@ -107,9 +106,7 @@ export class DrawCircle extends DrawPolyline {
       if (!extEntity.polyline) return null
 
       const show = extEntity.polyline.show
-      const showValue = show && typeof show.getValue === 'function'
-        ? show.getValue(time)
-        : show
+      const showValue = show && typeof show.getValue === 'function' ? show.getValue(time) : show
 
       if (!showValue) return null
       return attr.getOutlinePositions(entity)
@@ -161,10 +158,7 @@ export class DrawCircle extends DrawPolyline {
 
     // 高度处理
     if (!style.clampToGround && extEntity.ellipse) {
-      const height = this.formatNum(
-        Cesium.Cartographic.fromCartesian(positions[0]).height,
-        2
-      )
+      const height = this.formatNum(Cesium.Cartographic.fromCartesian(positions[0]).height, 2)
       extEntity.ellipse.height = new Cesium.ConstantProperty(height)
       style.height = height
 
@@ -175,10 +169,7 @@ export class DrawCircle extends DrawPolyline {
     }
 
     // 半径处理
-    const radius = this.formatNum(
-      Cesium.Cartesian3.distance(positions[0], positions[1]),
-      2
-    )
+    const radius = this.formatNum(Cesium.Cartesian3.distance(positions[0], positions[1]), 2)
 
     if (extEntity.ellipse) {
       extEntity.ellipse.semiMinorAxis = new Cesium.ConstantProperty(radius) // 短半轴
@@ -187,10 +178,7 @@ export class DrawCircle extends DrawPolyline {
         // 椭圆 - 长半轴
         let semiMajorAxis
         if (positions.length === 3) {
-          semiMajorAxis = this.formatNum(
-            Cesium.Cartesian3.distance(positions[0], positions[2]),
-            2
-          )
+          semiMajorAxis = this.formatNum(Cesium.Cartesian3.distance(positions[0], positions[2]), 2)
         } else {
           semiMajorAxis = radius
         }
@@ -219,13 +207,15 @@ export class DrawCircle extends DrawPolyline {
     const semiMajorAxisProp = extEntity.ellipse.semiMajorAxis
     const semiMinorAxisProp = extEntity.ellipse.semiMinorAxis
 
-    const semiMajorAxis = semiMajorAxisProp && typeof semiMajorAxisProp.getValue === 'function'
-      ? semiMajorAxisProp.getValue(this.viewer!.clock.currentTime)
-      : semiMajorAxisProp
+    const semiMajorAxis =
+      semiMajorAxisProp && typeof semiMajorAxisProp.getValue === 'function'
+        ? semiMajorAxisProp.getValue(this.viewer!.clock.currentTime)
+        : semiMajorAxisProp
 
-    const semiMinorAxis = semiMinorAxisProp && typeof semiMinorAxisProp.getValue === 'function'
-      ? semiMinorAxisProp.getValue(this.viewer!.clock.currentTime)
-      : semiMinorAxisProp
+    const semiMinorAxis =
+      semiMinorAxisProp && typeof semiMinorAxisProp.getValue === 'function'
+        ? semiMinorAxisProp.getValue(this.viewer!.clock.currentTime)
+        : semiMinorAxisProp
 
     if (!semiMajorAxis || !semiMinorAxis) return
 

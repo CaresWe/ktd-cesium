@@ -58,7 +58,10 @@ export class DrawPPolygonEx extends DrawPPolygon {
         polygonHierarchy: new Cesium.PolygonHierarchy(this._positions_show),
         vertexFormat: Cesium.PerInstanceColorAppearance.VERTEX_FORMAT
       }),
-      attributes: (this.currentGroundPrimitive as unknown as Record<string, unknown>)._instanceAttributes as Record<string, unknown> || {
+      attributes: ((this.currentGroundPrimitive as unknown as Record<string, unknown>)._instanceAttributes as Record<
+        string,
+        unknown
+      >) || {
         color: Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.YELLOW.withAlpha(0.5))
       }
     })

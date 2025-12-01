@@ -95,7 +95,10 @@ export class DrawPCylinder extends DrawPPoint {
         vertexFormat: Cesium.PerInstanceColorAppearance.VERTEX_FORMAT
       }),
       modelMatrix: modelMatrix,
-      attributes: (this.currentPrimitive as unknown as Record<string, unknown>)._instanceAttributes as Record<string, unknown> || {
+      attributes: ((this.currentPrimitive as unknown as Record<string, unknown>)._instanceAttributes as Record<
+        string,
+        unknown
+      >) || {
         color: Cesium.ColorGeometryInstanceAttribute.fromColor(
           this.parseColor(style.color) || Cesium.Color.YELLOW.withAlpha(0.5)
         )

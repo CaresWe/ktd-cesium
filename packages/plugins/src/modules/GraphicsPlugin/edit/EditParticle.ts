@@ -76,9 +76,7 @@ export class EditParticle extends EditBase {
       }
 
       // 设置位置
-      ;(this.entity.position as Cesium.ConstantPositionProperty).setValue(
-        finalPosition as Cesium.Cartesian3
-      )
+      ;(this.entity.position as Cesium.ConstantPositionProperty).setValue(finalPosition as Cesium.Cartesian3)
     } catch (error) {
       console.error('EditParticle.setPositions: 设置位置失败', error)
       throw error // 向上抛出错误，让调用者处理

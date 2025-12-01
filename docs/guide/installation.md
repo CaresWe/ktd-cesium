@@ -126,7 +126,7 @@ module.exports = {
 
 ```html
 <!-- Cesium -->
-<link href="https://cesium.com/downloads/cesiumjs/releases/1.135/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+<link href="https://cesium.com/downloads/cesiumjs/releases/1.135/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
 <script src="https://cesium.com/downloads/cesiumjs/releases/1.135/Build/Cesium/Cesium.js"></script>
 
 <!-- KTD-Cesium（需要自行构建和托管）-->
@@ -140,6 +140,7 @@ module.exports = {
 ```typescript
 import { KtdViewer } from '@ktd-cesium/core'
 import { degreesToCartesian } from '@ktd-cesium/shared'
+import * as Cesium from 'cesium'
 
 console.log('KTD-Cesium 安装成功！')
 
@@ -148,9 +149,9 @@ const cartesian = degreesToCartesian(116.4, 39.9, 0)
 console.log('坐标转换结果:', cartesian)
 
 // 创建地图（确保页面中有 id="cesiumContainer" 的元素）
-// const viewer = new KtdViewer({
-//   container: 'cesiumContainer',
-// })
+// const cesiumViewer = new Cesium.Viewer('cesiumContainer')
+// const viewer = new KtdViewer(cesiumViewer)
+// console.log('Viewer 创建成功:', viewer)
 ```
 
 如果控制台输出了结果且没有报错，说明安装成功！
@@ -168,6 +169,7 @@ console.log('坐标转换结果:', cartesian)
 **问题**：提示找不到模块类型
 
 **解决方案**：
+
 ```bash
 pnpm add -D @types/cesium
 ```
@@ -187,3 +189,4 @@ pnpm add @ktd-cesium/core@latest @ktd-cesium/shared@latest @ktd-cesium/plugins@l
 - 查看 [快速开始](/guide/getting-started) 了解基本用法
 - 探索 [Shared 包](/packages/shared/overview) 的工具函数
 - 了解 [Core 包](/packages/core/overview) 的核心功能
+- 使用 [Plugins 包](/packages/plugins/overview) 扩展功能

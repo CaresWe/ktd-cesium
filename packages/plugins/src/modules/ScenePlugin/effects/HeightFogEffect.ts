@@ -23,12 +23,7 @@ export class HeightFogEffect implements PostProcessEffect {
     let fogColor: Color
     if (options.fogColor) {
       if (Array.isArray(options.fogColor)) {
-        fogColor = new Cesium.Color(
-          options.fogColor[0],
-          options.fogColor[1],
-          options.fogColor[2],
-          1.0
-        )
+        fogColor = new Cesium.Color(options.fogColor[0], options.fogColor[1], options.fogColor[2], 1.0)
       } else {
         fogColor = options.fogColor
       }
@@ -41,10 +36,7 @@ export class HeightFogEffect implements PostProcessEffect {
       fragmentShader,
       uniforms: {
         u_earthRadiusOnCamera: () => {
-          return (
-            Cesium.Cartesian3.magnitude(viewer.camera.positionWC) -
-            viewer.camera.positionCartographic.height
-          )
+          return Cesium.Cartesian3.magnitude(viewer.camera.positionWC) - viewer.camera.positionCartographic.height
         },
         u_cameraHeight: () => viewer.camera.positionCartographic.height,
         u_fogColor: () => fogColor,
@@ -176,9 +168,7 @@ export class HeightFogEffect implements PostProcessEffect {
    */
   setFogColor(color: Color | [number, number, number]): void {
     if (this.stage) {
-      const fogColor = Array.isArray(color)
-        ? new Cesium.Color(color[0], color[1], color[2], 1.0)
-        : color
+      const fogColor = Array.isArray(color) ? new Cesium.Color(color[0], color[1], color[2], 1.0) : color
       this.stage.uniforms.u_fogColor = () => fogColor
     }
   }

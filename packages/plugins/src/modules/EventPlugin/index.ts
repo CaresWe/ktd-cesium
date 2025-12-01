@@ -1,10 +1,4 @@
-import {
-  ScreenSpaceEventHandler,
-  ScreenSpaceEventType,
-  Cartographic,
-  Math as CesiumMath,
-  defined
-} from 'cesium'
+import { ScreenSpaceEventHandler, ScreenSpaceEventType, Cartographic, Math as CesiumMath, defined } from 'cesium'
 import { BasePlugin } from '../../BasePlugin'
 import type { KtdViewer } from '@ktd-cesium/core'
 import type {
@@ -47,7 +41,6 @@ export class EventPlugin extends BasePlugin {
   protected onInstall(viewer: KtdViewer): void {
     // 使用 cesiumViewer 属性访问原始 Cesium Viewer
     this.handler = new ScreenSpaceEventHandler(viewer.cesiumViewer.canvas)
-    console.log('Event plugin installed')
   }
 
   /**
@@ -67,7 +60,7 @@ export class EventPlugin extends BasePlugin {
   /**
    * 获取拾取信息
    */
-  private getPickInfo(movement: any): PickInfo {
+  private getPickInfo(movement: { position?: Cesium.Cartesian2; endPosition?: Cesium.Cartesian2 }): PickInfo {
     this.ensureInstalled()
 
     const position = movement.position || movement.endPosition
@@ -213,15 +206,11 @@ export class EventPlugin extends BasePlugin {
   /**
    * 添加鼠标事件
    */
-  private addMouseEvent(
-    eventType: ScreenSpaceEventType,
-    type: string,
-    callback: MouseEventCallback
-  ): string {
+  private addMouseEvent(eventType: ScreenSpaceEventType, type: string, callback: MouseEventCallback): string {
     this.ensureInstalled()
 
     const id = this.generateEventId(type)
-    const wrappedCallback = (movement: any) => {
+    const wrappedCallback = (movement: { position?: Cesium.Cartesian2; endPosition?: Cesium.Cartesian2 }) => {
       const info = this.getPickInfo(movement)
       callback(info)
     }
@@ -264,15 +253,11 @@ export class EventPlugin extends BasePlugin {
   /**
    * 添加触摸事件
    */
-  private addTouchEvent(
-    eventType: ScreenSpaceEventType,
-    type: string,
-    callback: TouchEventCallback
-  ): string {
+  private addTouchEvent(eventType: ScreenSpaceEventType, type: string, callback: TouchEventCallback): string {
     this.ensureInstalled()
 
     const id = this.generateEventId(type)
-    const wrappedCallback = (movement: any) => {
+    const wrappedCallback = (movement: { position?: Cesium.Cartesian2; endPosition?: Cesium.Cartesian2 }) => {
       const info = this.getPickInfo(movement)
       callback(info)
     }
@@ -374,11 +359,7 @@ export class EventPlugin extends BasePlugin {
   /**
    * 添加键盘事件
    */
-  private addKeyboardEvent(
-    eventType: string,
-    type: string,
-    callback: KeyboardEventCallback
-  ): string {
+  private addKeyboardEvent(eventType: string, type: string, callback: KeyboardEventCallback): string {
     this.ensureInstalled()
 
     const id = this.generateEventId(type)
@@ -532,7 +513,7 @@ export class EventPlugin extends BasePlugin {
     this.ensureInstalled()
 
     const id = this.generateEventId('layerAdded')
-    const wrappedCallback = (layer: any, index: number) => {
+    const wrappedCallback = (layer: unknown, index: number) => {
       callback({ layer, index })
     }
     const removeListener = this.cesiumViewer.imageryLayers.layerAdded.addEventListener(wrappedCallback)
@@ -554,7 +535,7 @@ export class EventPlugin extends BasePlugin {
     this.ensureInstalled()
 
     const id = this.generateEventId('layerRemoved')
-    const wrappedCallback = (layer: any, index: number) => {
+    const wrappedCallback = (layer: unknown, index: number) => {
       callback({ layer, index })
     }
     const removeListener = this.cesiumViewer.imageryLayers.layerRemoved.addEventListener(wrappedCallback)
@@ -576,7 +557,7 @@ export class EventPlugin extends BasePlugin {
     this.ensureInstalled()
 
     const id = this.generateEventId('layerMoved')
-    const wrappedCallback = (layer: any, newIndex: number, _oldIndex: number) => {
+    const wrappedCallback = (layer: unknown, newIndex: number, _oldIndex: number) => {
       callback({ layer, index: newIndex })
     }
     const removeListener = this.cesiumViewer.imageryLayers.layerMoved.addEventListener(wrappedCallback)
@@ -598,12 +579,10 @@ export class EventPlugin extends BasePlugin {
     this.ensureInstalled()
 
     const id = this.generateEventId('layerShown')
-    const wrappedCallback = (layer: any, index: number) => {
+    const wrappedCallback = (layer: unknown, index: number) => {
       callback({ layer, index })
     }
-    const removeListener = this.cesiumViewer.imageryLayers.layerShownOrHidden.addEventListener(
-      wrappedCallback
-    )
+    const removeListener = this.cesiumViewer.imageryLayers.layerShownOrHidden.addEventListener(wrappedCallback)
 
     this.listeners.set(id, {
       id,
@@ -670,7 +649,7 @@ export class EventPlugin extends BasePlugin {
    * 获取指定类型的事件监听器
    */
   getListenersByType(type: string): EventListener[] {
-    return Array.from(this.listeners.values()).filter(listener => listener.type === type)
+    return Array.from(this.listeners.values()).filter((listener) => listener.type === type)
   }
 
   protected onDestroy(): void {
@@ -682,8 +661,6 @@ export class EventPlugin extends BasePlugin {
       this.handler.destroy()
       this.handler = null
     }
-
-    console.log('Event plugin destroyed')
   }
 }
 
@@ -696,8 +673,8 @@ export * from './types'
  * 事件监听器接口
  */
 interface GraphicsEventListener {
-  fn: Function
-  ctx?: any
+  fn: (...args: unknown[]) => unknown
+  ctx?: unknown
 }
 
 /**
@@ -717,11 +694,12 @@ function falseFn(): boolean {
 /**
  * 绑定函数上下文
  */
-function bind(fn: Function, obj: any): any {
-  const slice = Array.prototype.slice
-  return fn.bind ? fn.bind(obj) : function() {
-    return fn.apply(obj, slice.call(arguments))
-  }
+function bind(fn: (...args: unknown[]) => unknown, obj: unknown): (...args: unknown[]) => unknown {
+  return fn.bind
+    ? fn.bind(obj)
+    : function (...args: unknown[]) {
+        return fn.apply(obj, args)
+      }
 }
 
 /**
@@ -729,11 +707,11 @@ function bind(fn: Function, obj: any): any {
  */
 let lastId = 0
 const objIdKey = '_ktd_id'
-function stamp(obj: any): number {
-  if (!obj[objIdKey]) {
+function stamp(obj: Record<string, unknown>): number {
+  if (!(objIdKey in obj)) {
     obj[objIdKey] = ++lastId
   }
-  return obj[objIdKey]
+  return obj[objIdKey] as number
 }
 
 /**
@@ -751,11 +729,15 @@ export class EventEmitter {
    * @param fn 监听函数
    * @param context 上下文对象
    */
-  on(types: string | Record<string, Function>, fn?: Function, context?: any): this {
+  on(
+    types: string | Record<string, (...args: unknown[]) => unknown>,
+    fn?: (...args: unknown[]) => unknown,
+    context?: unknown
+  ): this {
     // types 可以是类型/处理器对的映射
     if (typeof types === 'object') {
       for (const type in types) {
-        this._on(type, types[type], fn)
+        this._on(type, types[type], fn as unknown)
       }
     } else {
       // types 可以是空格分隔的字符串
@@ -774,13 +756,17 @@ export class EventEmitter {
    * @param fn 监听函数
    * @param context 上下文对象
    */
-  off(types?: string | Record<string, Function>, fn?: Function, context?: any): this {
+  off(
+    types?: string | Record<string, (...args: unknown[]) => unknown>,
+    fn?: (...args: unknown[]) => unknown,
+    context?: unknown
+  ): this {
     if (!types) {
       // 如果没有参数则清除所有监听器
       this._events = {}
     } else if (typeof types === 'object') {
       for (const type in types) {
-        this._off(type, types[type], fn)
+        this._off(type, types[type], fn as unknown)
       }
     } else {
       const typesList = splitWords(types)
@@ -795,7 +781,7 @@ export class EventEmitter {
   /**
    * 添加监听器(内部方法)
    */
-  private _on(type: string, fn: Function, context?: any): void {
+  private _on(type: string, fn: (...args: unknown[]) => unknown, context?: unknown): void {
     const typeListeners = this._events[type] || []
     if (!this._events[type]) {
       this._events[type] = typeListeners
@@ -820,7 +806,7 @@ export class EventEmitter {
   /**
    * 移除监听器(内部方法)
    */
-  private _off(type: string, fn?: Function, context?: any): void {
+  private _off(type: string, fn?: (...args: unknown[]) => unknown, context?: unknown): void {
     const listeners = this._events[type]
     if (!listeners) return
 
@@ -859,20 +845,20 @@ export class EventEmitter {
    * @param data 数据对象
    * @param propagate 是否传播
    */
-  fire(type: string, data?: any, propagate?: boolean): this {
+  fire(type: string, data?: unknown, propagate?: boolean): this {
     if (!this.listens(type, propagate)) return this
 
     const event = {
-      ...data,
+      ...(data as Record<string, unknown>),
       type,
       target: this,
-      sourceTarget: data?.sourceTarget || this
+      sourceTarget: (data as Record<string, unknown> | undefined)?.sourceTarget || this
     }
 
     const listeners = this._events[type]
 
     if (listeners) {
-      this._firingCount = (this._firingCount + 1) || 1
+      this._firingCount = this._firingCount + 1 || 1
       for (let i = 0, len = listeners.length; i < len; i++) {
         const l = listeners[i]
         l.fn.call(l.ctx || this, event)
@@ -913,7 +899,11 @@ export class EventEmitter {
    * @param fn 监听函数
    * @param context 上下文
    */
-  once(types: string | Record<string, Function>, fn?: Function, context?: any): this {
+  once(
+    types: string | Record<string, (...args: unknown[]) => unknown>,
+    fn?: (...args: unknown[]) => unknown,
+    context?: unknown
+  ): this {
     if (typeof types === 'object') {
       for (const type in types) {
         this.once(type, types[type], fn)
@@ -949,13 +939,9 @@ export class EventEmitter {
   /**
    * 传播事件
    */
-  private _propagateEvent(e: any): void {
+  private _propagateEvent(e: Record<string, unknown>): void {
     for (const id in this._eventParents) {
-      this._eventParents[id].fire(
-        e.type,
-        { ...e, layer: e.target, propagatedFrom: e.target },
-        true
-      )
+      this._eventParents[id].fire(e.type as string, { ...e, layer: e.target, propagatedFrom: e.target }, true)
     }
   }
 

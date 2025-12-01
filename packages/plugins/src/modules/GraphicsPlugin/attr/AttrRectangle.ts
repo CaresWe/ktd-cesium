@@ -57,10 +57,7 @@ export interface RectangleEntityAttr {
 /**
  * 样式赋值到 entity
  */
-export function style2Entity(
-  style?: RectangleStyleConfig,
-  entityattr?: RectangleEntityAttr
-): RectangleEntityAttr {
+export function style2Entity(style?: RectangleStyleConfig, entityattr?: RectangleEntityAttr): RectangleEntityAttr {
   const finalStyle = style || {}
 
   if (entityattr == null) {
@@ -69,8 +66,8 @@ export function style2Entity(
 
   // 贴地时，剔除高度相关属性
   if (finalStyle.clampToGround) {
-    if (finalStyle.hasOwnProperty('height')) delete finalStyle.height
-    if (finalStyle.hasOwnProperty('extrudedHeight')) delete finalStyle.extrudedHeight
+    if (Object.prototype.hasOwnProperty.call(finalStyle, 'height')) delete finalStyle.height
+    if (Object.prototype.hasOwnProperty.call(finalStyle, 'extrudedHeight')) delete finalStyle.extrudedHeight
   }
 
   // Style 赋值到 Entity
@@ -115,8 +112,7 @@ export function style2Entity(
         break
       case 'extrudedHeight':
         if (isNumber(value)) {
-          entityattr.extrudedHeight =
-            Number(entityattr.height || finalStyle.height || 0) + Number(value)
+          entityattr.extrudedHeight = Number(entityattr.height || finalStyle.height || 0) + Number(value)
         } else {
           entityattr.extrudedHeight = value as Cesium.Property
         }
@@ -131,9 +127,7 @@ export function style2Entity(
         // 填充图片
         entityattr.material = new Cesium.ImageMaterialProperty({
           image: finalStyle.image,
-          color: Cesium.Color.fromCssColorString('#FFFFFF').withAlpha(
-            Number(finalStyle.opacity || 1.0)
-          )
+          color: Cesium.Color.fromCssColorString('#FFFFFF').withAlpha(Number(finalStyle.opacity || 1.0))
         })
         break
       case 'rotation':

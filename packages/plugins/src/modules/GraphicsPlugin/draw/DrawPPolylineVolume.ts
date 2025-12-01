@@ -3,7 +3,7 @@ import { DrawPPolyline } from './DrawPPolyline'
 import { getCurrentMousePosition } from '@ktd-cesium/shared'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { GraphicsEventType } from '../../EventPlugin'
-import type {  PolylineVolumePrimitiveAttribute } from '../types'
+import type { PolylineVolumePrimitiveAttribute } from '../types'
 
 /**
  * Primitive 方式的管道体绘制类
@@ -105,7 +105,8 @@ export class DrawPPolylineVolume extends DrawPPolyline {
       this.primitives!.remove(this.currentPrimitive)
     }
 
-    const attr = (this.currentPrimitive as unknown as Record<string, unknown>).attribute as PolylineVolumePrimitiveAttribute
+    const attr = (this.currentPrimitive as unknown as Record<string, unknown>)
+      .attribute as PolylineVolumePrimitiveAttribute
     const style = attr.style
     const shape = style.shape || this.createDefaultShape()
 
@@ -116,7 +117,10 @@ export class DrawPPolylineVolume extends DrawPPolyline {
         shapePositions: shape,
         vertexFormat: Cesium.PerInstanceColorAppearance.VERTEX_FORMAT
       }),
-      attributes: (this.currentPrimitive as unknown as Record<string, unknown>)._instanceAttributes as Record<string, unknown> || {
+      attributes: ((this.currentPrimitive as unknown as Record<string, unknown>)._instanceAttributes as Record<
+        string,
+        unknown
+      >) || {
         color: Cesium.ColorGeometryInstanceAttribute.fromColor(
           this.parseColor(style.color) || Cesium.Color.YELLOW.withAlpha(0.5)
         )
@@ -235,11 +239,7 @@ export class DrawPPolylineVolume extends DrawPPolyline {
         const mpt1 = positions[positions.length - 1]
         const mpt2 = positions[positions.length - 2]
 
-        if (
-          Math.abs(mpt1.x - mpt2.x) < 1 &&
-          Math.abs(mpt1.y - mpt2.y) < 1 &&
-          Math.abs(mpt1.z - mpt2.z) < 1
-        ) {
+        if (Math.abs(mpt1.x - mpt2.x) < 1 && Math.abs(mpt1.y - mpt2.y) < 1 && Math.abs(mpt1.z - mpt2.z) < 1) {
           positions.pop()
         }
       }
@@ -251,9 +251,7 @@ export class DrawPPolylineVolume extends DrawPPolyline {
    * Primitive 绘制结束
    */
   protected override finishPrimitive(): void {
-    if (!this.currentPrimitive) return
-
-    // 保存最终位置
+    if (!this.currentPrimitive) return // 保存最终位置
     ;(this.currentPrimitive as unknown as Record<string, unknown>)._positions_draw = this.getDrawPosition()
 
     // 绑定编辑对象

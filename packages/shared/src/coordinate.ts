@@ -1,9 +1,4 @@
-import {
-  Cartesian3,
-  Cartographic,
-  EllipsoidGeodesic,
-  Math as CesiumMath
-} from 'cesium'
+import { Cartesian3, Cartographic, EllipsoidGeodesic, Math as CesiumMath } from 'cesium'
 
 /**
  * 经纬度转笛卡尔坐标
@@ -11,11 +6,7 @@ import {
  * @param latitude 纬度
  * @param height 高度（米）
  */
-export function degreesToCartesian(
-  longitude: number,
-  latitude: number,
-  height: number = 0
-): Cartesian3 {
+export function degreesToCartesian(longitude: number, latitude: number, height: number = 0): Cartesian3 {
   return Cartesian3.fromDegrees(longitude, latitude, height)
 }
 
@@ -23,9 +14,7 @@ export function degreesToCartesian(
  * 笛卡尔坐标转经纬度
  * @param cartesian 笛卡尔坐标
  */
-export function cartesianToDegrees(
-  cartesian: Cartesian3
-): { longitude: number; latitude: number; height: number } {
+export function cartesianToDegrees(cartesian: Cartesian3): { longitude: number; latitude: number; height: number } {
   const cartographic = Cartographic.fromCartesian(cartesian)
 
   return {

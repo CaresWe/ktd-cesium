@@ -53,8 +53,6 @@ export class FlattenManager {
       })
 
       this.tileset.clippingPlanes = this.clippingPlanes
-
-      console.log('Flatten enabled at height:', config.height)
     } catch (error) {
       console.error('Failed to enable flatten:', error)
       throw error
@@ -97,8 +95,6 @@ export class FlattenManager {
         const plane = this.createFlattenPlane(height)
         this.clippingPlanes.add(plane)
       }
-
-      console.log('Flatten height updated:', height)
     } catch (error) {
       console.error('Failed to update flatten height:', error)
       throw error
@@ -147,12 +143,6 @@ export class FlattenManager {
       })
 
       this.tileset.clippingPlanes = this.clippingPlanes
-
-      console.log('Entity flatten enabled', {
-        entityId: entity.id,
-        height: config.height,
-        planesCount: planes.length
-      })
     } catch (error) {
       console.error('Failed to enable entity flatten:', error)
       throw error
@@ -248,7 +238,6 @@ export class FlattenManager {
 
       this.config = null
       this._entityConfig = null
-      console.log('Flatten disabled')
     } catch (error) {
       console.error('Failed to disable flatten:', error)
       throw error

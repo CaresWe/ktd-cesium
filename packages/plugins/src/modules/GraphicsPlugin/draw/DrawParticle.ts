@@ -152,18 +152,12 @@ export class DrawParticle extends DrawPrimitiveBase {
         )
       case 'box':
         return new Cesium.BoxEmitter(
-          emitterOptions instanceof Cesium.Cartesian3
-            ? emitterOptions
-            : new Cesium.Cartesian3(1.0, 1.0, 1.0)
+          emitterOptions instanceof Cesium.Cartesian3 ? emitterOptions : new Cesium.Cartesian3(1.0, 1.0, 1.0)
         )
       case 'circle':
-        return new Cesium.CircleEmitter(
-          typeof emitterOptions === 'number' ? emitterOptions : 0.5
-        )
+        return new Cesium.CircleEmitter(typeof emitterOptions === 'number' ? emitterOptions : 0.5)
       case 'sphere':
-        return new Cesium.SphereEmitter(
-          typeof emitterOptions === 'number' ? emitterOptions : 1.0
-        )
+        return new Cesium.SphereEmitter(typeof emitterOptions === 'number' ? emitterOptions : 1.0)
       default:
         return new Cesium.ConeEmitter(Cesium.Math.toRadians(45.0))
     }
@@ -225,12 +219,7 @@ export class DrawParticle extends DrawPrimitiveBase {
     const offset = this.particleOptions?.emitterOffset || new Cesium.Cartesian3(-4.0, 0.0, 1.4)
     const rotation = this.particleOptions?.emitterRotation || { heading: 0, pitch: 0, roll: 0 }
 
-    this.hpr = Cesium.HeadingPitchRoll.fromDegrees(
-      rotation.heading,
-      rotation.pitch,
-      rotation.roll,
-      this.hpr
-    )
+    this.hpr = Cesium.HeadingPitchRoll.fromDegrees(rotation.heading, rotation.pitch, rotation.roll, this.hpr)
 
     this.trs.translation = Cesium.Cartesian3.clone(offset, this.translation)
     this.trs.rotation = Cesium.Quaternion.fromHeadingPitchRoll(this.hpr, this.rotation)

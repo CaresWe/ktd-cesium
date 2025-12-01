@@ -20,12 +20,11 @@ export class DrawLabel extends DrawPoint {
     this._positions_draw = null
 
     const labelAttr = attribute as LabelDrawAttribute
-    const that = this
 
     const addattr: Cesium.Entity.ConstructorOptions & { attribute: LabelDrawAttribute } = {
       show: false,
       position: new Cesium.CallbackProperty((_time?: Cesium.JulianDate) => {
-        return that.getDrawPosition()
+        return this.getDrawPosition()
       }, false) as unknown as Cesium.PositionProperty,
       label: attr.style2Entity(labelAttr.style),
       attribute: labelAttr

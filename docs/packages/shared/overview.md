@@ -31,6 +31,20 @@ const cartesian = degreesToCartesian(116.4, 39.9, 0)
 const { longitude, latitude, height } = cartesianToDegrees(cartesian)
 ```
 
+### [坐标转换（国内坐标系）(coordinate-transform)](/packages/shared/coordinate-transform)
+
+提供 WGS84、GCJ-02（火星坐标系）、BD-09（百度坐标系）之间的相互转换。
+
+```typescript
+import { wgs84ToGcj02, gcj02ToBd09, transformCoordinate, CoordinateOffset } from '@ktd-cesium/shared'
+
+// WGS84 转 GCJ-02
+const [gcjLng, gcjLat] = wgs84ToGcj02(116.3974, 39.9093)
+
+// 使用工厂函数转换
+const [bdLng, bdLat] = transformCoordinate(116.4039, 39.9151, CoordinateOffset.GCJ02, CoordinateOffset.BD09)
+```
+
 ### [数学计算 (math)](/packages/shared/math)
 
 提供常用的数学计算工具函数。
@@ -64,6 +78,88 @@ import { formatCoordinate, formatDistance } from '@ktd-cesium/shared'
 
 const coord = formatCoordinate(116.4074, 39.9042)
 const dist = formatDistance(1500)
+```
+
+### [工具函数 (utils)](/packages/shared/utils)
+
+提供通用的工具函数，包括对象操作、函数操作、字符串处理等。
+
+```typescript
+import { extend, clone, throttle } from '@ktd-cesium/shared'
+
+// 对象合并
+const merged = extend({ a: 1 }, { b: 2 })
+
+// 深拷贝
+const copied = clone(original)
+
+// 节流函数
+const throttled = throttle(fn, 100)
+```
+
+### [位置处理 (position)](/packages/shared/position)
+
+提供 Cesium 位置相关的工具方法，包括高度计算、距离计算、位置插值等。
+
+```typescript
+import { getMaxHeight, getDistance, lerpPosition } from '@ktd-cesium/shared'
+
+const maxHeight = getMaxHeight(positions)
+const distance = getDistance(pos1, pos2)
+const interpolated = lerpPosition(start, end, 0.5)
+```
+
+### [曲线处理 (curve)](/packages/shared/curve)
+
+提供将折线转换为平滑曲线的功能。
+
+```typescript
+import { line2curve } from '@ktd-cesium/shared'
+
+// 将折线转换为平滑曲线
+const smoothCurve = line2curve(positions, false)
+```
+
+### [几何计算 (geometry)](/packages/shared/geometry)
+
+提供矩阵变换、旋转、平移、平行线计算等几何计算功能。
+
+```typescript
+import { getRotateCenterPoint, getOffsetLine } from '@ktd-cesium/shared'
+
+// 绕中心点旋转
+const rotated = getRotateCenterPoint(center, point, 90)
+
+// 计算平行线
+const offsetLine = getOffsetLine(positions, 0.5)
+```
+
+### [Cesium 工具 (cesium)](/packages/shared/cesium)
+
+提供 GeoJSON 处理、样式配置、鼠标位置拾取等 Cesium 相关的工具函数。
+
+```typescript
+import { getPositionByGeoJSON, getCurrentMousePosition } from '@ktd-cesium/shared'
+
+// 从 GeoJSON 获取位置
+const position = getPositionByGeoJSON(geojson.geometry)
+
+// 获取鼠标位置
+const mousePos = getCurrentMousePosition(scene, screenPosition)
+```
+
+### [军标图形 (military-symbols)](/packages/shared/military-symbols)
+
+提供多种军事标绘图形的计算功能。
+
+```typescript
+import { computeAttackArrowPositions, computeSectorPositions } from '@ktd-cesium/shared'
+
+// 计算攻击箭头
+const arrowPositions = computeAttackArrowPositions(positions)
+
+// 计算扇形
+const sectorPositions = computeSectorPositions(positions)
 ```
 
 ## 使用场景
@@ -109,6 +205,13 @@ const colorValue = mapRange(temperature, -20, 40, 0, 1)
 详细的 API 文档请查看各个模块：
 
 - [坐标转换 API](/packages/shared/coordinate)
+- [坐标转换（国内坐标系）API](/packages/shared/coordinate-transform)
 - [数学计算 API](/packages/shared/math)
 - [颜色处理 API](/packages/shared/color)
 - [格式化 API](/packages/shared/format)
+- [工具函数 API](/packages/shared/utils)
+- [位置处理 API](/packages/shared/position)
+- [曲线处理 API](/packages/shared/curve)
+- [几何计算 API](/packages/shared/geometry)
+- [Cesium 工具 API](/packages/shared/cesium)
+- [军标图形 API](/packages/shared/military-symbols)

@@ -252,13 +252,13 @@ describe('doubleArrow', () => {
     // ==================== 边界条件测试 ====================
     describe('Boundary conditions', () => {
       it('should return empty array for null positions', () => {
-        const result = computeDoubleArrowPositions(null as any)
+        const result = computeDoubleArrowPositions(null as unknown as Cartesian3[])
 
         expect(result).toEqual([])
       })
 
       it('should return empty array for undefined positions', () => {
-        const result = computeDoubleArrowPositions(undefined as any)
+        const result = computeDoubleArrowPositions(undefined as unknown as Cartesian3[])
 
         expect(result).toEqual([])
       })

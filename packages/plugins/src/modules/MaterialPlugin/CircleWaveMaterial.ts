@@ -135,11 +135,9 @@ export class CircleWaveMaterial {
       this._color = value as Cesium.Property
 
       if (value && typeof (value as Cesium.Property).definitionChanged === 'object') {
-        this._colorSubscription = (value as Cesium.Property).definitionChanged.addEventListener(
-          () => {
-            this._definitionChanged.raiseEvent(this)
-          }
-        )
+        this._colorSubscription = (value as Cesium.Property).definitionChanged.addEventListener(() => {
+          this._definitionChanged.raiseEvent(this)
+        })
       }
 
       this._definitionChanged.raiseEvent(this)

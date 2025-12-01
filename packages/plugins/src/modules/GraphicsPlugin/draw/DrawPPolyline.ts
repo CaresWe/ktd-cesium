@@ -43,7 +43,9 @@ export class DrawPPolyline extends DrawPrimitiveBase {
   /**
    * 创建 Polyline Primitive
    */
-  protected override createPrimitive(attribute: Record<string, unknown>): Cesium.Primitive | Cesium.GroundPrimitive | null {
+  protected override createPrimitive(
+    attribute: Record<string, unknown>
+  ): Cesium.Primitive | Cesium.GroundPrimitive | null {
     this._positions_draw = []
 
     const polylineAttr = attribute as PolylinePrimitiveAttribute
@@ -189,11 +191,7 @@ export class DrawPPolyline extends DrawPrimitiveBase {
         const mpt1 = positions[positions.length - 1]
         const mpt2 = positions[positions.length - 2]
 
-        if (
-          Math.abs(mpt1.x - mpt2.x) < 1 &&
-          Math.abs(mpt1.y - mpt2.y) < 1 &&
-          Math.abs(mpt1.z - mpt2.z) < 1
-        ) {
+        if (Math.abs(mpt1.x - mpt2.x) < 1 && Math.abs(mpt1.y - mpt2.y) < 1 && Math.abs(mpt1.z - mpt2.z) < 1) {
           positions.pop()
         }
       }

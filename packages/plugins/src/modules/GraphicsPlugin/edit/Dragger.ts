@@ -58,10 +58,7 @@ function getAttrForType(type: PointType, attr: DraggerAttr): DraggerAttr {
  * @param options 选项
  * @returns 拖拽点实体
  */
-export function createDragger(
-  dataSource: Cesium.CustomDataSource,
-  options: CreateDraggerOptions
-): DraggerEntity {
+export function createDragger(dataSource: Cesium.CustomDataSource, options: CreateDraggerOptions): DraggerEntity {
   let dragger: DraggerEntity
 
   if (options.dragger) {

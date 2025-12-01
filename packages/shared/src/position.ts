@@ -149,18 +149,16 @@ export function getCenterPosition(positions: Cesium.Cartesian3[]): Cesium.Cartes
 
   if (positions.length === 1) return positions[0]
 
-  let x = 0, y = 0, z = 0
+  let x = 0,
+    y = 0,
+    z = 0
   for (let i = 0; i < positions.length; i++) {
     x += positions[i].x
     y += positions[i].y
     z += positions[i].z
   }
 
-  return new Cesium.Cartesian3(
-    x / positions.length,
-    y / positions.length,
-    z / positions.length
-  )
+  return new Cesium.Cartesian3(x / positions.length, y / positions.length, z / positions.length)
 }
 
 /**
@@ -181,7 +179,11 @@ export function lerpPosition(pos1: Cesium.Cartesian3, pos2: Cesium.Cartesian3, t
  * @param count 生成的点数（不包括起点和终点）
  * @returns 插值点数组
  */
-export function interpolatePositions(pos1: Cesium.Cartesian3, pos2: Cesium.Cartesian3, count: number): Cesium.Cartesian3[] {
+export function interpolatePositions(
+  pos1: Cesium.Cartesian3,
+  pos2: Cesium.Cartesian3,
+  count: number
+): Cesium.Cartesian3[] {
   const result: Cesium.Cartesian3[] = [pos1]
 
   for (let i = 1; i <= count; i++) {

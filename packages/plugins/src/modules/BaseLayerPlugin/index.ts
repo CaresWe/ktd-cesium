@@ -2,7 +2,8 @@ import type {
   ImageryLayer,
   UrlTemplateImageryProvider as CesiumUrlTemplateImageryProvider,
   WebMapServiceImageryProvider as CesiumWebMapServiceImageryProvider,
-  WebMapTileServiceImageryProvider as CesiumWebMapTileServiceImageryProvider
+  WebMapTileServiceImageryProvider as CesiumWebMapTileServiceImageryProvider,
+  Rectangle
 } from 'cesium'
 import {
   UrlTemplateImageryProvider,
@@ -52,14 +53,16 @@ export class BaseLayerPlugin extends BasePlugin {
   private layers: Map<string, ImageryLayer> = new Map()
 
   protected onInstall(_viewer: KtdViewer): void {
-    console.log('Layer plugin installed')
+    // Layer plugin installed
   }
 
   /**
    * 根据坐标系创建瓦片方案
    * @private
    */
-  private createTilingScheme(coordinateSystem?: CoordinateSystem | string): any {
+  private createTilingScheme(
+    coordinateSystem?: CoordinateSystem | string
+  ): GeographicTilingScheme | WebMercatorTilingScheme {
     const coordSys = coordinateSystem || CoordinateSystem.EPSG3857
 
     switch (coordSys) {
@@ -342,7 +345,12 @@ export class BaseLayerPlugin extends BasePlugin {
       return this.layers.get(id)!
     }
 
-    const providerOptions: any = {
+    const providerOptions: {
+      url: string
+      enablePickFeatures: boolean
+      layers?: string
+      rectangle?: Rectangle
+    } = {
       url: options.url,
       enablePickFeatures: options.enablePickFeatures ?? true
     }
@@ -371,7 +379,11 @@ export class BaseLayerPlugin extends BasePlugin {
    */
   private addLayerFromProvider(
     id: string,
-    provider: any,
+    provider:
+      | UrlTemplateImageryProvider
+      | WebMapServiceImageryProvider
+      | WebMapTileServiceImageryProvider
+      | ArcGisMapServerImageryProvider,
     options: BaseLayerOptions
   ): ImageryLayer {
     const layer = this.cesiumViewer.imageryLayers.addImageryProvider(provider, options.index)
@@ -723,7 +735,6 @@ export class BaseLayerPlugin extends BasePlugin {
 
   protected onDestroy(): void {
     this.clearAll()
-    console.log('Layer plugin destroyed')
   }
 }
 

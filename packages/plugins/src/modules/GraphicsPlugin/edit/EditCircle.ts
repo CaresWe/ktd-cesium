@@ -100,9 +100,7 @@ export class EditCircle extends EditPolygon {
       // 更新高度
       const graphic = this.getGraphic()
       if (graphic.height !== undefined && graphic.height) {
-        const heightValue = (graphic.height as Cesium.Property).getValue(
-          this.viewer.clock.currentTime
-        ) as number
+        const heightValue = (graphic.height as Cesium.Property).getValue(this.viewer.clock.currentTime) as number
 
         if (Number.isFinite(heightValue)) {
           for (let i = 0, len = this._positions_draw.length; i < len; i++) {
@@ -175,10 +173,7 @@ export class EditCircle extends EditPolygon {
 
             // 更新高度
             if (!style.clampToGround) {
-              const height = this.formatNum(
-                Cesium.Cartographic.fromCartesian(position).height,
-                2
-              )
+              const height = this.formatNum(Cesium.Cartographic.fromCartesian(position).height, 2)
               const graphic = this.getGraphic()
               graphic.height = height as unknown as Cesium.Property
               style.height = height
@@ -191,11 +186,7 @@ export class EditCircle extends EditPolygon {
               const majorPos = draggerEntity.majorDragger.position
               if (majorPos && typeof majorPos === 'object' && 'getValue' in majorPos) {
                 const currentMajorPos = (majorPos as Cesium.Property).getValue(time) as Cesium.Cartesian3
-                const newPos = Cesium.Cartesian3.add(
-                  currentMajorPos,
-                  diff,
-                  new Cesium.Cartesian3()
-                )
+                const newPos = Cesium.Cartesian3.add(currentMajorPos, diff, new Cesium.Cartesian3())
                 draggerEntity.majorDragger.position = newPos
               }
             }
@@ -205,11 +196,7 @@ export class EditCircle extends EditPolygon {
               const minorPos = draggerEntity.minorDragger.position
               if (minorPos && typeof minorPos === 'object' && 'getValue' in minorPos) {
                 const currentMinorPos = (minorPos as Cesium.Property).getValue(time) as Cesium.Cartesian3
-                const newPos = Cesium.Cartesian3.add(
-                  currentMinorPos,
-                  diff,
-                  new Cesium.Cartesian3()
-                )
+                const newPos = Cesium.Cartesian3.add(currentMinorPos, diff, new Cesium.Cartesian3())
                 draggerEntity.minorDragger.position = newPos
               }
             }
@@ -370,5 +357,4 @@ export class EditCircle extends EditPolygon {
       throw error // 向上抛出错误
     }
   }
-
 }

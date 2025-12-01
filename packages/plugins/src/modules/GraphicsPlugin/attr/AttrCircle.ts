@@ -10,7 +10,10 @@ import type { GeoJSONFeature } from '../types'
 /**
  * 样式赋值到 entity
  */
-export function style2Entity(style: Record<string, unknown>, entityattr?: Cesium.EllipseGraphics.ConstructorOptions): Cesium.EllipseGraphics.ConstructorOptions {
+export function style2Entity(
+  style: Record<string, unknown>,
+  entityattr?: Cesium.EllipseGraphics.ConstructorOptions
+): Cesium.EllipseGraphics.ConstructorOptions {
   style = style || {}
 
   if (entityattr == null) {
@@ -22,8 +25,8 @@ export function style2Entity(style: Record<string, unknown>, entityattr?: Cesium
 
   // 贴地时，剔除高度相关属性
   if (style.clampToGround) {
-    if (style.hasOwnProperty('height')) delete style.height
-    if (style.hasOwnProperty('extrudedHeight')) delete style.extrudedHeight
+    if (Object.prototype.hasOwnProperty.call(style, 'height')) delete style.height
+    if (Object.prototype.hasOwnProperty.call(style, 'extrudedHeight')) delete style.extrudedHeight
   }
 
   // Style 赋值到 Entity
@@ -56,13 +59,14 @@ export function style2Entity(style: Record<string, unknown>, entityattr?: Cesium
         break
       case 'height':
         entityattr.height = Number(value)
-        if (style.extrudedHeight && (style.extrudedHeight)) {
+        if (style.extrudedHeight && style.extrudedHeight) {
           entityattr.extrudedHeight = Number(style.extrudedHeight) + Number(value)
         }
         break
       case 'extrudedHeight':
         if (isNumber(value)) {
-          entityattr.extrudedHeight = Number((entityattr as Record<string, unknown>).height || style.height || 0) + Number(value)
+          entityattr.extrudedHeight =
+            Number((entityattr as Record<string, unknown>).height || style.height || 0) + Number(value)
         } else {
           entityattr.extrudedHeight = Number(value)
         }
@@ -159,11 +163,7 @@ export function getEllipseOuterPositions(options: {
   const step = Math.ceil(cep.outerPositions.length / 3 / count)
 
   for (let i = 0; i < cep.outerPositions.length; i += step * 3) {
-    const cartesian = new Cesium.Cartesian3(
-      cep.outerPositions[i],
-      cep.outerPositions[i + 1],
-      cep.outerPositions[i + 2]
-    )
+    const cartesian = new Cesium.Cartesian3(cep.outerPositions[i], cep.outerPositions[i + 1], cep.outerPositions[i + 2])
     positions.push(cartesian)
   }
 
@@ -173,11 +173,7 @@ export function getEllipseOuterPositions(options: {
 /**
  * 获取 entity 的外边界坐标
  */
-export function getOutlinePositions(
-  entity: Cesium.Entity,
-  noAdd?: boolean,
-  count?: number
-): Cesium.Cartesian3[] {
+export function getOutlinePositions(entity: Cesium.Entity, noAdd?: boolean, count?: number): Cesium.Cartesian3[] {
   const time = Cesium.JulianDate.now()
 
   const position = entity.position?.getValue(time)

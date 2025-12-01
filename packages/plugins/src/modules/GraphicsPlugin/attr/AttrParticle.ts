@@ -191,10 +191,10 @@ export function toGeoJSON(entity: EntityWithAttribute): GeoJSONFeature {
 
 /**
  * 将样式应用到实体
- * @param style - 样式配置对象
- * @param entityattr - 实体对象
+ * @param _style - 样式配置对象
+ * @param _entityattr - 实体对象
  */
-export function style2Entity(style: ParticleStyleConfig, entityattr?: unknown): void {
+export function style2Entity(_style: ParticleStyleConfig, _entityattr?: unknown): void {
   // 粒子系统的样式在创建时应用，这里无需做任何操作
   // 保留此方法以满足 AttrClass 接口要求
 }

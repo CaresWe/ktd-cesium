@@ -7,7 +7,7 @@ export default defineConfig({
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'KtdCesiumUtils',
       formats: ['es', 'cjs'],
-      fileName: (format) => format === 'es' ? 'index.js' : 'index.cjs'
+      fileName: (format) => (format === 'es' ? 'index.js' : 'index.cjs')
     },
     rollupOptions: {
       external: ['cesium'],

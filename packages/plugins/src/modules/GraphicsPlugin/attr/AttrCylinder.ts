@@ -6,7 +6,10 @@ import type { GeoJSONFeature } from '../types'
 /**
  * 样式赋值到 entity
  */
-export function style2Entity(style: Record<string, unknown>, entityattr?: Cesium.CylinderGraphics.ConstructorOptions): Cesium.CylinderGraphics.ConstructorOptions {
+export function style2Entity(
+  style: Record<string, unknown>,
+  entityattr?: Cesium.CylinderGraphics.ConstructorOptions
+): Cesium.CylinderGraphics.ConstructorOptions {
   style = style || {}
 
   if (entityattr == null) {

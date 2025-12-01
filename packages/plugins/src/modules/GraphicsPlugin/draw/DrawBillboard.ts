@@ -23,12 +23,11 @@ export class DrawBillboard extends DrawPoint {
     this._positions_draw = null
 
     const billboardAttr = attribute as BillboardDrawAttribute
-    const that = this
 
     const addattr: Cesium.Entity.ConstructorOptions & { attribute: BillboardDrawAttribute } = {
       show: false,
       position: new Cesium.CallbackProperty((_time?: Cesium.JulianDate) => {
-        return that.getDrawPosition()
+        return this.getDrawPosition()
       }, false) as unknown as Cesium.PositionProperty,
       billboard: attr.style2Entity(billboardAttr.style),
       attribute: billboardAttr

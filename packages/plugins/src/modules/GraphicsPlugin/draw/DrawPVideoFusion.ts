@@ -31,6 +31,14 @@ interface ExtendedVideoPrimitive extends PrimitiveObject {
 }
 
 /**
+ * 扩展的编辑控制点 Entity 接口
+ */
+interface EditPointEntity extends Cesium.Entity {
+  _editIndex?: number
+  _editType?: string
+}
+
+/**
  * 视频融合 Primitive 绘制类
  * 支持：
  * - 视频材质 (MP4, WebM, FLV, HLS)
@@ -431,7 +439,6 @@ export class DrawPVideoFusion extends DrawPrimitiveBase {
       }),
       show: style.show !== false
     })
-
     ;(this.videoPrimitive as ExtendedVideoPrimitive)._videoAttribute = { style } as VideoFusionPrimitiveAttribute
     ;(this.videoPrimitive as ExtendedVideoPrimitive)._positions_draw = positions
 
@@ -459,8 +466,9 @@ export class DrawPVideoFusion extends DrawPrimitiveBase {
       show: style.show !== false,
       classificationType: style.classificationType || Cesium.ClassificationType.BOTH
     })
-
-    ;(this.videoPrimitive as unknown as ExtendedVideoPrimitive)._videoAttribute = { style } as VideoFusionPrimitiveAttribute
+    ;(this.videoPrimitive as unknown as ExtendedVideoPrimitive)._videoAttribute = {
+      style
+    } as VideoFusionPrimitiveAttribute
     ;(this.videoPrimitive as unknown as ExtendedVideoPrimitive)._positions_draw = positions
 
     this.primitives!.add(this.videoPrimitive)
@@ -627,9 +635,9 @@ export class DrawPVideoFusion extends DrawPrimitiveBase {
           outlineWidth: 2,
           disableDepthTestDistance: Number.POSITIVE_INFINITY
         }
-      })
-      ;(point as any)._editIndex = index
-      ;(point as any)._editType = 'corner'
+      }) as EditPointEntity
+      point._editIndex = index
+      point._editType = 'corner'
       this.editPoints.push(point)
     })
   }
@@ -640,7 +648,7 @@ export class DrawPVideoFusion extends DrawPrimitiveBase {
   protected removeEditPoints(): void {
     if (!this.dataSource) return
 
-    this.editPoints.forEach(point => {
+    this.editPoints.forEach((point) => {
       this.dataSource!.entities.remove(point)
     })
     this.editPoints = []

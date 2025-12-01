@@ -15,7 +15,7 @@ import type { KtdViewer } from '@ktd-cesium/core'
 import type { EventPlugin } from '../EventPlugin'
 import { MonomerManager } from './MonomerManager'
 import { StyleManager } from './StyleManager'
-import { ClippingPlaneManager} from './ClippingPlaneManager'
+import { ClippingPlaneManager } from './ClippingPlaneManager'
 import { ClipManager } from './ClipManager'
 import { FloodAnalyzer } from './FloodAnalyzer'
 import { FlattenManager } from './FlattenManager'
@@ -52,7 +52,6 @@ import type {
   SnowAccumulationConfig,
   WeatherEffectType
 } from './types'
-import type { TransformPlugin } from '../TransformPlugin'
 
 /**
  * 3D Tiles 插件
@@ -86,9 +85,6 @@ export class TilesPlugin extends BasePlugin {
   /** 事件插件引用 */
   private eventPlugin?: EventPlugin
 
-  /** 变换插件引用 */
-  private transformPlugin?: TransformPlugin
-
   /** 点击事件监听器ID */
   private clickListenerId?: string
 
@@ -105,12 +101,9 @@ export class TilesPlugin extends BasePlugin {
     try {
       // 获取插件引用
       this.eventPlugin = viewer.getPlugin('event') as EventPlugin | undefined
-      this.transformPlugin = viewer.getPlugin('transform') as TransformPlugin | undefined
 
       // 注册全局事件
       this.registerGlobalEvents()
-
-      console.log('Tiles plugin installed')
     } catch (error) {
       console.error('Failed to install Tiles plugin:', error)
       throw error
@@ -141,7 +134,7 @@ export class TilesPlugin extends BasePlugin {
   /**
    * 处理点击事件
    */
-  private handleClick(info: { pickedObject?: { primitive?: unknown; id?: unknown } }): void {
+  private handleClick(info: { pickedObject?: unknown }): void {
     try {
       if (!info.pickedObject) return
 
@@ -170,7 +163,7 @@ export class TilesPlugin extends BasePlugin {
   /**
    * 处理悬停事件
    */
-  private handleHover(info: { pickedObject?: { primitive?: unknown; id?: unknown } }): void {
+  private handleHover(info: { pickedObject?: unknown }): void {
     try {
       const feature = (info.pickedObject as Cesium3DTileFeature) || null
 
@@ -287,9 +280,7 @@ export class TilesPlugin extends BasePlugin {
         const [x, y, z] = config.offset
         const offset = new Cartesian3(x, y, z)
         const translationMatrix = Matrix4.fromTranslation(offset, new Matrix4())
-        matrix = matrix
-          ? Matrix4.multiply(matrix, translationMatrix, new Matrix4())
-          : translationMatrix
+        matrix = matrix ? Matrix4.multiply(matrix, translationMatrix, new Matrix4()) : translationMatrix
       }
 
       // 应用旋转
@@ -303,9 +294,7 @@ export class TilesPlugin extends BasePlugin {
         const quaternion = Transforms.headingPitchRollQuaternion(Cartesian3.ZERO, hpr)
         const rotation = Matrix3.fromQuaternion(quaternion, new Matrix3())
         const rotationMatrix = Matrix4.fromRotation(rotation, new Matrix4())
-        matrix = matrix
-          ? Matrix4.multiply(matrix, rotationMatrix, new Matrix4())
-          : rotationMatrix
+        matrix = matrix ? Matrix4.multiply(matrix, rotationMatrix, new Matrix4()) : rotationMatrix
       }
 
       // 应用缩放
@@ -378,8 +367,12 @@ export class TilesPlugin extends BasePlugin {
 
       // 保存原始变换参数
       const originalTransform: TilesTransform = {
-        offset: config.offset ? { x: config.offset[0], y: config.offset[1], z: config.offset[2] } : { x: 0, y: 0, z: 0 },
-        rotation: config.rotation ? { heading: config.rotation[0], pitch: config.rotation[1], roll: config.rotation[2] } : { heading: 0, pitch: 0, roll: 0 },
+        offset: config.offset
+          ? { x: config.offset[0], y: config.offset[1], z: config.offset[2] }
+          : { x: 0, y: 0, z: 0 },
+        rotation: config.rotation
+          ? { heading: config.rotation[0], pitch: config.rotation[1], roll: config.rotation[2] }
+          : { heading: 0, pitch: 0, roll: 0 },
         scale: config.scale ?? 1
       }
 
@@ -485,10 +478,7 @@ export class TilesPlugin extends BasePlugin {
           }
         },
 
-        getFeaturesByProperty: (
-          propertyName: string,
-          value: string | number
-        ): Cesium3DTileFeature[] => {
+        getFeaturesByProperty: (propertyName: string, value: string | number): Cesium3DTileFeature[] => {
           try {
             const allFeatures = layer.getAllFeatures()
             return allFeatures.filter((feature) => {
@@ -516,8 +506,6 @@ export class TilesPlugin extends BasePlugin {
             if (editOptions?.onTransformStart) {
               editOptions.onTransformStart(currentTransform)
             }
-
-            console.log(`Edit mode enabled for layer: ${layer.name}`)
           } catch (error) {
             console.error('Failed to enable edit mode:', error)
           }
@@ -538,7 +526,6 @@ export class TilesPlugin extends BasePlugin {
             }
 
             editOptions = undefined
-            console.log(`Edit mode disabled for layer: ${layer.name}`)
           } catch (error) {
             console.error('Failed to disable edit mode:', error)
           }
@@ -930,9 +917,7 @@ export class TilesPlugin extends BasePlugin {
       }
 
       const features = layer.getAllFeatures()
-      const matchedFeatures = features.filter((feature) =>
-        this.matchFilters(feature, operation.filters)
-      )
+      const matchedFeatures = features.filter((feature) => this.matchFilters(feature, operation.filters))
 
       switch (operation.operation) {
         case 'show':
@@ -1048,8 +1033,6 @@ export class TilesPlugin extends BasePlugin {
       if (this.hoverListenerId && this.eventPlugin) {
         this.eventPlugin.off(this.hoverListenerId)
       }
-
-      console.log('Tiles plugin destroyed')
     } catch (error) {
       console.error('Failed to destroy Tiles plugin:', error)
     }

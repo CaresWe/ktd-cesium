@@ -6,6 +6,15 @@ import { GraphicsEventType } from '../../EventPlugin'
 import type { PolygonPrimitiveAttribute } from '../types'
 
 /**
+ * 扩展的 GroundPrimitive 接口，包含自定义属性
+ */
+interface ExtendedGroundPrimitive extends Cesium.GroundPrimitive {
+  attribute?: PolygonPrimitiveAttribute
+  _positions_draw?: Cesium.Cartesian3[] | Cesium.Cartesian3
+  _instanceAttributes?: unknown
+}
+
+/**
  * Primitive 方式的多边形绘制类
  * 使用 GroundPrimitive，适合大量贴地多边形绘制
  *
@@ -28,7 +37,9 @@ export class DrawPPolygon extends DrawPPolyline {
   /**
    * 创建 GroundPrimitive
    */
-  protected override createPrimitive(attribute: Record<string, unknown>): Cesium.Primitive | Cesium.GroundPrimitive | null {
+  protected override createPrimitive(
+    attribute: Record<string, unknown>
+  ): Cesium.Primitive | Cesium.GroundPrimitive | null {
     this._positions_draw = []
 
     const polygonAttr = attribute as PolygonPrimitiveAttribute
@@ -96,7 +107,7 @@ export class DrawPPolygon extends DrawPPolyline {
         lastPointTemporary = false
 
         // 在绘制点基础自动增加高度
-        const polygonAttr = this.currentGroundPrimitive as any
+        const polygonAttr = this.currentGroundPrimitive as ExtendedGroundPrimitive
         if (polygonAttr?.attribute?.config?.addHeight) {
           point = addPositionsHeight(point, polygonAttr.attribute.config.addHeight) as Cesium.Cartesian3
         }
@@ -180,11 +191,7 @@ export class DrawPPolygon extends DrawPPolyline {
         const mpt1 = positions[positions.length - 1]
         const mpt2 = positions[positions.length - 2]
 
-        if (
-          Math.abs(mpt1.x - mpt2.x) < 1 &&
-          Math.abs(mpt1.y - mpt2.y) < 1 &&
-          Math.abs(mpt1.z - mpt2.z) < 1
-        ) {
+        if (Math.abs(mpt1.x - mpt2.x) < 1 && Math.abs(mpt1.y - mpt2.y) < 1 && Math.abs(mpt1.z - mpt2.z) < 1) {
           positions.pop()
         }
       }
@@ -207,12 +214,13 @@ export class DrawPPolygon extends DrawPPolyline {
     }
 
     // 创建新的几何体
+    const extPrimitive = this.currentGroundPrimitive as ExtendedGroundPrimitive
     const geometryInstance = new Cesium.GeometryInstance({
       geometry: new Cesium.PolygonGeometry({
         polygonHierarchy: new Cesium.PolygonHierarchy(positions),
         vertexFormat: Cesium.PerInstanceColorAppearance.VERTEX_FORMAT
       }),
-      attributes: (this.currentGroundPrimitive as any)._instanceAttributes || {
+      attributes: extPrimitive._instanceAttributes || {
         color: Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.YELLOW.withAlpha(0.5))
       }
     })
@@ -222,8 +230,8 @@ export class DrawPPolygon extends DrawPPolyline {
       appearance: new Cesium.PerInstanceColorAppearance({
         closed: false
       }),
-      show: (this.currentGroundPrimitive as any).show,
-      classificationType: (this.currentGroundPrimitive as any).classificationType
+      show: extPrimitive.show,
+      classificationType: extPrimitive.classificationType
     })
 
     this.primitives!.add(this.currentGroundPrimitive)
@@ -249,10 +257,8 @@ export class DrawPPolygon extends DrawPPolyline {
    * Primitive 绘制结束
    */
   protected override finishPrimitive(): void {
-    if (!this.currentGroundPrimitive) return
-
-    // 保存最终位置
-    ;(this.currentGroundPrimitive as any)._positions_draw = this.getDrawPosition()
+    if (!this.currentGroundPrimitive) return // 保存最终位置
+    ;(this.currentGroundPrimitive as ExtendedGroundPrimitive)._positions_draw = this.getDrawPosition()
 
     // 绑定编辑对象
     // (this.currentGroundPrimitive as any).editing = this.getEditClass(this.currentGroundPrimitive as unknown as Cesium.Entity)

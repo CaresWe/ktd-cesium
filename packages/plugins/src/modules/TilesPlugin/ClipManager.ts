@@ -60,8 +60,6 @@ export class ClipManager {
       if (config.showBox && this.graphicsPlugin) {
         this.boxEntity = this.createBoxVisualization(config)
       }
-
-      console.log('Box clipping enabled')
     } catch (error) {
       console.error('Failed to enable box clipping:', error)
       throw error
@@ -203,14 +201,12 @@ export class ClipManager {
         const plugin = this.graphicsPlugin as unknown as Record<string, unknown>
         const removeEntity = plugin.removeEntity
         if (typeof removeEntity === 'function') {
-          (removeEntity as (entity: unknown) => void)(this.boxEntity)
+          ;(removeEntity as (entity: unknown) => void)(this.boxEntity)
         }
       }
 
       this.boxClipConfig = null
       this.boxEntity = null
-
-      console.log('Box clipping disabled')
     } catch (error) {
       console.error('Failed to disable box clipping:', error)
       throw error
@@ -246,7 +242,6 @@ export class ClipManager {
         })
 
         this.tileset.clippingPlanes = this.clippingPlanes
-        console.log('Model clipping enabled')
       } else {
         console.warn('No clipping planes generated from entity geometry')
       }
@@ -338,7 +333,9 @@ export class ClipManager {
       // 处理矩形裁剪
       else if (entityAny.rectangle) {
         const rectangle = entityAny.rectangle as Record<string, unknown>
-        const coordinates = rectangle.coordinates as { getValue?: () => { west: number; south: number; east: number; north: number } }
+        const coordinates = rectangle.coordinates as {
+          getValue?: () => { west: number; south: number; east: number; north: number }
+        }
 
         if (coordinates?.getValue) {
           const rect = coordinates.getValue()
@@ -387,11 +384,7 @@ export class ClipManager {
 
           for (let i = 0; i < segments; i++) {
             const angle = (i / segments) * Math.PI * 2
-            const offset = new Cartesian3(
-              Math.cos(angle) * semiMajorAxis,
-              Math.sin(angle) * semiMinorAxis,
-              0
-            )
+            const offset = new Cartesian3(Math.cos(angle) * semiMajorAxis, Math.sin(angle) * semiMinorAxis, 0)
             const point = Cartesian3.add(position, offset, new Cartesian3())
             positions.push(point)
           }
@@ -437,8 +430,6 @@ export class ClipManager {
       }
 
       this.modelClipConfig = null
-
-      console.log('Model clipping disabled')
     } catch (error) {
       console.error('Failed to disable model clipping:', error)
       throw error

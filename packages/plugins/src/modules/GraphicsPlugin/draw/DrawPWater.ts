@@ -63,7 +63,9 @@ export class DrawPWater extends DrawPPolygon {
   /**
    * 创建水面 Primitive
    */
-  protected override createPrimitive(attribute: Record<string, unknown>): Cesium.Primitive | Cesium.GroundPrimitive | null {
+  protected override createPrimitive(
+    attribute: Record<string, unknown>
+  ): Cesium.Primitive | Cesium.GroundPrimitive | null {
     this._positions_draw = []
 
     const waterAttr = attribute as WaterPrimitiveAttribute
@@ -249,11 +251,7 @@ export class DrawPWater extends DrawPPolygon {
         const mpt1 = positions[positions.length - 1]
         const mpt2 = positions[positions.length - 2]
 
-        if (
-          Math.abs(mpt1.x - mpt2.x) < 1 &&
-          Math.abs(mpt1.y - mpt2.y) < 1 &&
-          Math.abs(mpt1.z - mpt2.z) < 1
-        ) {
+        if (Math.abs(mpt1.x - mpt2.x) < 1 && Math.abs(mpt1.y - mpt2.y) < 1 && Math.abs(mpt1.z - mpt2.z) < 1) {
           positions.pop()
         }
       }
@@ -315,12 +313,7 @@ export class DrawPWater extends DrawPPolygon {
   protected createEditor(): EditWater | null {
     if (!this.waterPrimitive || !this.viewer || !this.dataSource) return null
 
-    return new EditWater(
-      this.waterPrimitive,
-      this.viewer,
-      this.dataSource,
-      () => this.updatePolygonGeometry()
-    )
+    return new EditWater(this.waterPrimitive, this.viewer, this.dataSource, () => this.updatePolygonGeometry())
   }
 
   // ==================== 编辑功能 ====================
@@ -398,7 +391,7 @@ export class DrawPWater extends DrawPPolygon {
    * 获取位置
    */
   getPositions(): Cesium.Cartesian3[] {
-    return (this._positions_draw as Cesium.Cartesian3[])?.map(p => p.clone()) || []
+    return (this._positions_draw as Cesium.Cartesian3[])?.map((p) => p.clone()) || []
   }
 
   /**

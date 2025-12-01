@@ -142,13 +142,13 @@ describe('regular', () => {
 
     describe('Boundary conditions', () => {
       it('should return empty array for null positions', () => {
-        const result = computeRegularPositions(null as any)
+        const result = computeRegularPositions(null as unknown as Cartesian3[])
 
         expect(result).toEqual([])
       })
 
       it('should return empty array for undefined positions', () => {
-        const result = computeRegularPositions(undefined as any)
+        const result = computeRegularPositions(undefined as unknown as Cartesian3[])
 
         expect(result).toEqual([])
       })
@@ -309,9 +309,7 @@ describe('regular', () => {
         const result = computeRegularPositions(positions, 8)
         const center = positions[0]
 
-        // Check angular spacing (should be 360/8 = 45 degrees)
-        const expectedAngle = 360 / 8
-
+        // Check that all vertices are at positive distance from center
         for (let i = 0; i < result.length; i++) {
           const dist = Cartesian3.distance(center, result[i])
           expect(dist).toBeGreaterThan(0)
@@ -450,13 +448,13 @@ describe('regular', () => {
 
     describe('Boundary conditions', () => {
       it('should return null for null positions', () => {
-        const params = getRegularParams(null as any)
+        const params = getRegularParams(null as unknown as Cartesian3[])
 
         expect(params).toBeNull()
       })
 
       it('should return null for undefined positions', () => {
-        const params = getRegularParams(undefined as any)
+        const params = getRegularParams(undefined as unknown as Cartesian3[])
 
         expect(params).toBeNull()
       })

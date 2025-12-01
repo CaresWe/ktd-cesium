@@ -118,9 +118,7 @@ export class EditRectangle extends EditPolygon {
 
         // 如果有 height 属性，设置高度
         if (graphic.height !== undefined && graphic.height) {
-          const heightValue = (graphic.height as Cesium.Property).getValue(
-            this.viewer.clock.currentTime
-          ) as number
+          const heightValue = (graphic.height as Cesium.Property).getValue(this.viewer.clock.currentTime) as number
           if (Number.isFinite(heightValue)) {
             position = setPositionsHeight(position, heightValue) as Cesium.Cartesian3
           }
@@ -158,10 +156,7 @@ export class EditRectangle extends EditPolygon {
               if (this.heightDraggers && this.heightDraggers.length > 0 && graphic.extrudedHeight) {
                 const extrudedHeight = (graphic.extrudedHeight as Cesium.Property).getValue(time) as number
                 if (Number.isFinite(extrudedHeight) && this.heightDraggers[draggerEntity.index]) {
-                  const heightPos = setPositionsHeight(
-                    updatedPosition,
-                    extrudedHeight
-                  ) as Cesium.Cartesian3
+                  const heightPos = setPositionsHeight(updatedPosition, extrudedHeight) as Cesium.Cartesian3
                   this.heightDraggers[draggerEntity.index].position = heightPos
                 }
               }
@@ -197,9 +192,7 @@ export class EditRectangle extends EditPolygon {
       // 整体平移移动点
       let positionMove = centerOfMass(positions)
       if (graphic.height !== undefined && graphic.height) {
-        const newHeight = (graphic.height as Cesium.Property).getValue(
-          this.viewer.clock.currentTime
-        ) as number
+        const newHeight = (graphic.height as Cesium.Property).getValue(this.viewer.clock.currentTime) as number
         if (Number.isFinite(newHeight)) {
           positionMove = setPositionsHeight(positionMove, newHeight) as Cesium.Cartesian3
         }
@@ -216,11 +209,7 @@ export class EditRectangle extends EditPolygon {
             }
 
             // 记录差值
-            const diff = Cesium.Cartesian3.subtract(
-              dragPosition,
-              positionMove,
-              new Cesium.Cartesian3()
-            )
+            const diff = Cesium.Cartesian3.subtract(dragPosition, positionMove, new Cesium.Cartesian3())
             positionMove = dragPosition
 
             // 更新所有位置

@@ -114,7 +114,8 @@ export class DrawPCircle extends DrawPPolyline {
     }
 
     // 获取配置
-    const attr = (this.currentGroundPrimitive as unknown as Record<string, unknown>).attribute as CirclePrimitiveAttribute
+    const attr = (this.currentGroundPrimitive as unknown as Record<string, unknown>)
+      .attribute as CirclePrimitiveAttribute
     const granularity = attr.config?.granularity || 64
 
     // 生成圆形多边形坐标
@@ -130,7 +131,10 @@ export class DrawPCircle extends DrawPPolyline {
         polygonHierarchy: new Cesium.PolygonHierarchy(circlePositions),
         vertexFormat: Cesium.PerInstanceColorAppearance.VERTEX_FORMAT
       }),
-      attributes: (this.currentGroundPrimitive as unknown as Record<string, unknown>)._instanceAttributes as Record<string, unknown> || {
+      attributes: ((this.currentGroundPrimitive as unknown as Record<string, unknown>)._instanceAttributes as Record<
+        string,
+        unknown
+      >) || {
         color: Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.YELLOW.withAlpha(0.5))
       }
     })

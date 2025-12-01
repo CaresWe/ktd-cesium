@@ -40,9 +40,7 @@ function cartesians2mercators(arr: Cesium.Cartesian3[]): number[][] {
  */
 function mercator2cartesian(point: number[]): Cesium.Cartesian3 | null {
   if (isNaN(point[0]) || isNaN(point[1])) return null
-  const carto = webMercatorProjection.unproject(
-    new Cesium.Cartesian3(point[0], point[1], point[2] || 0)
-  )
+  const carto = webMercatorProjection.unproject(new Cesium.Cartesian3(point[0], point[1], point[2] || 0))
   return Cesium.Cartesian3.fromRadians(carto.longitude, carto.latitude, carto.height)
 }
 
@@ -78,9 +76,7 @@ function mathDistance(pnt1: number[], pnt2: number[]): number {
  */
 function getAzimuth(startPoint: number[], endPoint: number[]): number {
   let azimuth: number
-  const angle = Math.asin(
-    Math.abs(endPoint[1] - startPoint[1]) / mathDistance(startPoint, endPoint)
-  )
+  const angle = Math.asin(Math.abs(endPoint[1] - startPoint[1]) / mathDistance(startPoint, endPoint))
   if (endPoint[1] >= startPoint[1] && endPoint[0] >= startPoint[0]) {
     azimuth = angle + Math.PI
   } else if (endPoint[1] >= startPoint[1] && endPoint[0] < startPoint[0]) {
@@ -112,12 +108,7 @@ function isClockWise(pnt1: number[], pnt2: number[], pnt3: number[]): boolean {
  * @param pntD 线2点D
  * @returns 交点坐标 [x, y]
  */
-function getIntersectPoint(
-  pntA: number[],
-  pntB: number[],
-  pntC: number[],
-  pntD: number[]
-): number[] {
+function getIntersectPoint(pntA: number[], pntB: number[], pntC: number[], pntD: number[]): number[] {
   if (pntA[1] === pntB[1]) {
     const f = (pntD[0] - pntC[0]) / (pntD[1] - pntC[1])
     const x = f * (pntA[1] - pntC[1]) + pntC[0]
@@ -144,11 +135,7 @@ function getIntersectPoint(
  * @param point3 点3 [x, y]
  * @returns 圆心坐标 [x, y]
  */
-function getCircleCenterOfThreePoints(
-  point1: number[],
-  point2: number[],
-  point3: number[]
-): number[] {
+function getCircleCenterOfThreePoints(point1: number[], point2: number[], point3: number[]): number[] {
   const pntA = [(point1[0] + point2[0]) / 2, (point1[1] + point2[1]) / 2]
   const pntB = [pntA[0] - point1[1] + point2[1], pntA[1] + point1[0] - point2[0]]
   const pntC = [(point1[0] + point3[0]) / 2, (point1[1] + point3[1]) / 2]
@@ -191,10 +178,7 @@ function getArcPoints(
  * @param segments 圆弧分段数(默认100)
  * @returns 弓形面的边界点(Cesium.Cartesian3数组)
  */
-export function computeLunePositions(
-  positions: Cesium.Cartesian3[],
-  segments: number = 100
-): Cesium.Cartesian3[] {
+export function computeLunePositions(positions: Cesium.Cartesian3[], segments: number = 100): Cesium.Cartesian3[] {
   if (!positions || positions.length < 3) {
     return positions || []
   }

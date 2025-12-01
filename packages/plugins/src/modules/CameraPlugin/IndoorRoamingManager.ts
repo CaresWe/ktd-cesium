@@ -67,9 +67,7 @@ export class IndoorRoamingManager {
     } = options
 
     // 保存配置
-    this.waypoints = waypoints.map(([lon, lat, height]) =>
-      Cesium.Cartesian3.fromDegrees(lon, lat, height)
-    )
+    this.waypoints = waypoints.map(([lon, lat, height]) => Cesium.Cartesian3.fromDegrees(lon, lat, height))
     this.duration = duration
     this.speedMultiplier = speedMultiplier
     this.isLooping = loop
@@ -78,18 +76,12 @@ export class IndoorRoamingManager {
     this.lookAheadDistance = lookAheadDistance
 
     // 创建位置属性
-    this.positionProperty = this.createPositionProperty(
-      this.waypoints,
-      duration,
-      loop
-    )
+    this.positionProperty = this.createPositionProperty(this.waypoints, duration, loop)
 
     // 设置插值算法
     const degree = interpolationDegree ?? (interpolation === 'hermite' ? 100 : 5)
     const algorithm =
-      interpolation === 'hermite'
-        ? Cesium.HermitePolynomialApproximation
-        : Cesium.LagrangePolynomialApproximation
+      interpolation === 'hermite' ? Cesium.HermitePolynomialApproximation : Cesium.LagrangePolynomialApproximation
 
     this.positionProperty.setInterpolationOptions({
       interpolationDegree: degree,
@@ -117,9 +109,7 @@ export class IndoorRoamingManager {
     this.viewer.clock.startTime = this.startTime!.clone()
     this.viewer.clock.stopTime = this.stopTime!.clone()
     this.viewer.clock.currentTime = this.startTime!.clone()
-    this.viewer.clock.clockRange = loop
-      ? Cesium.ClockRange.LOOP_STOP
-      : Cesium.ClockRange.CLAMPED
+    this.viewer.clock.clockRange = loop ? Cesium.ClockRange.LOOP_STOP : Cesium.ClockRange.CLAMPED
     this.viewer.clock.multiplier = speedMultiplier
     this.viewer.clock.shouldAnimate = true
 
@@ -136,7 +126,6 @@ export class IndoorRoamingManager {
     })
 
     this.isRoaming = true
-    console.log('Indoor roaming started')
   }
 
   /**
@@ -179,8 +168,6 @@ export class IndoorRoamingManager {
     this.waypoints = []
     this.data = this.createEmptyData()
     this.isRoaming = false
-
-    console.log('Indoor roaming stopped')
   }
 
   /**
@@ -225,7 +212,7 @@ export class IndoorRoamingManager {
   private createPositionProperty(
     positions: Cesium.Cartesian3[],
     duration: number,
-    loop: boolean
+    _loop: boolean
   ): Cesium.SampledPositionProperty {
     const property = new Cesium.SampledPositionProperty()
     const lineLength = positions.length
@@ -236,11 +223,7 @@ export class IndoorRoamingManager {
     this.stopTime = stop
 
     for (let i = 0; i < lineLength; i++) {
-      let time = Cesium.JulianDate.addSeconds(
-        start,
-        (i * duration) / lineLength,
-        new Cesium.JulianDate()
-      )
+      let time = Cesium.JulianDate.addSeconds(start, (i * duration) / lineLength, new Cesium.JulianDate())
       if (i === lineLength - 1) {
         time = stop
       }
@@ -275,20 +258,12 @@ export class IndoorRoamingManager {
     )
 
     // 计算前方位置（用于确定朝向）
-    const futureTime = Cesium.JulianDate.addSeconds(
-      currentTime,
-      0.1,
-      new Cesium.JulianDate()
-    )
+    const futureTime = Cesium.JulianDate.addSeconds(currentTime, 0.1, new Cesium.JulianDate())
     const futurePosition = this.positionProperty.getValue(futureTime)
 
     if (futurePosition) {
       // 计算朝向
-      const direction = Cesium.Cartesian3.subtract(
-        futurePosition,
-        currentPosition,
-        new Cesium.Cartesian3()
-      )
+      const direction = Cesium.Cartesian3.subtract(futurePosition, currentPosition, new Cesium.Cartesian3())
       Cesium.Cartesian3.normalize(direction, direction)
 
       // 计算航向角
@@ -315,10 +290,7 @@ export class IndoorRoamingManager {
   private updateRealTimeData(position: Cesium.Cartesian3): void {
     const cartographic = Cesium.Cartographic.fromCartesian(position)
     const totalDistance = this.calculateDistance(this.waypoints)
-    const elapsedTime = Cesium.JulianDate.secondsDifference(
-      this.viewer.clock.currentTime,
-      this.startTime!
-    )
+    const elapsedTime = Cesium.JulianDate.secondsDifference(this.viewer.clock.currentTime, this.startTime!)
     const elapsedDistance = (totalDistance / this.duration) * elapsedTime
 
     this.data.isRoaming = this.viewer.clock.shouldAnimate
@@ -401,11 +373,7 @@ export class IndoorRoamingManager {
       const nextPoint = this.waypoints[i + 1]
 
       // 计算前方方向
-      const direction = Cesium.Cartesian3.subtract(
-        nextPoint,
-        currentPoint,
-        new Cesium.Cartesian3()
-      )
+      const direction = Cesium.Cartesian3.subtract(nextPoint, currentPoint, new Cesium.Cartesian3())
       Cesium.Cartesian3.normalize(direction, direction)
 
       // 计算相机位置（加上人眼高度）
@@ -418,12 +386,7 @@ export class IndoorRoamingManager {
       )
 
       // 创建视锥体几何
-      const frustumGeometry = this.createFrustumGeometry(
-        cameraPosition,
-        direction,
-        length,
-        halfFov
-      )
+      const frustumGeometry = this.createFrustumGeometry(cameraPosition, direction, length, halfFov)
 
       if (frustumGeometry) {
         // 添加视锥体实体
@@ -478,11 +441,11 @@ export class IndoorRoamingManager {
 
       // 创建视锥体截面形状（梯形）
       const shape = [
-        new Cesium.Cartesian2(-endWidth / 2, -endHeight / 2),  // 左下
-        new Cesium.Cartesian2(endWidth / 2, -endHeight / 2),   // 右下
-        new Cesium.Cartesian2(endWidth / 2, endHeight / 2),    // 右上
-        new Cesium.Cartesian2(-endWidth / 2, endHeight / 2),   // 左上
-        new Cesium.Cartesian2(-endWidth / 2, -endHeight / 2)   // 闭合
+        new Cesium.Cartesian2(-endWidth / 2, -endHeight / 2), // 左下
+        new Cesium.Cartesian2(endWidth / 2, -endHeight / 2), // 右下
+        new Cesium.Cartesian2(endWidth / 2, endHeight / 2), // 右上
+        new Cesium.Cartesian2(-endWidth / 2, endHeight / 2), // 左上
+        new Cesium.Cartesian2(-endWidth / 2, -endHeight / 2) // 闭合
       ]
 
       return { positions, shape }

@@ -27,9 +27,7 @@ function cartesians2mercators(arr: Cesium.Cartesian3[]): number[][] {
 
 function mercator2cartesian(point: number[]): Cesium.Cartesian3 | null {
   if (isNaN(point[0]) || isNaN(point[1])) return null
-  const carto = webMercatorProjection.unproject(
-    new Cesium.Cartesian3(point[0], point[1], point[2] || 0)
-  )
+  const carto = webMercatorProjection.unproject(new Cesium.Cartesian3(point[0], point[1], point[2] || 0))
   return Cesium.Cartesian3.fromRadians(carto.longitude, carto.latitude, carto.height)
 }
 
@@ -45,7 +43,6 @@ function mercators2cartesians(arr: number[][]): Cesium.Cartesian3[] {
 // ==================== 绘图工具函数 ====================
 
 const HALF_PI = Math.PI / 2
-const ZERO_TOLERANCE = 0.0001
 
 function mathDistance(pnt1: number[], pnt2: number[]): number {
   return Math.sqrt(Math.pow(pnt1[0] - pnt2[0], 2) + Math.pow(pnt1[1] - pnt2[1], 2))
@@ -61,9 +58,7 @@ function isClockWise(pnt1: number[], pnt2: number[], pnt3: number[]): boolean {
 
 function getAzimuth(startPoint: number[], endPoint: number[]): number {
   let azimuth: number
-  const angle = Math.asin(
-    Math.abs(endPoint[1] - startPoint[1]) / mathDistance(startPoint, endPoint)
-  )
+  const angle = Math.asin(Math.abs(endPoint[1] - startPoint[1]) / mathDistance(startPoint, endPoint))
   if (endPoint[1] >= startPoint[1] && endPoint[0] >= startPoint[0]) {
     azimuth = angle + Math.PI
   } else if (endPoint[1] >= startPoint[1] && endPoint[0] < startPoint[0]) {

@@ -171,7 +171,7 @@ describe('KtdViewer', () => {
       const plugin = ktdViewer.use(AsyncPlugin as ViewerPluginConstructor)
 
       // 等待异步完成
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
       expect(ktdViewer.plugins.has('asyncPlugin')).toBe(true)
       expect(plugin.install).toHaveBeenCalled()
@@ -194,12 +194,9 @@ describe('KtdViewer', () => {
       ktdViewer.use(FailingAsyncPlugin as ViewerPluginConstructor)
 
       // 等待异步失败
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Failed to install plugin "failingAsyncPlugin":',
-        expect.any(Error)
-      )
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to install plugin "failingAsyncPlugin":', expect.any(Error))
       // 插件不应该被添加到 map 中
       expect(ktdViewer.plugins.has('failingAsyncPlugin')).toBe(false)
 
@@ -247,16 +244,24 @@ describe('KtdViewer', () => {
         static pluginName = 'plugin1'
         name = 'plugin1'
         installed = false
-        install = vi.fn(() => { this.installed = true })
-        destroy = vi.fn(() => { this.installed = false })
+        install = vi.fn(() => {
+          this.installed = true
+        })
+        destroy = vi.fn(() => {
+          this.installed = false
+        })
       }
 
       class Plugin2 implements ViewerPlugin {
         static pluginName = 'plugin2'
         name = 'plugin2'
         installed = false
-        install = vi.fn(() => { this.installed = true })
-        destroy = vi.fn(() => { this.installed = false })
+        install = vi.fn(() => {
+          this.installed = true
+        })
+        destroy = vi.fn(() => {
+          this.installed = false
+        })
       }
 
       const p1 = ktdViewer.use(Plugin1 as ViewerPluginConstructor)
@@ -276,7 +281,9 @@ describe('KtdViewer', () => {
         static pluginName = 'pluginWithoutDestroy'
         name = 'pluginWithoutDestroy'
         installed = false
-        install = vi.fn(() => { this.installed = true })
+        install = vi.fn(() => {
+          this.installed = true
+        })
         // 没有 destroy 方法
       }
 
@@ -318,7 +325,9 @@ describe('KtdViewer', () => {
         name = 'failingPlugin'
         installed = false
 
-        install = vi.fn(() => { this.installed = true })
+        install = vi.fn(() => {
+          this.installed = true
+        })
         destroy = vi.fn(() => {
           throw new Error('Destroy failed')
         })
@@ -329,10 +338,7 @@ describe('KtdViewer', () => {
       ktdViewer.use(FailingPlugin as ViewerPluginConstructor)
       ktdViewer.destroy()
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Failed to destroy plugin "failingPlugin":',
-        expect.any(Error)
-      )
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to destroy plugin "failingPlugin":', expect.any(Error))
       expect(ktdViewer.destroyed).toBe(true)
       expect(ktdViewer.plugins.size).toBe(0)
 
@@ -345,7 +351,9 @@ describe('KtdViewer', () => {
         name = 'failingAsyncDestroyPlugin'
         installed = false
 
-        install = vi.fn(() => { this.installed = true })
+        install = vi.fn(() => {
+          this.installed = true
+        })
         destroy = vi.fn(() => {
           return Promise.reject(new Error('Async destroy failed'))
         })
@@ -357,7 +365,7 @@ describe('KtdViewer', () => {
       ktdViewer.destroy()
 
       // 等待异步失败
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
       expect(consoleSpy).toHaveBeenCalledWith(
         'Failed to destroy plugin "failingAsyncDestroyPlugin":',
@@ -446,21 +454,27 @@ describe('KtdViewer', () => {
         static pluginName = 'plugin1'
         name = 'plugin1'
         installed = false
-        install = vi.fn(() => { this.installed = true })
+        install = vi.fn(() => {
+          this.installed = true
+        })
       }
 
       class Plugin2 implements ViewerPlugin {
         static pluginName = 'plugin2'
         name = 'plugin2'
         installed = false
-        install = vi.fn(() => { this.installed = true })
+        install = vi.fn(() => {
+          this.installed = true
+        })
       }
 
       class Plugin3 implements ViewerPlugin {
         static pluginName = 'plugin3'
         name = 'plugin3'
         installed = false
-        install = vi.fn(() => { this.installed = true })
+        install = vi.fn(() => {
+          this.installed = true
+        })
       }
 
       ktdViewer.use(Plugin1 as ViewerPluginConstructor)

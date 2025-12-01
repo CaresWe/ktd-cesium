@@ -76,14 +76,13 @@ export class CameraPlugin extends BasePlugin {
     try {
       const eventPlugin = viewer.getPlugin('event')
       if (eventPlugin) {
-        this.keyboardRoaming.setEventPlugin(eventPlugin as any)
+        // EventPlugin 类型将在运行时验证
+        this.keyboardRoaming.setEventPlugin(eventPlugin as unknown as import('../EventPlugin').EventPlugin)
       }
     } catch (e) {
       // EventPlugin 未安装，使用降级方案（直接 DOM 事件）
-      console.warn('EventPlugin not found, keyboard roaming will use direct DOM events')
+      // 这是预期行为，不需要警告
     }
-
-    console.log('Camera plugin installed')
   }
 
   /**
@@ -272,10 +271,12 @@ export class CameraPlugin extends BasePlugin {
     this.ensureInstalled()
 
     return new Promise((resolve) => {
-      this.cesiumViewer.flyTo(entity, {
-        duration: options?.duration || 3,
-        offset: options?.offset
-      }).then(() => resolve())
+      this.cesiumViewer
+        .flyTo(entity, {
+          duration: options?.duration || 3,
+          offset: options?.offset
+        })
+        .then(() => resolve())
     })
   }
 
@@ -546,7 +547,6 @@ export class CameraPlugin extends BasePlugin {
     this.roaming?.destroy()
     this.keyboardRoaming?.destroy()
     this.indoorRoaming?.destroy()
-    console.log('Camera plugin destroyed')
   }
 }
 

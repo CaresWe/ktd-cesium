@@ -172,19 +172,14 @@ export class EditEllipsoid extends EditBase {
       let positionCenter: Cesium.Cartesian3
 
       if (positionProp && typeof positionProp === 'object' && 'getValue' in positionProp) {
-        positionCenter = (positionProp as Cesium.Property).getValue(
-          this.viewer.clock.currentTime
-        ) as Cesium.Cartesian3
+        positionCenter = (positionProp as Cesium.Property).getValue(this.viewer.clock.currentTime) as Cesium.Cartesian3
       } else if (positionProp) {
         positionCenter = positionProp as unknown as Cesium.Cartesian3
       } else {
         positionCenter = position
       }
 
-      const topDraggerPosition = addPositionsHeight(
-        positionCenter,
-        style.heightRadii || 100
-      ) as Cesium.Cartesian3
+      const topDraggerPosition = addPositionsHeight(positionCenter, style.heightRadii || 100) as Cesium.Cartesian3
 
       const topDragger = draggerCtl.createDragger(this.dataSource, {
         position: topDraggerPosition,

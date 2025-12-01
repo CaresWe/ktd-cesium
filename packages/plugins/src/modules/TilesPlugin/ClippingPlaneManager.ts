@@ -41,11 +41,7 @@ export class ClippingPlaneManager {
 
       // 创建剖切平面集合
       const planes = config.planes.map((planeConfig) => {
-        const normal = new Cartesian3(
-          planeConfig.normal[0],
-          planeConfig.normal[1],
-          planeConfig.normal[2]
-        )
+        const normal = new Cartesian3(planeConfig.normal[0], planeConfig.normal[1], planeConfig.normal[2])
         return new ClippingPlane(normal, planeConfig.distance)
       })
 
@@ -61,8 +57,6 @@ export class ClippingPlaneManager {
 
       // 应用到 tileset
       this.tileset.clippingPlanes = this.clippingPlanes
-
-      console.log('Clipping planes enabled')
     } catch (error) {
       console.error('Failed to enable clipping planes:', error)
       throw error
@@ -90,9 +84,7 @@ export class ClippingPlaneManager {
       }
 
       if (config.edgeColor !== undefined) {
-        this.clippingPlanes.edgeColor = CesiumColor.fromCssColorString(
-          config.edgeColor.toCssColorString()
-        )
+        this.clippingPlanes.edgeColor = CesiumColor.fromCssColorString(config.edgeColor.toCssColorString())
         this.config.edgeColor = config.edgeColor
       }
 
@@ -105,11 +97,7 @@ export class ClippingPlaneManager {
       if (config.planes) {
         this.clippingPlanes.removeAll()
         config.planes.forEach((planeConfig) => {
-          const normal = new Cartesian3(
-            planeConfig.normal[0],
-            planeConfig.normal[1],
-            planeConfig.normal[2]
-          )
+          const normal = new Cartesian3(planeConfig.normal[0], planeConfig.normal[1], planeConfig.normal[2])
           this.clippingPlanes!.add(new ClippingPlane(normal, planeConfig.distance))
         })
         this.config.planes = config.planes
@@ -129,17 +117,11 @@ export class ClippingPlaneManager {
         throw new Error('Clipping planes not initialized')
       }
 
-      const normal = new Cartesian3(
-        planeConfig.normal[0],
-        planeConfig.normal[1],
-        planeConfig.normal[2]
-      )
+      const normal = new Cartesian3(planeConfig.normal[0], planeConfig.normal[1], planeConfig.normal[2])
       const plane = new ClippingPlane(normal, planeConfig.distance)
 
       this.clippingPlanes.add(plane)
       this.config.planes.push(planeConfig)
-
-      console.log('Clipping plane added')
     } catch (error) {
       console.error('Failed to add clipping plane:', error)
       throw error
@@ -161,8 +143,6 @@ export class ClippingPlaneManager {
 
       this.clippingPlanes.remove(this.clippingPlanes.get(index))
       this.config.planes.splice(index, 1)
-
-      console.log(`Clipping plane ${index} removed`)
     } catch (error) {
       console.error('Failed to remove clipping plane:', error)
       throw error
@@ -206,7 +186,6 @@ export class ClippingPlaneManager {
         })
 
         this.tileset.clippingPlanes = this.clippingPlanes
-        console.log('Entity clipping enabled', { entityId: entity.id, planesCount: planes.length })
       } else {
         console.warn('No clipping planes generated from entity')
       }
@@ -335,7 +314,6 @@ export class ClippingPlaneManager {
         this.clippingPlanes = null
         this.config = null
         this._entityConfig = null
-        console.log('Clipping planes disabled')
       }
     } catch (error) {
       console.error('Failed to disable clipping planes:', error)

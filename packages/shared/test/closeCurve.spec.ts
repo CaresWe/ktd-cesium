@@ -86,13 +86,13 @@ describe('closeCurve', () => {
     })
 
     it('should return empty array for null input', () => {
-      const result = computeCloseCurvePositions(null as any)
+      const result = computeCloseCurvePositions(null as unknown as Cartesian3[])
 
       expect(result).toEqual([])
     })
 
     it('should return empty array for undefined input', () => {
-      const result = computeCloseCurvePositions(undefined as any)
+      const result = computeCloseCurvePositions(undefined as unknown as Cartesian3[])
 
       expect(result).toEqual([])
     })

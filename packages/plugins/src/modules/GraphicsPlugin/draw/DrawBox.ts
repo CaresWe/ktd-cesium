@@ -22,11 +22,10 @@ export class DrawBox extends DrawPoint {
     this._positions_draw = null
 
     const boxAttr = attribute as BoxDrawAttribute
-    const that = this
 
     const addattr: Cesium.Entity.ConstructorOptions & { attribute: BoxDrawAttribute } = {
       position: new Cesium.CallbackProperty((_time?: Cesium.JulianDate) => {
-        return that.getDrawPosition()
+        return this.getDrawPosition()
       }, false) as unknown as Cesium.PositionProperty,
       box: attr.style2Entity(boxAttr.style),
       attribute: boxAttr

@@ -74,7 +74,7 @@ export class EditBase {
   /**
    * 监听事件
    */
-  on(type: string, fn: Function, context?: unknown): this {
+  on(type: string, fn: (...args: unknown[]) => unknown, context?: unknown): this {
     if (this.eventPlugin) {
       this.eventPlugin.on(type, fn, context)
     }
@@ -84,7 +84,7 @@ export class EditBase {
   /**
    * 移除事件监听
    */
-  off(type?: string, fn?: Function, context?: unknown): this {
+  off(type?: string, fn?: (...args: unknown[]) => unknown, context?: unknown): this {
     if (this.eventPlugin) {
       this.eventPlugin.off(type, fn, context)
     }
@@ -177,7 +177,9 @@ export class EditBase {
     const scratchBoundingSphere = new Cesium.BoundingSphere()
     const zOffset = new Cesium.Cartesian3()
 
-    const draggerHandler = new Cesium.ScreenSpaceEventHandler(this.viewer.scene.canvas) as ExtendedScreenSpaceEventHandler
+    const draggerHandler = new Cesium.ScreenSpaceEventHandler(
+      this.viewer.scene.canvas
+    ) as ExtendedScreenSpaceEventHandler
     draggerHandler.dragger = null
 
     // 鼠标按下选中拖拽点
@@ -194,7 +196,9 @@ export class EditBase {
           // 关闭 popup (如果存在)
           const extViewer = this.viewer as ExtendedViewer
           if (extViewer.getPlugin) {
-            const popupPlugin = extViewer.getPlugin<EnableablePlugin & { close: (entity: Cesium.Entity) => void }>('PopupPlugin')
+            const popupPlugin = extViewer.getPlugin<EnableablePlugin & { close: (entity: Cesium.Entity) => void }>(
+              'PopupPlugin'
+            )
             if (popupPlugin && 'close' in popupPlugin) {
               popupPlugin.close(entity as Cesium.Entity)
             }
@@ -252,11 +256,7 @@ export class EditBase {
             // 使用 camera 的 getPixelSize 方法
             const canvas = this.viewer.scene.canvas
             const metersPerPixel =
-              this.viewer.camera.getPixelSize(
-                scratchBoundingSphere,
-                canvas.clientWidth,
-                canvas.clientHeight
-              ) * 1.5
+              this.viewer.camera.getPixelSize(scratchBoundingSphere, canvas.clientWidth, canvas.clientHeight) * 1.5
 
             Cesium.Cartesian3.multiplyByScalar(tangentPlane.zAxis, -dy * metersPerPixel, zOffset)
             const newPosition = Cesium.Cartesian3.clone(position)
@@ -350,11 +350,7 @@ export class EditBase {
       const pickedObject = this.viewer.scene.pick(event.position)
       if (Cesium.defined(pickedObject)) {
         const entity = pickedObject.id as ExtendedEntity
-        if (
-          entity &&
-          (entity._isDragger ?? false) &&
-          draggerCtl.PointType.Control === entity._pointType
-        ) {
+        if (entity && (entity._isDragger ?? false) && draggerCtl.PointType.Control === entity._pointType) {
           const isDelOk = this.deletePointForDragger(entity, event.position)
 
           if (isDelOk) {

@@ -3,7 +3,10 @@ import * as Cesium from 'cesium'
 /**
  * 设置填充材质
  */
-export function setFillMaterial(entityattr: Record<string, unknown>, style: Record<string, unknown>): Record<string, unknown> {
+export function setFillMaterial(
+  entityattr: Record<string, unknown>,
+  style: Record<string, unknown>
+): Record<string, unknown> {
   if (style.material) {
     // material 属性优先
     entityattr.material = style.material
@@ -23,12 +26,11 @@ export function setFillMaterial(entityattr: Record<string, unknown>, style: Reco
       case 'image': // 图片填充
         entityattr.material = new Cesium.ImageMaterialProperty({
           image: style.image as string,
-          color: Cesium.Color.fromCssColorString('#FFFFFF').withAlpha(
-            Number(style.opacity || 1.0)
-          )
+          color: Cesium.Color.fromCssColorString('#FFFFFF').withAlpha(Number(style.opacity || 1.0))
         })
         break
-      case 'grid': // 网格
+      case 'grid': {
+        // 网格
         const lineCount = Number(style.grid_lineCount || 8)
         const lineThickness = Number(style.grid_lineThickness || 2.0)
         entityattr.material = new Cesium.GridMaterialProperty({
@@ -38,22 +40,25 @@ export function setFillMaterial(entityattr: Record<string, unknown>, style: Reco
           lineThickness: new Cesium.Cartesian2(lineThickness, lineThickness)
         })
         break
-      case 'checkerboard': // 棋盘
+      }
+      case 'checkerboard': {
+        // 棋盘
         const repeat = Number(style.checkerboard_repeat || 4)
         entityattr.material = new Cesium.CheckerboardMaterialProperty({
           evenColor: color,
-          oddColor: Cesium.Color.fromCssColorString(
-            String(style.checkerboard_oddcolor || '#ffffff')
-          ).withAlpha(Number(style.opacity || 1.0)),
+          oddColor: Cesium.Color.fromCssColorString(String(style.checkerboard_oddcolor || '#ffffff')).withAlpha(
+            Number(style.opacity || 1.0)
+          ),
           repeat: new Cesium.Cartesian2(repeat, repeat)
         })
         break
+      }
       case 'stripe': // 条纹
         entityattr.material = new Cesium.StripeMaterialProperty({
           evenColor: color,
-          oddColor: Cesium.Color.fromCssColorString(
-            String(style.stripe_oddcolor || '#ffffff')
-          ).withAlpha(Number(style.opacity || 1.0)),
+          oddColor: Cesium.Color.fromCssColorString(String(style.stripe_oddcolor || '#ffffff')).withAlpha(
+            Number(style.opacity || 1.0)
+          ),
           repeat: Number(style.stripe_repeat || 6)
         })
         break

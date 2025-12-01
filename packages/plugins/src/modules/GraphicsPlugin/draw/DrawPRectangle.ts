@@ -72,10 +72,7 @@ export class DrawPRectangle extends DrawPPolyline {
   /**
    * 根据两个对角点生成矩形的四个顶点
    */
-  private generateRectanglePositions(
-    corner1: Cesium.Cartesian3,
-    corner2: Cesium.Cartesian3
-  ): Cesium.Cartesian3[] {
+  private generateRectanglePositions(corner1: Cesium.Cartesian3, corner2: Cesium.Cartesian3): Cesium.Cartesian3[] {
     const carto1 = Cesium.Cartographic.fromCartesian(corner1)
     const carto2 = Cesium.Cartographic.fromCartesian(corner2)
 
@@ -121,7 +118,10 @@ export class DrawPRectangle extends DrawPPolyline {
         polygonHierarchy: new Cesium.PolygonHierarchy(rectanglePositions),
         vertexFormat: Cesium.PerInstanceColorAppearance.VERTEX_FORMAT
       }),
-      attributes: (this.currentGroundPrimitive as unknown as Record<string, unknown>)._instanceAttributes as Record<string, unknown> || {
+      attributes: ((this.currentGroundPrimitive as unknown as Record<string, unknown>)._instanceAttributes as Record<
+        string,
+        unknown
+      >) || {
         color: Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.YELLOW.withAlpha(0.5))
       }
     })

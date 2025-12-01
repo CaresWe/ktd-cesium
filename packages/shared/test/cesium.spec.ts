@@ -308,7 +308,7 @@ describe('cesium', () => {
           }
         }
 
-        const result = getPositionByGeoJSON(geojson as any)
+        const result = getPositionByGeoJSON(geojson as unknown as Parameters<typeof getPositionByGeoJSON>[0])
 
         expect(result).toBeNull()
       })
@@ -339,7 +339,7 @@ describe('cesium', () => {
     })
 
     it('should return null for null position', () => {
-      const result = formatPosition(null as any)
+      const result = formatPosition(null as unknown as Cartesian3)
 
       expect(result).toBeNull()
     })
@@ -371,7 +371,7 @@ describe('cesium', () => {
           pick: vi.fn().mockReturnValue(Cartesian3.fromDegrees(116.391, 39.907, 100)),
           ellipsoid: {}
         }
-      } as any
+      } as unknown as Parameters<typeof getCurrentMousePosition>[0]
 
       const position = new Cartesian2(100, 100)
       const result = getCurrentMousePosition(mockScene, position)
@@ -395,10 +395,10 @@ describe('cesium', () => {
           pick: vi.fn().mockReturnValue(Cartesian3.fromDegrees(116.391, 39.907, 100)),
           ellipsoid: {}
         }
-      } as any
+      } as unknown as Parameters<typeof getCurrentMousePosition>[0]
 
       const position = new Cartesian2(100, 100)
-      const result = getCurrentMousePosition(mockScene, position)
+      getCurrentMousePosition(mockScene, position)
 
       expect(mockScene.pick).toHaveBeenCalled()
     })
@@ -417,7 +417,7 @@ describe('cesium', () => {
           pick: vi.fn().mockReturnValue(Cartesian3.fromDegrees(116.391, 39.907, -6000)),
           ellipsoid: {}
         }
-      } as any
+      } as unknown as Parameters<typeof getCurrentMousePosition>[0]
 
       const position = new Cartesian2(100, 100)
       const result = getCurrentMousePosition(mockScene, position)

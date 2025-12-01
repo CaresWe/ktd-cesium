@@ -1,5 +1,11 @@
 import type { Viewer as CesiumViewer } from 'cesium'
-import type { IKtdViewer, KtdViewer as KtdViewerType, KtdViewerOptions, ViewerPlugin, ViewerPluginConstructor } from './types'
+import type {
+  IKtdViewer,
+  KtdViewer as KtdViewerType,
+  KtdViewerOptions,
+  ViewerPlugin,
+  ViewerPluginConstructor
+} from './types'
 
 /**
  * 扩展的 Cesium Viewer
@@ -21,7 +27,7 @@ export class KtdViewer implements IKtdViewer {
 
     // 安装预设插件
     if (options.plugins && options.plugins.length > 0) {
-      options.plugins.forEach(Plugin => {
+      options.plugins.forEach((Plugin) => {
         this.use(Plugin)
       })
     }
@@ -74,11 +80,13 @@ export class KtdViewer implements IKtdViewer {
 
     // 如果安装返回 Promise，则等待完成
     if (result instanceof Promise) {
-      result.then(() => {
-        this.plugins.set(pluginName, plugin)
-      }).catch(error => {
-        console.error(`Failed to install plugin "${pluginName}":`, error)
-      })
+      result
+        .then(() => {
+          this.plugins.set(pluginName, plugin)
+        })
+        .catch((error) => {
+          console.error(`Failed to install plugin "${pluginName}":`, error)
+        })
     } else {
       this.plugins.set(pluginName, plugin)
     }
@@ -107,7 +115,7 @@ export class KtdViewer implements IKtdViewer {
         try {
           const result = plugin.destroy()
           if (result instanceof Promise) {
-            result.catch(error => {
+            result.catch((error) => {
               console.error(`Failed to destroy plugin "${name}":`, error)
             })
           }

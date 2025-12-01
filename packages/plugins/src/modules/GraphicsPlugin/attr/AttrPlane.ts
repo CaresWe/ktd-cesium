@@ -84,12 +84,13 @@ export function style2Entity(style?: PlaneStyleConfig, entityattr?: PlaneEntityA
           Number(finalStyle.opacity || 1.0)
         )
         break
-      case 'dimensionsX':
+      case 'dimensionsX': {
         const dimensionsX = finalStyle.dimensionsX || 100.0
         const dimensionsY = finalStyle.dimensionsY || 100.0
         entityattr.dimensions = new Cesium.Cartesian2(dimensionsX, dimensionsY)
         break
-      case 'plane_normal':
+      }
+      case 'plane_normal': {
         let plane_normal: Cesium.Cartesian3
         switch (value) {
           case 'x':
@@ -105,6 +106,7 @@ export function style2Entity(style?: PlaneStyleConfig, entityattr?: PlaneEntityA
         const plane_distance = finalStyle.plane_distance || 0.0
         entityattr.plane = new Cesium.Plane(plane_normal, plane_distance)
         break
+      }
       case 'distanceDisplayCondition':
         if (value) {
           entityattr.distanceDisplayCondition = new Cesium.DistanceDisplayCondition(

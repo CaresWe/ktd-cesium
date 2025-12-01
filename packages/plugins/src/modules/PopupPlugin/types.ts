@@ -51,11 +51,11 @@ export enum PopupAlignment {
  */
 export interface VueComponentConfig {
   /** Vue 组件定义 */
-  component: any
+  component: unknown
   /** 传递给组件的 props */
-  props?: Record<string, any>
+  props?: Record<string, unknown>
   /** 事件监听器 */
-  listeners?: Record<string, Function>
+  listeners?: Record<string, (...args: unknown[]) => unknown>
 }
 
 /**
@@ -63,9 +63,9 @@ export interface VueComponentConfig {
  */
 export interface ReactComponentConfig {
   /** React 组件 */
-  component: any
+  component: unknown
   /** 传递给组件的 props */
-  props?: Record<string, any>
+  props?: Record<string, unknown>
 }
 
 /**
@@ -150,9 +150,9 @@ export interface PopupInstance {
   /** 销毁弹窗 */
   destroy: () => void
   /** Vue 应用实例（仅 Vue 组件） */
-  vueApp?: any
+  vueApp?: unknown
   /** React Root 实例（仅 React 组件） */
-  reactRoot?: any
+  reactRoot?: unknown
 }
 
 /**

@@ -79,9 +79,7 @@ export class EditPolygon extends EditPolyline {
       ) {
         // 对于 polygon，需要设置 hierarchy
         const positions = this.getPosition()
-        this.entity.polygon.hierarchy = new Cesium.ConstantProperty(
-          new Cesium.PolygonHierarchy(positions)
-        )
+        this.entity.polygon.hierarchy = new Cesium.ConstantProperty(new Cesium.PolygonHierarchy(positions))
       }
     } catch (error) {
       console.error('EditPolygon.updateAttrForEditing: 更新属性失败', error)

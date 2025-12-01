@@ -3,7 +3,7 @@
  * 支持 React 组件渲染
  */
 
-import type { TooltipRenderer, TooltipReactNode, TooltipVNode, TooltipContent } from '../types'
+import type { TooltipRenderer, TooltipReactNode, TooltipContent } from '../types'
 
 /**
  * React Root 接口 (React 18+)
@@ -40,13 +40,10 @@ export class ReactRenderer implements TooltipRenderer {
    * @param React React 对象
    * @param ReactDOM ReactDOM 对象
    */
-  setReact(
-    React: { createElement: unknown },
-    ReactDOM: { createRoot?: unknown; render?: unknown }
-  ): void {
+  setReact(React: { createElement: unknown }, ReactDOM: { createRoot?: unknown; render?: unknown }): void {
     this._createElement = React.createElement as CreateElementFn
-    this._createRoot = (ReactDOM.createRoot ? ReactDOM.createRoot as CreateRootFn : null)
-    this._legacyRender = (ReactDOM.render ? ReactDOM.render as RenderFn : null)
+    this._createRoot = ReactDOM.createRoot ? (ReactDOM.createRoot as CreateRootFn) : null
+    this._legacyRender = ReactDOM.render ? (ReactDOM.render as RenderFn) : null
   }
 
   /**

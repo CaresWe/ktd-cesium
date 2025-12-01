@@ -1,11 +1,6 @@
 import * as Cesium from 'cesium'
 import { EditBase } from './EditBase'
-import type {
-  EditController,
-  VideoEditControlPoint,
-  VideoEditPointEntity,
-  VideoFusionEditPrimitive
-} from '../types'
+import type { EditController, VideoEditControlPoint, VideoEditPointEntity, VideoFusionEditPrimitive } from '../types'
 
 /**
  * 视频融合编辑类
@@ -56,7 +51,7 @@ export class EditVideoFusion extends EditBase implements EditController {
     if (!positions || positions.length < 3) return this
 
     this._enabled = true
-    this.originalPositions = positions.map(p => p.clone())
+    this.originalPositions = positions.map((p) => p.clone())
 
     // 读取配置
     const config = primitive._videoAttribute?.config
@@ -133,11 +128,7 @@ export class EditVideoFusion extends EditBase implements EditController {
   private createEdgeDraggers(positions: Cesium.Cartesian3[]): void {
     for (let i = 0; i < positions.length; i++) {
       const nextIndex = (i + 1) % positions.length
-      const midPoint = Cesium.Cartesian3.midpoint(
-        positions[i],
-        positions[nextIndex],
-        new Cesium.Cartesian3()
-      )
+      const midPoint = Cesium.Cartesian3.midpoint(positions[i], positions[nextIndex], new Cesium.Cartesian3())
 
       const dragger = this.dataSource.entities.add({
         position: midPoint,
@@ -181,7 +172,7 @@ export class EditVideoFusion extends EditBase implements EditController {
    */
   private calculateCenter(positions: Cesium.Cartesian3[]): Cesium.Cartesian3 {
     const center = new Cesium.Cartesian3()
-    positions.forEach(pos => {
+    positions.forEach((pos) => {
       Cesium.Cartesian3.add(center, pos, center)
     })
     Cesium.Cartesian3.divideByScalar(center, positions.length, center)
@@ -283,11 +274,7 @@ export class EditVideoFusion extends EditBase implements EditController {
     const nextIndex = (index + 1) % positions.length
 
     // 计算位移
-    const currentMidPoint = Cesium.Cartesian3.midpoint(
-      positions[index],
-      positions[nextIndex],
-      new Cesium.Cartesian3()
-    )
+    const currentMidPoint = Cesium.Cartesian3.midpoint(positions[index], positions[nextIndex], new Cesium.Cartesian3())
     const offset = Cesium.Cartesian3.subtract(newPosition, currentMidPoint, new Cesium.Cartesian3())
 
     // 移动相邻两个角点
@@ -333,11 +320,7 @@ export class EditVideoFusion extends EditBase implements EditController {
     // 更新边中点
     this.edgeDraggers.forEach((dragger, index) => {
       const nextIndex = (index + 1) % positions.length
-      const midPoint = Cesium.Cartesian3.midpoint(
-        positions[index],
-        positions[nextIndex],
-        new Cesium.Cartesian3()
-      )
+      const midPoint = Cesium.Cartesian3.midpoint(positions[index], positions[nextIndex], new Cesium.Cartesian3())
       dragger.position = new Cesium.ConstantPositionProperty(midPoint)
     })
 
@@ -355,13 +338,13 @@ export class EditVideoFusion extends EditBase implements EditController {
    */
   private removeDraggers(): void {
     // 移除角点
-    this.cornerDraggers.forEach(dragger => {
+    this.cornerDraggers.forEach((dragger) => {
       this.dataSource.entities.remove(dragger)
     })
     this.cornerDraggers = []
 
     // 移除边中点
-    this.edgeDraggers.forEach(dragger => {
+    this.edgeDraggers.forEach((dragger) => {
       this.dataSource.entities.remove(dragger)
     })
     this.edgeDraggers = []
@@ -397,7 +380,7 @@ export class EditVideoFusion extends EditBase implements EditController {
    */
   getPositions(): Cesium.Cartesian3[] {
     const primitive = this.entity as unknown as VideoFusionEditPrimitive
-    return primitive._positions_draw?.map(p => p.clone()) || []
+    return primitive._positions_draw?.map((p) => p.clone()) || []
   }
 
   /**

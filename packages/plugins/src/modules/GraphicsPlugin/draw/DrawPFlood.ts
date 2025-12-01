@@ -3,6 +3,14 @@ import { DrawPWater } from './DrawPWater'
 import type { FloodPrimitiveAttribute, FloodAnimationState } from '../types'
 
 /**
+ * 扩展的 Primitive 接口，包含洪水属性
+ */
+interface FloodPrimitive extends Cesium.Primitive {
+  _floodAttribute?: FloodPrimitiveAttribute
+  _positions_draw?: Cesium.Cartesian3[]
+}
+
+/**
  * 洪水推进 Primitive 绘制类
  * 支持水位动态上升/下降，模拟洪水推进效果
  */
@@ -27,7 +35,9 @@ export class DrawPFlood extends DrawPWater {
   /**
    * 创建洪水 Primitive
    */
-  protected override createPrimitive(attribute: Record<string, unknown>): Cesium.Primitive | Cesium.GroundPrimitive | null {
+  protected override createPrimitive(
+    attribute: Record<string, unknown>
+  ): Cesium.Primitive | Cesium.GroundPrimitive | null {
     const floodAttr = attribute as FloodPrimitiveAttribute
     const style = floodAttr.style
 
@@ -45,7 +55,7 @@ export class DrawPFlood extends DrawPWater {
 
     // 保存属性
     if (primitive) {
-      ;(primitive as any)._floodAttribute = floodAttr
+      ;(primitive as FloodPrimitive)._floodAttribute = floodAttr
     }
 
     // 自动开始动画
@@ -65,7 +75,7 @@ export class DrawPFlood extends DrawPWater {
     const positions = this._positions_draw as Cesium.Cartesian3[]
     if (positions.length < 3) return
 
-    const floodAttr = (this.waterPrimitive as any)._floodAttribute as FloodPrimitiveAttribute | undefined
+    const floodAttr = (this.waterPrimitive as FloodPrimitive)?._floodAttribute
     const style = floodAttr?.style || {}
 
     // 移除旧的 Primitive
@@ -91,9 +101,8 @@ export class DrawPFlood extends DrawPWater {
       }),
       show: style.show !== false
     })
-
-    ;(this.waterPrimitive as any)._floodAttribute = floodAttr
-    ;(this.waterPrimitive as any)._positions_draw = positions
+    ;(this.waterPrimitive as FloodPrimitive)._floodAttribute = floodAttr
+    ;(this.waterPrimitive as FloodPrimitive)._positions_draw = positions
 
     this.primitives!.add(this.waterPrimitive)
     this.primitive = this.waterPrimitive
@@ -110,7 +119,7 @@ export class DrawPFlood extends DrawPWater {
     this.floodState.isAnimating = true
     this.floodState.startTime = Date.now()
 
-    const floodAttr = (this.waterPrimitive as any)?._floodAttribute as FloodPrimitiveAttribute | undefined
+    const floodAttr = (this.waterPrimitive as FloodPrimitive)?._floodAttribute
     const style = floodAttr?.style || {}
     const duration = (style.duration ?? 10) * 1000 // 转换为毫秒
     const riseSpeed = style.riseSpeed ?? 1
@@ -196,7 +205,7 @@ export class DrawPFlood extends DrawPWater {
    * 设置目标高度并开始动画
    */
   animateToHeight(targetHeight: number, duration?: number): void {
-    const floodAttr = (this.waterPrimitive as any)?._floodAttribute as FloodPrimitiveAttribute | undefined
+    const floodAttr = (this.waterPrimitive as FloodPrimitive)?._floodAttribute
     if (floodAttr?.style && duration !== undefined) {
       floodAttr.style.duration = duration
     }

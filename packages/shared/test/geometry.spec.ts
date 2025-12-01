@@ -25,7 +25,10 @@ describe('geometry', () => {
     })
 
     it('should return default HeadingPitchRoll for undefined inputs', () => {
-      const result = getHeadingPitchRollByOrientation(undefined as any, undefined as any)
+      const result = getHeadingPitchRollByOrientation(
+        undefined as unknown as Cartesian3,
+        undefined as unknown as Quaternion
+      )
 
       expect(result).toBeInstanceOf(HeadingPitchRoll)
     })

@@ -1,5 +1,5 @@
 import * as Cesium from 'cesium'
-import { DrawPrimitiveBase} from './DrawPrimitiveBase'
+import { DrawPrimitiveBase } from './DrawPrimitiveBase'
 import { getCurrentMousePosition } from '@ktd-cesium/shared'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { GraphicsEventType } from '../../EventPlugin'

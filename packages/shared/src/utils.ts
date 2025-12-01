@@ -23,13 +23,15 @@ export function extend<T extends Record<string, unknown>>(dest: T, ...sources: P
 /**
  * 创建对象（Object.create 的兼容实现）
  */
-export const create = Object.create || (() => {
-  function F(this: unknown) {}
-  return function <T>(proto: T): T {
-    (F as unknown as { prototype: T }).prototype = proto
-    return new (F as unknown as new () => T)()
-  }
-})()
+export const create =
+  Object.create ||
+  (() => {
+    function F(this: unknown) {}
+    return function <T>(proto: T): T {
+      ;(F as unknown as { prototype: T }).prototype = proto
+      return new (F as unknown as new () => T)()
+    }
+  })()
 
 /**
  * 设置对象选项
@@ -60,17 +62,16 @@ export function setOptions<T extends Record<string, unknown>>(
  * @returns 绑定后的函数
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function bind<T extends (...args: any[]) => any>(
-  fn: T,
-  obj: unknown,
-  ...boundArgs: unknown[]
-): T {
+export function bind<T extends (...args: any[]) => any>(fn: T, obj: unknown, ...boundArgs: unknown[]): T {
   if (fn.bind) {
     return fn.bind(obj, ...boundArgs) as T
   }
 
   return function (this: unknown, ...args: unknown[]) {
-    return (fn as unknown as (...args: unknown[]) => unknown).apply(obj, boundArgs.length ? boundArgs.concat(args) : args)
+    return (fn as unknown as (...args: unknown[]) => unknown).apply(
+      obj,
+      boundArgs.length ? boundArgs.concat(args) : args
+    )
   } as T
 }
 
@@ -89,10 +90,8 @@ export function throttle<T extends (...args: any[]) => any>(
 ): (...args: unknown[]) => void {
   let lock: boolean = false
   let args: unknown[] | false = false
-  let wrapperFn: (...args: unknown[]) => void
-  let later: () => void
 
-  later = function () {
+  const later = function () {
     lock = false
     if (args) {
       wrapperFn(...args)
@@ -100,11 +99,11 @@ export function throttle<T extends (...args: any[]) => any>(
     }
   }
 
-  wrapperFn = function (...currentArgs: unknown[]) {
+  const wrapperFn = function (...currentArgs: unknown[]) {
     if (lock) {
       args = currentArgs
     } else {
-      (fn as unknown as (...args: unknown[]) => unknown).apply(context, currentArgs)
+      ;(fn as unknown as (...args: unknown[]) => unknown).apply(context, currentArgs)
       setTimeout(later, time)
       lock = true
     }
@@ -132,7 +131,7 @@ const objIdKey = '_ktd_id'
  */
 export function stamp(obj: Record<string, unknown>): number {
   if (!(obj as Record<string, number>)[objIdKey]) {
-    (obj as Record<string, number>)[objIdKey] = ++lastId
+    ;(obj as Record<string, number>)[objIdKey] = ++lastId
   }
   return (obj as Record<string, number>)[objIdKey]
 }
@@ -166,7 +165,7 @@ export function wrapNum(x: number, range: [number, number], includeMax?: boolean
   const max = range[1]
   const min = range[0]
   const d = max - min
-  return x === max && includeMax ? x : ((x - min) % d + d) % d + min
+  return x === max && includeMax ? x : ((((x - min) % d) + d) % d) + min
 }
 
 // ==================== 字符串处理 ====================
@@ -196,12 +195,16 @@ export function splitWords(str: string): string[] {
  * @param uppercase 是否大写参数名
  * @returns 参数字符串
  */
-export function getParamString(obj: Record<string, string | number>, existingUrl?: string, uppercase?: boolean): string {
+export function getParamString(
+  obj: Record<string, string | number>,
+  existingUrl?: string,
+  uppercase?: boolean
+): string {
   const params: string[] = []
   for (const i in obj) {
     params.push(encodeURIComponent(uppercase ? i.toUpperCase() : i) + '=' + encodeURIComponent(String(obj[i])))
   }
-  return ((!existingUrl || existingUrl.indexOf('?') === -1) ? '?' : '&') + params.join('&')
+  return (!existingUrl || existingUrl.indexOf('?') === -1 ? '?' : '&') + params.join('&')
 }
 
 const templateRe = /\{ *([\w_-]+) *\}/g
@@ -212,7 +215,10 @@ const templateRe = /\{ *([\w_-]+) *\}/g
  * @param data 数据对象
  * @returns 替换后的字符串
  */
-export function template(str: string, data: Record<string, string | number | ((data: Record<string, unknown>) => string | number)>): string {
+export function template(
+  str: string,
+  data: Record<string, string | number | ((data: Record<string, unknown>) => string | number)>
+): string {
   return str.replace(templateRe, (str, key) => {
     let value = data[key]
 
@@ -248,9 +254,11 @@ type AnimationFrameCallback = (time: number) => void
 
 function getPrefixed(name: string): ((callback: AnimationFrameCallback) => number) | undefined {
   const win = window as unknown as Record<string, unknown>
-  return win['webkit' + name] as ((callback: AnimationFrameCallback) => number) | undefined ||
-         win['moz' + name] as ((callback: AnimationFrameCallback) => number) | undefined ||
-         win['ms' + name] as ((callback: AnimationFrameCallback) => number) | undefined
+  return (
+    (win['webkit' + name] as ((callback: AnimationFrameCallback) => number) | undefined) ||
+    (win['moz' + name] as ((callback: AnimationFrameCallback) => number) | undefined) ||
+    (win['ms' + name] as ((callback: AnimationFrameCallback) => number) | undefined)
+  )
 }
 
 let lastTime = 0
@@ -264,8 +272,13 @@ function timeoutDefer(fn: AnimationFrameCallback): number {
 }
 
 export const requestFn = window.requestAnimationFrame || getPrefixed('RequestAnimationFrame') || timeoutDefer
-export const cancelFn = window.cancelAnimationFrame || getPrefixed('CancelAnimationFrame') ||
-  getPrefixed('CancelRequestAnimationFrame') || function (id: number) { window.clearTimeout(id) }
+export const cancelFn =
+  window.cancelAnimationFrame ||
+  getPrefixed('CancelAnimationFrame') ||
+  getPrefixed('CancelRequestAnimationFrame') ||
+  function (id: number) {
+    window.clearTimeout(id)
+  }
 
 /**
  * 请求动画帧
@@ -316,7 +329,7 @@ export function clone<T>(obj: T): T {
   }
 
   if (obj instanceof Array) {
-    return obj.map(item => clone(item)) as T
+    return obj.map((item) => clone(item)) as T
   }
 
   if (obj instanceof Object) {

@@ -83,7 +83,9 @@ export class TooltipCore {
     if (typeof content === 'string') {
       container.innerHTML = content
     } else {
-      console.warn('TooltipCore: Default renderer only supports string content. Use customRenderer for Vue/React components.')
+      console.warn(
+        'TooltipCore: Default renderer only supports string content. Use customRenderer for Vue/React components.'
+      )
       container.innerHTML = 'Unsupported content type'
     }
   }

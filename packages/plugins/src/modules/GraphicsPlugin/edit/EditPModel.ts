@@ -128,11 +128,13 @@ export class EditPModel extends EditBase {
       // 检查模型是否准备好
       if (!this.entity.ready) {
         if (this.entity.readyPromise) {
-          this.entity.readyPromise.then(() => {
-            this.bindDraggers()
-          }).catch((error) => {
-            console.error('EditPModel.bindDraggers: 模型加载失败', error)
-          })
+          this.entity.readyPromise
+            .then(() => {
+              this.bindDraggers()
+            })
+            .catch((error) => {
+              console.error('EditPModel.bindDraggers: 模型加载失败', error)
+            })
         }
         return
       }
@@ -208,9 +210,7 @@ export class EditPModel extends EditBase {
           }
 
           if (typeof entityPosition === 'object' && 'getValue' in entityPosition) {
-            return (entityPosition as Cesium.Property).getValue(
-              this.viewer.clock.currentTime
-            ) as Cesium.Cartesian3
+            return (entityPosition as Cesium.Property).getValue(this.viewer.clock.currentTime) as Cesium.Cartesian3
           }
           return entityPosition as Cesium.Cartesian3
         }, false) as unknown as Cesium.Cartesian3,
@@ -365,9 +365,7 @@ export class EditPModel extends EditBase {
 
     // 处理 PositionProperty 类型
     if (typeof entityPosition === 'object' && 'getValue' in entityPosition) {
-      const posValue = (entityPosition as Cesium.Property).getValue(
-        this.viewer.clock.currentTime
-      ) as Cesium.Cartesian3
+      const posValue = (entityPosition as Cesium.Property).getValue(this.viewer.clock.currentTime) as Cesium.Cartesian3
       if (!posValue) {
         throw new Error('无法获取位置值')
       }
@@ -394,7 +392,7 @@ export class EditPModel extends EditBase {
 
       let rotpos = new Cesium.Cartesian3(radius, 0.0, 0.0)
 
-      let mat = Cesium.Transforms.eastNorthUpToFixedFrame(position)
+      const mat = Cesium.Transforms.eastNorthUpToFixedFrame(position)
       const rotationX = Cesium.Matrix4.fromRotationTranslation(
         Cesium.Matrix3.fromRotationZ(Cesium.Math.toRadians(angle))
       )
@@ -425,7 +423,7 @@ export class EditPModel extends EditBase {
       }
 
       // 获取该位置的默认矩阵
-      let mat = Cesium.Transforms.eastNorthUpToFixedFrame(positionCenter)
+      const mat = Cesium.Transforms.eastNorthUpToFixedFrame(positionCenter)
       const mat3 = Cesium.Matrix4.getMatrix3(mat, new Cesium.Matrix3())
 
       const xaxis = Cesium.Matrix3.getColumn(mat3, 0, new Cesium.Cartesian3())

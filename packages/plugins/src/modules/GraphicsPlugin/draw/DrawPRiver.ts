@@ -36,7 +36,9 @@ export class DrawPRiver extends DrawPWater {
   /**
    * 创建河流 Primitive
    */
-  protected override createPrimitive(attribute: Record<string, unknown>): Cesium.Primitive | Cesium.GroundPrimitive | null {
+  protected override createPrimitive(
+    attribute: Record<string, unknown>
+  ): Cesium.Primitive | Cesium.GroundPrimitive | null {
     this._positions_draw = []
 
     const riverAttr = attribute as RiverPrimitiveAttribute
@@ -265,11 +267,7 @@ export class DrawPRiver extends DrawPWater {
         const mpt1 = positions[positions.length - 1]
         const mpt2 = positions[positions.length - 2]
 
-        if (
-          Math.abs(mpt1.x - mpt2.x) < 1 &&
-          Math.abs(mpt1.y - mpt2.y) < 1 &&
-          Math.abs(mpt1.z - mpt2.z) < 1
-        ) {
+        if (Math.abs(mpt1.x - mpt2.x) < 1 && Math.abs(mpt1.y - mpt2.y) < 1 && Math.abs(mpt1.z - mpt2.z) < 1) {
           positions.pop()
         }
       }
@@ -305,7 +303,7 @@ export class DrawPRiver extends DrawPWater {
       // 更新材质参数模拟水位变化
       if (this.waterMaterial) {
         // 通过颜色透明度模拟水深
-        const depthFactor = (this.riverState.currentWaterLevel / (this.riverState.baseWaterLevel * 2))
+        const depthFactor = this.riverState.currentWaterLevel / (this.riverState.baseWaterLevel * 2)
         this.waterMaterial.uniforms.fadeFactor = Math.max(0.1, Math.min(0.9, depthFactor))
       }
     }

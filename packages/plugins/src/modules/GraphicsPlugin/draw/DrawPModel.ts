@@ -1,6 +1,13 @@
 import * as Cesium from 'cesium'
 import { DrawBase } from './DrawBase'
-import type { AttrClass, EditClassConstructor, ModelPrimitiveConfig, ModelPrimitiveStyle, ModelPrimitiveAttribute, ExtendedModelPrimitive } from '../types'
+import type {
+  AttrClass,
+  EditClassConstructor,
+  ModelPrimitiveConfig,
+  ModelPrimitiveStyle,
+  ModelPrimitiveAttribute,
+  ExtendedModelPrimitive
+} from '../types'
 import { getCurrentMousePosition } from '@ktd-cesium/shared'
 import * as attr from '../attr/AttrModel'
 import { defaultMessages } from '../../TooltipPlugin/messages'

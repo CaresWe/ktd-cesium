@@ -60,13 +60,13 @@ describe('attackArrow', () => {
     })
 
     it('should return empty array for null input', () => {
-      const result = computeAttackArrowPositions(null as any)
+      const result = computeAttackArrowPositions(null as unknown as Cartesian3[])
 
       expect(result).toEqual([])
     })
 
     it('should return empty array for undefined input', () => {
-      const result = computeAttackArrowPositions(undefined as any)
+      const result = computeAttackArrowPositions(undefined as unknown as Cartesian3[])
 
       expect(result).toEqual([])
     })
@@ -197,7 +197,7 @@ describe('attackArrow', () => {
     })
 
     it('should return empty array for null input', () => {
-      const result = computeAttackArrowPWPositions(null as any)
+      const result = computeAttackArrowPWPositions(null as unknown as Cartesian3[])
 
       expect(result).toEqual([])
     })
@@ -316,7 +316,7 @@ describe('attackArrow', () => {
     })
 
     it('should return empty array for null input', () => {
-      const result = computeAttackArrowYWPositions(null as any)
+      const result = computeAttackArrowYWPositions(null as unknown as Cartesian3[])
 
       expect(result).toEqual([])
     })

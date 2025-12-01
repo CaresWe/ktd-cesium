@@ -45,10 +45,12 @@ export class EditPoint extends EditBase {
       }
 
       // 验证 Cartesian3 的有效性
-      if (!Cesium.defined(finalPosition) ||
-          !Number.isFinite(finalPosition.x) ||
-          !Number.isFinite(finalPosition.y) ||
-          !Number.isFinite(finalPosition.z)) {
+      if (
+        !Cesium.defined(finalPosition) ||
+        !Number.isFinite(finalPosition.x) ||
+        !Number.isFinite(finalPosition.y) ||
+        !Number.isFinite(finalPosition.z)
+      ) {
         const error = new Error('位置坐标值无效')
         console.error('EditPoint.setPositions:', error.message, finalPosition)
         throw error
@@ -74,9 +76,7 @@ export class EditPoint extends EditBase {
       }
 
       // 设置位置
-      ;(this.entity.position as Cesium.ConstantPositionProperty).setValue(
-        finalPosition as Cesium.Cartesian3
-      )
+      ;(this.entity.position as Cesium.ConstantPositionProperty).setValue(finalPosition as Cesium.Cartesian3)
     } catch (error) {
       console.error('EditPoint.setPositions: 设置位置失败', error)
       throw error // 向上抛出错误，让调用者处理
@@ -114,10 +114,12 @@ export class EditPoint extends EditBase {
               throw new Error('拖拽位置无效')
             }
 
-            if (!Cesium.defined(newPosition) ||
-                !Number.isFinite(newPosition.x) ||
-                !Number.isFinite(newPosition.y) ||
-                !Number.isFinite(newPosition.z)) {
+            if (
+              !Cesium.defined(newPosition) ||
+              !Number.isFinite(newPosition.x) ||
+              !Number.isFinite(newPosition.y) ||
+              !Number.isFinite(newPosition.z)
+            ) {
               throw new Error('拖拽位置坐标值无效')
             }
 

@@ -79,12 +79,14 @@ export function style2Entity(style?: EllipsoidStyle, entityattr?: EllipsoidEntit
           Number(finalStyle.opacity || 1.0)
         )
         break
-      case 'extentRadii': // 球体长宽高半径
+      case 'extentRadii': {
+        // 球体长宽高半径
         const extentRadii = finalStyle.extentRadii || 100
         const widthRadii = finalStyle.widthRadii || 100
         const heightRadii = finalStyle.heightRadii || 100
         entityattr.radii = new Cesium.Cartesian3(extentRadii, widthRadii, heightRadii)
         break
+      }
     }
   }
 

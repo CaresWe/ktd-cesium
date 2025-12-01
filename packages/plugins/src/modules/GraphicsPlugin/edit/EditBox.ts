@@ -154,10 +154,12 @@ export class EditBox extends EditBase {
               throw new Error('拖拽位置无效')
             }
 
-            if (!Cesium.defined(position) ||
-                !Number.isFinite(position.x) ||
-                !Number.isFinite(position.y) ||
-                !Number.isFinite(position.z)) {
+            if (
+              !Cesium.defined(position) ||
+              !Number.isFinite(position.x) ||
+              !Number.isFinite(position.y) ||
+              !Number.isFinite(position.z)
+            ) {
               throw new Error('拖拽位置坐标值无效')
             }
 

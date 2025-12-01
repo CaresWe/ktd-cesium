@@ -1,10 +1,4 @@
-import {
-  Cesium3DTileset,
-  Cesium3DTileStyle,
-  Cartographic,
-  Ellipsoid,
-  Color as CesiumColor
-} from 'cesium'
+import { Cesium3DTileset, Cesium3DTileStyle, Cartographic, Ellipsoid, Color as CesiumColor } from 'cesium'
 import type { SeismicAnalysisConfig } from './types'
 
 /**
@@ -41,8 +35,6 @@ export class SeismicAnalyzer {
 
       // 应用初始样式
       this.applySeismicStyle(0)
-
-      console.log('Seismic analysis enabled')
     } catch (error) {
       console.error('Failed to enable seismic analysis:', error)
       throw error
@@ -103,7 +95,6 @@ export class SeismicAnalyzer {
       }
 
       animate()
-      console.log('Seismic animation started')
     } catch (error) {
       console.error('Failed to start seismic animation:', error)
       throw error
@@ -121,7 +112,6 @@ export class SeismicAnalyzer {
       }
 
       this.isAnimating = false
-      console.log('Seismic animation stopped')
     } catch (error) {
       console.error('Failed to stop seismic animation:', error)
     }
@@ -139,11 +129,7 @@ export class SeismicAnalyzer {
       const currentRadius = progress * effectRadius
 
       // 获取震中坐标（保留给未来使用）
-      const _epicenter = Cartographic.fromDegrees(
-        this.config.epicenter[0],
-        this.config.epicenter[1],
-        0
-      )
+      const _epicenter = Cartographic.fromDegrees(this.config.epicenter[0], this.config.epicenter[1], 0)
       const _epicenterCartesian = Ellipsoid.WGS84.cartographicToCartesian(_epicenter)
 
       // 获取或创建默认颜色梯度
@@ -186,8 +172,6 @@ export class SeismicAnalyzer {
       })
 
       this.tileset.style = style
-
-      console.log(`Seismic wave at ${currentRadius.toFixed(0)}m`)
     } catch (error) {
       console.error('Failed to apply seismic style:', error)
     }
@@ -216,7 +200,6 @@ export class SeismicAnalyzer {
       this.tileset.style = this.originalStyle
 
       this.config = null
-      console.log('Seismic analysis disabled')
     } catch (error) {
       console.error('Failed to disable seismic analysis:', error)
       throw error

@@ -103,7 +103,11 @@ const graphics = viewer.use(GraphicsPlugin)
 
 // 绘制多边形
 graphics.draw.polygon({
-  positions: [[116.4, 39.9], [116.5, 39.9], [116.5, 40.0]],
+  positions: [
+    [116.4, 39.9],
+    [116.5, 39.9],
+    [116.5, 40.0]
+  ],
   style: { fillColor: Cesium.Color.RED.withAlpha(0.5) }
 })
 ```
@@ -146,8 +150,51 @@ scene.addLightning({ mixFactor: 0.35 })
 
 // 添加局部下雨（多边形区域）
 scene.addLocalRain({
-  positions: [[116.0, 39.5], [117.0, 39.5], [117.0, 40.5], [116.0, 40.5]],
+  positions: [
+    [116.0, 39.5],
+    [117.0, 39.5],
+    [117.0, 40.5],
+    [116.0, 40.5]
+  ],
   dropCount: 5000
+})
+```
+
+### [AnalysisPlugin](/packages/plugins/analysis)
+
+分析插件，提供量算功能，支持空间距离、水平面积、高度差、坐标测量、贴地距离、贴地面积、三角测量、方位角等多种测量类型。
+
+```typescript
+import { AnalysisPlugin } from '@ktd-cesium/plugins'
+
+const analysis = viewer.use(AnalysisPlugin)
+
+// 开始空间距离测量
+analysis.startMeasure({
+  type: 'distance',
+  onComplete: (result) => {
+    console.log('距离:', result.value, '米')
+  }
+})
+```
+
+### [MaterialPlugin](/packages/plugins/material)
+
+材质插件，提供自定义 Cesium 材质，包括水面材质、线状流动材质、圆形波纹材质、视频材质等。
+
+```typescript
+import { createWaterMaterial, LineFlowMaterial } from '@ktd-cesium/plugins'
+
+// 创建水面材质
+const waterMaterial = createWaterMaterial({
+  baseWaterColor: '#1e90ff',
+  waveType: 'ripple'
+})
+
+// 创建流动线条材质
+const flowMaterial = new LineFlowMaterial({
+  color: Cesium.Color.CYAN,
+  duration: 2000
 })
 ```
 
@@ -266,12 +313,7 @@ myPlugin.doSomething()
 多个插件可以协同工作：
 
 ```typescript
-import {
-  BaseLayerPlugin,
-  CameraPlugin,
-  EventPlugin,
-  PopupPlugin
-} from '@ktd-cesium/plugins'
+import { BaseLayerPlugin, CameraPlugin, EventPlugin, PopupPlugin } from '@ktd-cesium/plugins'
 
 // 安装多个插件
 const baseLayer = viewer.use(BaseLayerPlugin)
@@ -306,12 +348,14 @@ events.on('click', (event) => {
 ```typescript
 // 好的做法
 const viewer = new KtdViewer(cesiumViewer, {
-  plugins: [BaseLayerPlugin]  // 只加载需要的插件
+  plugins: [BaseLayerPlugin] // 只加载需要的插件
 })
 
 // 避免
 const viewer = new KtdViewer(cesiumViewer, {
-  plugins: [/* 加载所有插件 */]  // 可能造成浪费
+  plugins: [
+    /* 加载所有插件 */
+  ] // 可能造成浪费
 })
 ```
 
@@ -322,7 +366,7 @@ class PluginManager {
   private plugins = new Map()
 
   install(viewer: KtdViewer, plugins: ViewerPluginConstructor[]) {
-    plugins.forEach(Plugin => {
+    plugins.forEach((Plugin) => {
       const instance = viewer.use(Plugin)
       this.plugins.set(Plugin.pluginName, instance)
     })

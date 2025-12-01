@@ -6,6 +6,15 @@ import type { EditClassConstructor, AttrClass, WallDrawAttribute, WallExtendedEn
 import type { EditBase } from '../edit/EditBase'
 
 /**
+ * 扩展的 WallGraphics 接口
+ */
+interface ExtendedWallGraphics extends Cesium.WallGraphics {
+  positions?: Cesium.Property | Cesium.Cartesian3[]
+  minimumHeights?: Cesium.Property | number[]
+  maximumHeights?: Cesium.Property | number[]
+}
+
+/**
  * 墙体绘制类
  *
  * 绘制流程:
@@ -61,15 +70,14 @@ export class DrawWall extends DrawPolyline {
     }
 
     if (addattr.wall) {
-      (addattr.wall as any).positions = new Cesium.CallbackProperty(() => {
+      const extWall = addattr.wall as ExtendedWallGraphics
+      extWall.positions = new Cesium.CallbackProperty(() => {
         return this.getDrawPosition()
       }, false) as unknown as Cesium.Property
-
-      (addattr.wall as any).minimumHeights = new Cesium.CallbackProperty(() => {
+      extWall.minimumHeights = new Cesium.CallbackProperty(() => {
         return this.getMinimumHeights()
       }, false) as unknown as Cesium.Property
-
-      (addattr.wall as any).maximumHeights = new Cesium.CallbackProperty(() => {
+      extWall.maximumHeights = new Cesium.CallbackProperty(() => {
         return this.getMaximumHeights()
       }, false) as unknown as Cesium.Property
     }
@@ -83,7 +91,7 @@ export class DrawWall extends DrawPolyline {
    */
   protected style2Entity(style: Record<string, unknown>, entity: Cesium.Entity): attr.WallEntityAttr {
     const extEntity = entity as WallExtendedEntity
-    return attr.style2Entity(style as attr.WallStyleConfig, (extEntity.wall as any) as attr.WallEntityAttr)
+    return attr.style2Entity(style as attr.WallStyleConfig, extEntity.wall as unknown as attr.WallEntityAttr)
   }
 
   /**
@@ -138,8 +146,9 @@ export class DrawWall extends DrawPolyline {
 
     const time = this.viewer!.clock.currentTime
 
-    const minHeights = (extEntity.wall as any)?.minimumHeights
-    const maxHeights = (extEntity.wall as any)?.maximumHeights
+    const extWall = extEntity.wall as ExtendedWallGraphics
+    const minHeights = extWall?.minimumHeights
+    const maxHeights = extWall?.maximumHeights
 
     let minimumHeights: number[] | undefined
     let maximumHeights: number[] | undefined
@@ -155,12 +164,7 @@ export class DrawWall extends DrawPolyline {
     extEntity._minimumHeights = minimumHeights
     extEntity._maximumHeights = maximumHeights
 
-    if (
-      !minimumHeights ||
-      minimumHeights.length === 0 ||
-      !maximumHeights ||
-      maximumHeights.length === 0
-    ) {
+    if (!minimumHeights || minimumHeights.length === 0 || !maximumHeights || maximumHeights.length === 0) {
       return
     }
 
@@ -188,21 +192,24 @@ export class DrawWall extends DrawPolyline {
     }
 
     if (extEntity.wall) {
-      (extEntity.wall as any).positions = new Cesium.CallbackProperty(() => {
+      const extWall = extEntity.wall as ExtendedWallGraphics
+      extWall.positions = new Cesium.CallbackProperty(() => {
         return extEntity._positions_draw
       }, false) as unknown as Cesium.Property
     }
 
     extEntity._minimumHeights = this.getMinimumHeights()
     if (extEntity.wall) {
-      (extEntity.wall as any).minimumHeights = new Cesium.CallbackProperty(() => {
+      const extWall = extEntity.wall as ExtendedWallGraphics
+      extWall.minimumHeights = new Cesium.CallbackProperty(() => {
         return extEntity._minimumHeights
       }, false) as unknown as Cesium.Property
     }
 
     extEntity._maximumHeights = this.getMaximumHeights()
     if (extEntity.wall) {
-      (extEntity.wall as any).maximumHeights = new Cesium.CallbackProperty(() => {
+      const extWall = extEntity.wall as ExtendedWallGraphics
+      extWall.maximumHeights = new Cesium.CallbackProperty(() => {
         return extEntity._maximumHeights
       }, false) as unknown as Cesium.Property
     }

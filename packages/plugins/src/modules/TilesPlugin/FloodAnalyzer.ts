@@ -41,8 +41,6 @@ export class FloodAnalyzer {
 
       // 应用初始水位样式
       this.updateWaterLevel(config.currentHeight)
-
-      console.log('Global flood analysis enabled')
     } catch (error) {
       console.error('Failed to enable flood analysis:', error)
       throw error
@@ -71,12 +69,6 @@ export class FloodAnalyzer {
 
       // 应用区域淹没样式
       this.updateRegionalFlood(config.currentHeight, positions)
-
-      console.log('Regional flood analysis enabled', {
-        polygonId: polygon.id,
-        positionCount: positions.length,
-        currentHeight: config.currentHeight
-      })
     } catch (error) {
       console.error('Failed to enable regional flood analysis:', error)
       throw error
@@ -126,10 +118,7 @@ export class FloodAnalyzer {
         }
 
         // 限制在范围内
-        const clampedHeight = Math.max(
-          this.config.minHeight,
-          Math.min(this.config.maxHeight, height)
-        )
+        const clampedHeight = Math.max(this.config.minHeight, Math.min(this.config.maxHeight, height))
 
         this.config.currentHeight = clampedHeight
         this.updateWaterLevel(clampedHeight)
@@ -144,10 +133,7 @@ export class FloodAnalyzer {
           throw new Error('Regional flood analysis not initialized')
         }
 
-        const clampedHeight = Math.max(
-          this.regionalConfig.minHeight,
-          Math.min(this.regionalConfig.maxHeight, height)
-        )
+        const clampedHeight = Math.max(this.regionalConfig.minHeight, Math.min(this.regionalConfig.maxHeight, height))
 
         this.regionalConfig.currentHeight = clampedHeight
 
@@ -214,8 +200,8 @@ export class FloodAnalyzer {
             // 首先检查是否在边界框内且低于水位
             [
               `\${Longitude} >= ${bounds.west} && \${Longitude} <= ${bounds.east} && ` +
-              `\${Latitude} >= ${bounds.south} && \${Latitude} <= ${bounds.north} && ` +
-              `\${Height} <= ${height}`,
+                `\${Latitude} >= ${bounds.south} && \${Latitude} <= ${bounds.north} && ` +
+                `\${Height} <= ${height}`,
               `color('${waterColor.withAlpha(waterAlpha).toCssColorString()}')`
             ],
             // 否则显示原色
@@ -225,12 +211,6 @@ export class FloodAnalyzer {
       })
 
       this.tileset.style = style
-
-      console.log('Regional flood style updated', {
-        height,
-        bounds,
-        waterColor: waterColor.toCssColorString()
-      })
     } catch (error) {
       console.error('Failed to update regional flood style:', error)
       throw error
@@ -306,7 +286,6 @@ export class FloodAnalyzer {
       }
 
       animate()
-      console.log(`${this.mode === 'global' ? 'Global' : 'Regional'} flood animation started`)
     } catch (error) {
       console.error('Failed to start flood animation:', error)
       throw error
@@ -324,7 +303,6 @@ export class FloodAnalyzer {
       }
 
       this.isAnimating = false
-      console.log('Flood animation stopped')
     } catch (error) {
       console.error('Failed to stop flood animation:', error)
     }
@@ -342,7 +320,6 @@ export class FloodAnalyzer {
 
       this.config = null
       this.regionalConfig = null
-      console.log('Flood analysis disabled')
     } catch (error) {
       console.error('Failed to disable flood analysis:', error)
       throw error

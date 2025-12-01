@@ -43,9 +43,7 @@ function getAngle(firstPoint: Cesium.Cartesian3, endPoint: Cesium.Cartesian3): n
  * @param positions 原始3个绘制点
  * @returns 等腰三角形的3个顶点
  */
-export function computeIsoscelesTrianglePositions(
-  positions: Cesium.Cartesian3[]
-): Cesium.Cartesian3[] {
+export function computeIsoscelesTrianglePositions(positions: Cesium.Cartesian3[]): Cesium.Cartesian3[] {
   if (!positions || positions.length < 3) {
     return positions || []
   }
@@ -60,7 +58,7 @@ export function computeIsoscelesTrianglePositions(
   // 计算角度
   const angle1 = getAngle(midpoint, p2)
   const angle2 = getAngle(midpoint, p3)
-  const angle = (angle1 - angle2) - 90
+  const angle = angle1 - angle2 - 90
 
   // 旋转第三个点到正确位置
   const newPoint2 = getRotateCenterPoint(midpoint, p3, angle)

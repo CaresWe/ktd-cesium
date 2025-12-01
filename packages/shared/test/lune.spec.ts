@@ -162,13 +162,13 @@ describe('lune', () => {
 
     describe('Boundary conditions', () => {
       it('should return empty array for null positions', () => {
-        const result = computeLunePositions(null as any)
+        const result = computeLunePositions(null as unknown as Cartesian3[])
 
         expect(result).toEqual([])
       })
 
       it('should return empty array for undefined positions', () => {
-        const result = computeLunePositions(undefined as any)
+        const result = computeLunePositions(undefined as unknown as Cartesian3[])
 
         expect(result).toEqual([])
       })
@@ -525,13 +525,13 @@ describe('lune', () => {
 
     describe('Boundary conditions', () => {
       it('should return null for null positions', () => {
-        const params = getLuneArcParams(null as any)
+        const params = getLuneArcParams(null as unknown as Cartesian3[])
 
         expect(params).toBeNull()
       })
 
       it('should return null for undefined positions', () => {
-        const params = getLuneArcParams(undefined as any)
+        const params = getLuneArcParams(undefined as unknown as Cartesian3[])
 
         expect(params).toBeNull()
       })

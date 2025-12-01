@@ -47,7 +47,7 @@ describe('curve', () => {
     })
 
     it('should return original positions if null or empty', () => {
-      expect(line2curve(null as any)).toBe(null)
+      expect(line2curve(null as unknown as Cartesian3[])).toBe(null)
       expect(line2curve([])).toEqual([])
     })
   })

@@ -3,7 +3,7 @@ import { DrawPPoint } from './DrawPPoint'
 import { getCurrentMousePosition } from '@ktd-cesium/shared'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { GraphicsEventType } from '../../EventPlugin'
-import type {  PlanePrimitiveAttribute } from '../types'
+import type { PlanePrimitiveAttribute } from '../types'
 
 /**
  * Primitive 方式的平面绘制类
@@ -87,7 +87,10 @@ export class DrawPPlane extends DrawPPoint {
         vertexFormat: Cesium.PerInstanceColorAppearance.VERTEX_FORMAT
       }),
       modelMatrix: modelMatrix,
-      attributes: (this.currentPrimitive as unknown as Record<string, unknown>)._instanceAttributes as Record<string, unknown> || {
+      attributes: ((this.currentPrimitive as unknown as Record<string, unknown>)._instanceAttributes as Record<
+        string,
+        unknown
+      >) || {
         color: Cesium.ColorGeometryInstanceAttribute.fromColor(
           this.parseColor(style.color) || Cesium.Color.YELLOW.withAlpha(0.5)
         )

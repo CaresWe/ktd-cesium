@@ -50,10 +50,10 @@ export class DrawPoint extends DrawBase {
     const pointStyle = style as PointStyleConfig
     if (pointStyle.label && entity.label) {
       // 同时加文字
-      labelStyle2Entity(pointStyle.label, entity.label as any)
+      labelStyle2Entity(pointStyle.label, entity.label)
     }
     if (entity.point) {
-      attr.style2Entity(pointStyle, entity.point as any)
+      attr.style2Entity(pointStyle, entity.point)
     }
   }
 

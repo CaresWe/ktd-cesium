@@ -57,10 +57,7 @@ const exDraw: Record<string, new (opts: DrawConfig) => DrawController> = {}
  * @param type 类型名称
  * @param DrawClass 绘制类
  */
-export function register(
-  type: string,
-  DrawClass: new (opts: DrawConfig) => DrawController
-): void {
+export function register(type: string, DrawClass: new (opts: DrawConfig) => DrawController): void {
   exDraw[type] = DrawClass
 }
 
@@ -187,9 +184,7 @@ export class GraphicsPlugin extends BasePlugin {
     this.cesiumViewer.dataSources.add(this.dataSource)
 
     // 初始化图元集合
-    this.primitives = this.cesiumViewer.scene.primitives.add(
-      new Cesium.PrimitiveCollection()
-    ) as PrimitiveCollection
+    this.primitives = this.cesiumViewer.scene.primitives.add(new Cesium.PrimitiveCollection()) as PrimitiveCollection
 
     // 初始化聚合数据源（用于Primitive聚合显示）
     this.clusterDataSource = new Cesium.CustomDataSource('GraphicsPlugin-ClusterDataSource')
@@ -219,12 +214,8 @@ export class GraphicsPlugin extends BasePlugin {
 
     // 移除默认的双击事件
     if (this.options.removeScreenSpaceEvent !== false) {
-      this.cesiumViewer.screenSpaceEventHandler.removeInputAction(
-        Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK
-      )
-      this.cesiumViewer.screenSpaceEventHandler.removeInputAction(
-        Cesium.ScreenSpaceEventType.LEFT_CLICK
-      )
+      this.cesiumViewer.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK)
+      this.cesiumViewer.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK)
     }
 
     // 初始化提示框
@@ -244,8 +235,6 @@ export class GraphicsPlugin extends BasePlugin {
         this.startEditing(data.entity as Entity)
       }
     })
-
-    console.log('Graphics plugin installed')
   }
 
   /**
@@ -572,11 +561,7 @@ export class GraphicsPlugin extends BasePlugin {
       const entity = handleEntityPick(info)
       if (entity) {
         const entityExt = entity as Entity & EntityExtension & { inProgress?: boolean }
-        if (
-          entityExt.editing &&
-          entityExt.inProgress !== true &&
-          this.isMyEntity(entity)
-        ) {
+        if (entityExt.editing && entityExt.inProgress !== true && this.isMyEntity(entity)) {
           const tooltip = this.tooltip
           if (this.tiptimeTik) {
             clearTimeout(this.tiptimeTik)
@@ -584,10 +569,7 @@ export class GraphicsPlugin extends BasePlugin {
           this.tiptimeTik = setTimeout(() => {
             // edit中的MOUSE_MOVE会关闭提示，延迟执行
             if (info.position) {
-              tooltip.showAt(
-                { x: info.position.x, y: info.position.y },
-                '单击选择对象进行编辑'
-              )
+              tooltip.showAt({ x: info.position.x, y: info.position.y }, '单击选择对象进行编辑')
             }
           }, 100)
         }
@@ -796,10 +778,7 @@ export class GraphicsPlugin extends BasePlugin {
    * @param json GeoJSON 数据
    * @param options 加载选项
    */
-  loadJson(
-    json: string | GeoJSONFeatureCollection | GeoJSONFeature,
-    options?: LoadJsonOptions
-  ): Entity[] {
+  loadJson(json: string | GeoJSONFeatureCollection | GeoJSONFeature, options?: LoadJsonOptions): Entity[] {
     const opts = options || {}
 
     let jsonObjs: GeoJSONFeatureCollection | GeoJSONFeature
@@ -845,12 +824,11 @@ export class GraphicsPlugin extends BasePlugin {
           }
         }
       }
-      feature.properties.style = (opts.style || feature.properties.style || {})
-      feature.properties.attr = (feature.properties.attr || {})
+      feature.properties.style = opts.style || feature.properties.style || {}
+      feature.properties.attr = feature.properties.attr || {}
 
       const type = feature.properties.type
       if (!type) {
-        console.log(`数据缺少 type 参数，跳过该 feature`)
         continue
       }
 
@@ -860,22 +838,20 @@ export class GraphicsPlugin extends BasePlugin {
       }
 
       if (!this.drawCtrl[type]) {
-        console.log(`数据无法识别或者数据的[${type}]类型参数有误`)
         continue
       }
 
       let entity: Entity | null | undefined
       const attr = feature.properties.attr as Record<string, unknown> | undefined
-      const existEntity = attr && typeof attr === 'object' && 'id' in attr && typeof attr.id === 'string'
-        ? this.getEntityById(attr.id)
-        : null
+      const existEntity =
+        attr && typeof attr === 'object' && 'id' in attr && typeof attr.id === 'string'
+          ? this.getEntityById(attr.id)
+          : null
       if (existEntity) {
         this.updateAttribute({ style: feature.properties.style }, existEntity)
         entity = existEntity
       } else {
-        entity = this.drawCtrl[type].jsonToEntity
-          ? this.drawCtrl[type].jsonToEntity(feature)
-          : undefined
+        entity = this.drawCtrl[type].jsonToEntity ? this.drawCtrl[type].jsonToEntity(feature) : undefined
         if (entity) {
           this.bindDeleteContextmenu(entity)
         }
@@ -1143,9 +1119,7 @@ export class GraphicsPlugin extends BasePlugin {
     const instances: Cesium.BoundingSphere[] = []
     for (const ent of entities) {
       try {
-        const boundingSphere = Cesium.BoundingSphere.fromPoints(
-          this.getPositions(ent) || []
-        )
+        const boundingSphere = Cesium.BoundingSphere.fromPoints(this.getPositions(ent) || [])
         if (boundingSphere) {
           instances.push(boundingSphere)
         }
@@ -1318,50 +1292,52 @@ export class GraphicsPlugin extends BasePlugin {
 
     if (opts.enabled) {
       // 自定义聚合样式
-      clustering.clusterEvent.addEventListener((clusteredEntities: Entity[], cluster: { billboard: Cesium.Billboard; label: Cesium.Label }) => {
-        cluster.billboard.show = true
-        cluster.label.show = opts.showLabel !== false
+      clustering.clusterEvent.addEventListener(
+        (clusteredEntities: Entity[], cluster: { billboard: Cesium.Billboard; label: Cesium.Label }) => {
+          cluster.billboard.show = true
+          cluster.label.show = opts.showLabel !== false
 
-        const count = clusteredEntities.length
-        const style = opts.clusterStyle || {}
+          const count = clusteredEntities.length
+          const style = opts.clusterStyle || {}
 
-        // 设置聚合billboard样式
-        cluster.billboard.verticalOrigin = Cesium.VerticalOrigin.BOTTOM
-        cluster.billboard.scale = 1.0
+          // 设置聚合billboard样式
+          cluster.billboard.verticalOrigin = Cesium.VerticalOrigin.BOTTOM
+          cluster.billboard.scale = 1.0
 
-        // 根据数量调整大小和颜色
-        let size = style.pixelSize || 40
-        let color = Cesium.Color.fromCssColorString(style.color || '#ff6b6b')
+          // 根据数量调整大小和颜色
+          let size = style.pixelSize || 40
+          let color = Cesium.Color.fromCssColorString(style.color || '#ff6b6b')
 
-        if (count >= 100) {
-          size = 60
-          color = Cesium.Color.RED
-        } else if (count >= 50) {
-          size = 50
-          color = Cesium.Color.ORANGE
-        } else if (count >= 10) {
-          size = 45
-          color = Cesium.Color.YELLOW
+          if (count >= 100) {
+            size = 60
+            color = Cesium.Color.RED
+          } else if (count >= 50) {
+            size = 50
+            color = Cesium.Color.ORANGE
+          } else if (count >= 10) {
+            size = 45
+            color = Cesium.Color.YELLOW
+          }
+
+          // 创建聚合图标
+          cluster.billboard.image = this._createClusterIcon(count, size, color, style)
+
+          // 设置聚合标签
+          if (opts.showLabel !== false) {
+            cluster.label.text = count.toString()
+            cluster.label.font = style.font || 'bold 16px sans-serif'
+            cluster.label.fillColor = Cesium.Color.fromCssColorString(style.labelColor || '#ffffff')
+            cluster.label.outlineColor = Cesium.Color.fromCssColorString(style.labelOutlineColor || '#000000')
+            cluster.label.outlineWidth = style.labelOutlineWidth || 2
+            cluster.label.pixelOffset = new Cesium.Cartesian2(0, -size / 2)
+          }
+
+          // 调用自定义聚合事件
+          if (opts.clusterEvent) {
+            opts.clusterEvent(clusteredEntities, cluster)
+          }
         }
-
-        // 创建聚合图标
-        cluster.billboard.image = this._createClusterIcon(count, size, color, style)
-
-        // 设置聚合标签
-        if (opts.showLabel !== false) {
-          cluster.label.text = count.toString()
-          cluster.label.font = style.font || 'bold 16px sans-serif'
-          cluster.label.fillColor = Cesium.Color.fromCssColorString(style.labelColor || '#ffffff')
-          cluster.label.outlineColor = Cesium.Color.fromCssColorString(style.labelOutlineColor || '#000000')
-          cluster.label.outlineWidth = style.labelOutlineWidth || 2
-          cluster.label.pixelOffset = new Cesium.Cartesian2(0, -size / 2)
-        }
-
-        // 调用自定义聚合事件
-        if (opts.clusterEvent) {
-          opts.clusterEvent(clusteredEntities, cluster)
-        }
-      })
+      )
     }
   }
 
@@ -1471,16 +1447,17 @@ export class GraphicsPlugin extends BasePlugin {
             verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
             scale: 1.0
           },
-          label: this.clusterOptions.showLabel !== false
-            ? {
-                text: count.toString(),
-                font: style.font || 'bold 16px sans-serif',
-                fillColor: Cesium.Color.fromCssColorString(style.labelColor || '#ffffff'),
-                outlineColor: Cesium.Color.fromCssColorString(style.labelOutlineColor || '#000000'),
-                outlineWidth: style.labelOutlineWidth || 2,
-                pixelOffset: new Cesium.Cartesian2(0, -size / 2)
-              }
-            : undefined
+          label:
+            this.clusterOptions.showLabel !== false
+              ? {
+                  text: count.toString(),
+                  font: style.font || 'bold 16px sans-serif',
+                  fillColor: Cesium.Color.fromCssColorString(style.labelColor || '#ffffff'),
+                  outlineColor: Cesium.Color.fromCssColorString(style.labelOutlineColor || '#000000'),
+                  outlineWidth: style.labelOutlineWidth || 2,
+                  pixelOffset: new Cesium.Cartesian2(0, -size / 2)
+                }
+              : undefined
         })
 
         // 隐藏被聚合的原始对象
@@ -1508,10 +1485,7 @@ export class GraphicsPlugin extends BasePlugin {
       if (processed.has(i)) continue
 
       const item = items[i]
-      const screenPos = Cesium.SceneTransforms.worldToWindowCoordinates(
-        this.cesiumViewer.scene,
-        item.position
-      )
+      const screenPos = Cesium.SceneTransforms.worldToWindowCoordinates(this.cesiumViewer.scene, item.position)
 
       if (!screenPos) continue
 
@@ -1556,12 +1530,7 @@ export class GraphicsPlugin extends BasePlugin {
   /**
    * 创建聚合图标
    */
-  private _createClusterIcon(
-    count: number,
-    size: number,
-    color: Cesium.Color,
-    style: Record<string, unknown>
-  ): string {
+  private _createClusterIcon(count: number, size: number, color: Cesium.Color, style: Record<string, unknown>): string {
     const canvas = document.createElement('canvas')
     canvas.width = size
     canvas.height = size
@@ -1684,8 +1653,6 @@ export class GraphicsPlugin extends BasePlugin {
     this.eventPlugin = null
     this.clusterOptions = null
     this.listeners.clear()
-
-    console.log('Graphics plugin destroyed')
   }
 }
 

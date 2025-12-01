@@ -280,19 +280,28 @@ export class TransformPlugin extends BasePlugin implements ITransformController 
     Cesium.Matrix3.setColumn(
       normalizedRotationMatrix,
       0,
-      Cesium.Cartesian3.normalize(Cesium.Matrix3.getColumn(rotationMatrix, 0, new Cesium.Cartesian3()), new Cesium.Cartesian3()),
+      Cesium.Cartesian3.normalize(
+        Cesium.Matrix3.getColumn(rotationMatrix, 0, new Cesium.Cartesian3()),
+        new Cesium.Cartesian3()
+      ),
       normalizedRotationMatrix
     )
     Cesium.Matrix3.setColumn(
       normalizedRotationMatrix,
       1,
-      Cesium.Cartesian3.normalize(Cesium.Matrix3.getColumn(rotationMatrix, 1, new Cesium.Cartesian3()), new Cesium.Cartesian3()),
+      Cesium.Cartesian3.normalize(
+        Cesium.Matrix3.getColumn(rotationMatrix, 1, new Cesium.Cartesian3()),
+        new Cesium.Cartesian3()
+      ),
       normalizedRotationMatrix
     )
     Cesium.Matrix3.setColumn(
       normalizedRotationMatrix,
       2,
-      Cesium.Cartesian3.normalize(Cesium.Matrix3.getColumn(rotationMatrix, 2, new Cesium.Cartesian3()), new Cesium.Cartesian3()),
+      Cesium.Cartesian3.normalize(
+        Cesium.Matrix3.getColumn(rotationMatrix, 2, new Cesium.Cartesian3()),
+        new Cesium.Cartesian3()
+      ),
       normalizedRotationMatrix
     )
 
@@ -720,7 +729,7 @@ export class TransformPlugin extends BasePlugin implements ITransformController 
   private clearGizmo(): void {
     if (!this.gizmoDataSource) return
 
-    this.gizmoEntities.forEach(entity => {
+    this.gizmoEntities.forEach((entity) => {
       this.gizmoDataSource!.entities.remove(entity)
     })
     this.gizmoEntities = []
@@ -795,7 +804,8 @@ export class TransformPlugin extends BasePlugin implements ITransformController 
    * 鼠标移动
    */
   private onMouseMove(position: Cesium.Cartesian2): void {
-    if (!this.dragAxis || (!this.entity && !this.primitive) || !this.dragStartPosition || !this.dragStartTransform) return
+    if (!this.dragAxis || (!this.entity && !this.primitive) || !this.dragStartPosition || !this.dragStartTransform)
+      return
 
     const ray = this.cesiumViewer.camera.getPickRay(position)
     if (!ray) return

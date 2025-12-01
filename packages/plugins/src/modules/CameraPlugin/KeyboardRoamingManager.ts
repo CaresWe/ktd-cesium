@@ -59,6 +59,15 @@ export class KeyboardRoamingManager {
   private enableCollision: boolean = true
   private minHeight: number = 1.5 // 最小高度（米）
 
+  // 直接绑定的事件处理器（降级方案）
+  private directEventHandlers?: {
+    keydownHandler: (e: KeyboardEvent) => void
+    keyupHandler: (e: KeyboardEvent) => void
+    mousedownHandler: (e: MouseEvent) => void
+    mouseupHandler: (e: MouseEvent) => void
+    mousemoveHandler: (e: MouseEvent) => void
+  }
+
   constructor(viewer: Cesium.Viewer, eventPlugin?: EventPlugin) {
     this.viewer = viewer
     this.scene = viewer.scene
@@ -108,7 +117,6 @@ export class KeyboardRoamingManager {
     this.registerEventListeners()
 
     this.enabled = true
-    console.log('Keyboard roaming started')
   }
 
   /**
@@ -135,7 +143,6 @@ export class KeyboardRoamingManager {
     this.lastMousePosition = undefined
 
     this.enabled = false
-    console.log('Keyboard roaming stopped')
   }
 
   /**
@@ -298,7 +305,7 @@ export class KeyboardRoamingManager {
     this.canvas.addEventListener('contextmenu', (e) => e.preventDefault())
 
     // 保存到事件列表（用于清理）
-    ;(this as any)._directEventHandlers = {
+    this.directEventHandlers = {
       keydownHandler,
       keyupHandler,
       mousedownHandler,
@@ -319,14 +326,13 @@ export class KeyboardRoamingManager {
       this.eventListenerIds = []
     } else {
       // 直接移除 DOM 事件
-      const handlers = (this as any)._directEventHandlers
-      if (handlers) {
-        document.removeEventListener('keydown', handlers.keydownHandler)
-        document.removeEventListener('keyup', handlers.keyupHandler)
-        this.canvas.removeEventListener('mousedown', handlers.mousedownHandler)
-        this.canvas.removeEventListener('mouseup', handlers.mouseupHandler)
-        this.canvas.removeEventListener('mousemove', handlers.mousemoveHandler)
-        ;(this as any)._directEventHandlers = null
+      if (this.directEventHandlers) {
+        document.removeEventListener('keydown', this.directEventHandlers.keydownHandler)
+        document.removeEventListener('keyup', this.directEventHandlers.keyupHandler)
+        this.canvas.removeEventListener('mousedown', this.directEventHandlers.mousedownHandler)
+        this.canvas.removeEventListener('mouseup', this.directEventHandlers.mouseupHandler)
+        this.canvas.removeEventListener('mousemove', this.directEventHandlers.mousemoveHandler)
+        this.directEventHandlers = undefined
       }
     }
 
@@ -461,11 +467,7 @@ export class KeyboardRoamingManager {
    */
   private getTerrainHeight(cartographic: Cesium.Cartographic): number {
     // 使用场景的 clampToHeight 获取高度
-    const position = Cesium.Cartesian3.fromRadians(
-      cartographic.longitude,
-      cartographic.latitude,
-      0
-    )
+    const position = Cesium.Cartesian3.fromRadians(cartographic.longitude, cartographic.latitude, 0)
 
     const clampedPosition = this.scene.clampToHeight(position)
     if (clampedPosition) {

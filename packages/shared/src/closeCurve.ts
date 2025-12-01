@@ -27,9 +27,7 @@ function cartesians2mercators(arr: Cesium.Cartesian3[]): number[][] {
 
 function mercator2cartesian(point: number[]): Cesium.Cartesian3 | null {
   if (isNaN(point[0]) || isNaN(point[1])) return null
-  const carto = webMercatorProjection.unproject(
-    new Cesium.Cartesian3(point[0], point[1], point[2] || 0)
-  )
+  const carto = webMercatorProjection.unproject(new Cesium.Cartesian3(point[0], point[1], point[2] || 0))
   return Cesium.Cartesian3.fromRadians(carto.longitude, carto.latitude, carto.height)
 }
 
@@ -83,12 +81,7 @@ function getNormal(pnt1: number[], pnt2: number[], pnt3: number[]): number[] {
  * @param pnt3 第三个点
  * @returns [右侧法向量点, 左侧法向量点]
  */
-function getBisectorNormals(
-  t: number,
-  pnt1: number[],
-  pnt2: number[],
-  pnt3: number[]
-): number[][] {
+function getBisectorNormals(t: number, pnt1: number[], pnt2: number[], pnt3: number[]): number[][] {
   const normal = getNormal(pnt1, pnt2, pnt3)
   let bisectorNormalRight: number[] | null = null
   let bisectorNormalLeft: number[] | null = null
@@ -143,13 +136,7 @@ function getBisectorNormals(
  * @param endPnt 结束点
  * @returns 曲线上的点
  */
-function getCubicValue(
-  t: number,
-  startPnt: number[],
-  cPnt1: number[],
-  cPnt2: number[],
-  endPnt: number[]
-): number[] {
+function getCubicValue(t: number, startPnt: number[], cPnt1: number[], cPnt2: number[], endPnt: number[]): number[] {
   t = Math.max(Math.min(t, 1), 0)
   const tp = 1 - t
   const t2 = t * t
@@ -223,13 +210,7 @@ export function computeCloseCurvePositions(
 
     // 在两个控制点之间插值
     for (let t = 0; t <= opts.segments; t++) {
-      const pnt = getCubicValue(
-        t / opts.segments,
-        pnt1,
-        adjustedNormals[i * 2],
-        adjustedNormals[i * 2 + 1],
-        pnt2
-      )
+      const pnt = getCubicValue(t / opts.segments, pnt1, adjustedNormals[i * 2], adjustedNormals[i * 2 + 1], pnt2)
       pList.push(pnt)
     }
     pList.push(pnt2)

@@ -163,7 +163,7 @@ export interface TiandituOptions {
   /** 最大层级，默认 18 */
   maximumLevel?: number
   /** 其他图层选项 */
-  [key: string]: any
+  [key: string]: unknown
 }
 
 /**
@@ -179,7 +179,7 @@ export interface AmapOptions {
   /** 最大层级，默认 18 */
   maximumLevel?: number
   /** 其他图层选项 */
-  [key: string]: any
+  [key: string]: unknown
 }
 
 /**
@@ -195,7 +195,7 @@ export interface TencentOptions {
   /** 最大层级，默认 18 */
   maximumLevel?: number
   /** 其他图层选项 */
-  [key: string]: any
+  [key: string]: unknown
 }
 
 /**
@@ -211,7 +211,7 @@ export interface BaiduOptions {
   /** 最大层级，默认 19 */
   maximumLevel?: number
   /** 其他图层选项 */
-  [key: string]: any
+  [key: string]: unknown
 }
 
 /**
@@ -227,7 +227,7 @@ export interface GeovisOptions {
   /** 最大层级，默认 18 */
   maximumLevel?: number
   /** 其他图层选项 */
-  [key: string]: any
+  [key: string]: unknown
 }
 
 /**
@@ -245,7 +245,7 @@ export interface SuperMapOptions {
   /** 最大层级，默认 18 */
   maximumLevel?: number
   /** 其他图层选项 */
-  [key: string]: any
+  [key: string]: unknown
 }
 
 /**

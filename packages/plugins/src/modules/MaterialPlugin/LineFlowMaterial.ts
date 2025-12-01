@@ -65,13 +65,7 @@ export class LineFlowMaterial {
     this.bgColor = options.bgColor ?? defaultBgColor
     this._duration = options.duration ?? 1000
 
-    const material = getImageMaterial(
-      this.url,
-      this.bgUrl,
-      options.repeat,
-      Boolean(options.axisY),
-      this.bgColor
-    )
+    const material = getImageMaterial(this.url, this.bgUrl, options.repeat, Boolean(options.axisY), this.bgColor)
 
     this._materialType = material.type
     this._materialImage = material.image
@@ -173,11 +167,9 @@ export class LineFlowMaterial {
       this._color = value as Cesium.Property
 
       if (value && typeof (value as Cesium.Property).definitionChanged === 'object') {
-        this._colorSubscription = (value as Cesium.Property).definitionChanged.addEventListener(
-          () => {
-            this._definitionChanged.raiseEvent(this)
-          }
-        )
+        this._colorSubscription = (value as Cesium.Property).definitionChanged.addEventListener(() => {
+          this._definitionChanged.raiseEvent(this)
+        })
       }
 
       this._definitionChanged.raiseEvent(this)

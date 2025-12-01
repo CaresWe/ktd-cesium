@@ -24,8 +24,6 @@ export class HeatmapManager {
 
       // 应用热力图样式
       this.updateStyle()
-
-      console.log('Heatmap enabled')
     } catch (error) {
       console.error('Failed to enable heatmap:', error)
       throw error
@@ -43,8 +41,6 @@ export class HeatmapManager {
 
       this.config.dataPoints = dataPoints
       this.updateStyle()
-
-      console.log('Heatmap data updated')
     } catch (error) {
       console.error('Failed to update heatmap data:', error)
       throw error
@@ -80,10 +76,7 @@ export class HeatmapManager {
   /**
    * 应用基于属性的热力图
    */
-  private applyPropertyHeatmap(
-    propertyName: string,
-    gradient: Array<{ stop: number; color: CesiumColor }>
-  ): void {
+  private applyPropertyHeatmap(propertyName: string, gradient: Array<{ stop: number; color: CesiumColor }>): void {
     try {
       if (!this.config) return
 
@@ -108,10 +101,7 @@ export class HeatmapManager {
       }
 
       // 添加边界条件
-      conditions.push([
-        `\${${propertyName}} < ${minValue}`,
-        `color('${gradient[0].color.toCssColorString()}')`
-      ])
+      conditions.push([`\${${propertyName}} < ${minValue}`, `color('${gradient[0].color.toCssColorString()}')`])
       conditions.push([
         `\${${propertyName}} >= ${maxValue}`,
         `color('${gradient[gradient.length - 1].color.toCssColorString()}')`
@@ -149,7 +139,6 @@ export class HeatmapManager {
       this.tileset.style = this.originalStyle
 
       this.config = null
-      console.log('Heatmap disabled')
     } catch (error) {
       console.error('Failed to disable heatmap:', error)
       throw error

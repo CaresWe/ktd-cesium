@@ -1,10 +1,23 @@
 import * as Cesium from 'cesium'
-import {isNumber,getMaxHeight} from '@ktd-cesium/shared'
+import { isNumber, getMaxHeight } from '@ktd-cesium/shared'
 import { DrawPolyline } from './DrawPolyline'
 import * as attr from '../attr/AttrRectangle'
 import { EditRectangle } from '../edit/EditRectangle'
 import type { EditClassConstructor, AttrClass, RectangleDrawAttribute, RectangleExtendedEntity } from '../types'
 import type { EditBase } from '../edit/EditBase'
+
+/**
+ * 扩展的 RectangleGraphics 接口
+ */
+interface ExtendedRectangleGraphics extends Cesium.RectangleGraphics {
+  coordinates?: Cesium.Property | Cesium.Rectangle
+  outline?: boolean | Cesium.Property
+  outlineWidth?: number | Cesium.Property
+  outlineColor?: Cesium.Color | Cesium.Property
+  height?: number | Cesium.Property
+  extrudedHeight?: number | Cesium.Property
+}
+
 /**
  * 矩形绘制类
  *
@@ -50,7 +63,7 @@ export class DrawRectangle extends DrawPolyline {
 
     // 设置矩形坐标
     if (addattr.rectangle) {
-      (addattr.rectangle as any).coordinates = new Cesium.CallbackProperty(() => {
+      ;(addattr.rectangle as ExtendedRectangleGraphics).coordinates = new Cesium.CallbackProperty(() => {
         return this.getRectangle()
       }, false) as unknown as Cesium.Property
     }
@@ -75,7 +88,10 @@ export class DrawRectangle extends DrawPolyline {
    */
   protected style2Entity(style: Record<string, unknown>, entity: Cesium.Entity): attr.RectangleEntityAttr {
     const extEntity = entity as RectangleExtendedEntity
-    return attr.style2Entity(style as attr.RectangleStyleConfig, (extEntity.rectangle as any) as attr.RectangleEntityAttr)
+    return attr.style2Entity(
+      style as attr.RectangleStyleConfig,
+      extEntity.rectangle as unknown as attr.RectangleEntityAttr
+    )
   }
 
   /**
@@ -91,52 +107,54 @@ export class DrawRectangle extends DrawPolyline {
       extEntity.polyline.show = new Cesium.CallbackProperty((time?: Cesium.JulianDate) => {
         if (!extEntity.rectangle) return false
 
-        const outline = (extEntity.rectangle as any).outline
-        const outlineWidth = (extEntity.rectangle as any).outlineWidth
+        const extRectangle = extEntity.rectangle as ExtendedRectangleGraphics
+        const outline = extRectangle.outline
+        const outlineWidth = extRectangle.outlineWidth
 
-      let outlineValue = false
-      if (typeof outline === 'boolean') {
-        outlineValue = outline
-      } else if (outline && typeof (outline as Cesium.Property).getValue === 'function') {
-        outlineValue = (outline as Cesium.Property).getValue(time)
-      }
+        let outlineValue = false
+        if (typeof outline === 'boolean') {
+          outlineValue = outline
+        } else if (outline && typeof (outline as Cesium.Property).getValue === 'function') {
+          outlineValue = (outline as Cesium.Property).getValue(time)
+        }
 
-      let widthValue = 0
-      if (typeof outlineWidth === 'number') {
-        widthValue = outlineWidth
-      } else if (outlineWidth && typeof (outlineWidth as Cesium.Property).getValue === 'function') {
-        widthValue = (outlineWidth as Cesium.Property).getValue(time)
-      }
+        let widthValue = 0
+        if (typeof outlineWidth === 'number') {
+          widthValue = outlineWidth
+        } else if (outlineWidth && typeof (outlineWidth as Cesium.Property).getValue === 'function') {
+          widthValue = (outlineWidth as Cesium.Property).getValue(time)
+        }
 
-      return outlineValue && widthValue > 1
+        return outlineValue && widthValue > 1
       }, false)
 
       extEntity.polyline.positions = new Cesium.CallbackProperty((time?: Cesium.JulianDate) => {
-      if (!extEntity.polyline) return null
+        if (!extEntity.polyline) return null
 
-      const show = extEntity.polyline.show
-      let showValue = false
-      if (typeof show === 'boolean') {
-        showValue = show
-      } else if (show && typeof (show as Cesium.Property).getValue === 'function') {
-        showValue = (show as Cesium.Property).getValue(time)
-      }
+        const show = extEntity.polyline.show
+        let showValue = false
+        if (typeof show === 'boolean') {
+          showValue = show
+        } else if (show && typeof (show as Cesium.Property).getValue === 'function') {
+          showValue = (show as Cesium.Property).getValue(time)
+        }
 
-      if (!showValue) return null
+        if (!showValue) return null
         if (!extEntity._draw_positions) return null
         return attr.getOutlinePositions(entity)
       }, false) as unknown as Cesium.Property
 
       extEntity.polyline.width = new Cesium.CallbackProperty(() => {
-        return (extEntity.rectangle as any)?.outlineWidth
+        return (extEntity.rectangle as ExtendedRectangleGraphics)?.outlineWidth
       }, false) as unknown as Cesium.Property
 
       // Cesium 1.134+ 要求 material 必须是 MaterialProperty
       extEntity.polyline.material = new Cesium.ColorMaterialProperty(
         new Cesium.CallbackProperty((time?: Cesium.JulianDate) => {
           // 确保返回有效的 Color 对象
-          if ((extEntity.rectangle as any)?.outlineColor) {
-            const outlineColor = (extEntity.rectangle as any).outlineColor
+          const extRectangle = extEntity.rectangle as ExtendedRectangleGraphics
+          if (extRectangle?.outlineColor) {
+            const outlineColor = extRectangle.outlineColor
             if (typeof (outlineColor as Cesium.Property).getValue === 'function') {
               return (outlineColor as Cesium.Property).getValue(time) || Cesium.Color.YELLOW
             }
@@ -170,11 +188,12 @@ export class DrawRectangle extends DrawPolyline {
     const posArray = Array.isArray(positions) ? positions : [positions]
     const maxHeight = getMaxHeight(posArray)
     if (maxHeight !== 0 && extEntity.rectangle) {
-      (extEntity.rectangle as any).height = maxHeight
+      const extRectangle = extEntity.rectangle as ExtendedRectangleGraphics
+      extRectangle.height = maxHeight
       style.height = maxHeight
 
       if (style.extrudedHeight && isNumber(style.extrudedHeight)) {
-        (extEntity.rectangle as any).extrudedHeight = maxHeight + Number(style.extrudedHeight)
+        extRectangle.extrudedHeight = maxHeight + Number(style.extrudedHeight)
       }
     }
   }
@@ -190,13 +209,11 @@ export class DrawRectangle extends DrawPolyline {
 
     // 确保 _draw_positions 是数组类型
     if (this._positions_draw) {
-      extEntity._draw_positions = Array.isArray(this._positions_draw)
-        ? this._positions_draw
-        : [this._positions_draw]
+      extEntity._draw_positions = Array.isArray(this._positions_draw) ? this._positions_draw : [this._positions_draw]
     }
 
     if (extEntity.rectangle) {
-      (extEntity.rectangle as any).coordinates = new Cesium.CallbackProperty(() => {
+      ;(extEntity.rectangle as ExtendedRectangleGraphics).coordinates = new Cesium.CallbackProperty(() => {
         if (!extEntity._draw_positions || extEntity._draw_positions.length < 2) return null
         return Cesium.Rectangle.fromCartesianArray(extEntity._draw_positions)
       }, false) as unknown as Cesium.Property

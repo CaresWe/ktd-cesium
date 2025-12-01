@@ -48,7 +48,6 @@ export class DrawCorridor extends DrawPolyline {
       this._maxPointNum = this._maxPointNum_def
     }
 
-    const that = this
     const addattr: Cesium.Entity.ConstructorOptions & { attribute: CorridorDrawAttribute } = {
       corridor: attr.style2Entity(corridorAttr.style),
       attribute: corridorAttr
@@ -56,7 +55,7 @@ export class DrawCorridor extends DrawPolyline {
 
     if (addattr.corridor) {
       addattr.corridor.positions = new Cesium.CallbackProperty(() => {
-        return that.getDrawPosition()
+        return this.getDrawPosition()
       }, false) as unknown as Cesium.PositionProperty
     }
 
@@ -70,7 +69,10 @@ export class DrawCorridor extends DrawPolyline {
   /**
    * 样式转 Entity
    */
-  protected override style2Entity(style: Record<string, unknown>, entity: Cesium.Entity): Cesium.CorridorGraphics.ConstructorOptions {
+  protected override style2Entity(
+    style: Record<string, unknown>,
+    entity: Cesium.Entity
+  ): Cesium.CorridorGraphics.ConstructorOptions {
     const extEntity = entity as CorridorExtendedEntity
     return attr.style2Entity(style, extEntity.corridor)
   }
@@ -88,7 +90,7 @@ export class DrawCorridor extends DrawPolyline {
 
     if (!style.clampToGround && extEntity.corridor) {
       const positions = this.getDrawPosition()
-      const positionsArray = Array.isArray(positions) ? positions : (positions ? [positions] : [])
+      const positionsArray = Array.isArray(positions) ? positions : positions ? [positions] : []
       const maxHeight = getMaxHeight(positionsArray)
 
       if (maxHeight !== 0) {

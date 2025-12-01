@@ -270,13 +270,13 @@ describe('gatheringPlace', () => {
     // ==================== 边界条件测试 ====================
     describe('Boundary conditions', () => {
       it('should return empty array for null positions', () => {
-        const result = computeGatheringPlacePositions(null as any)
+        const result = computeGatheringPlacePositions(null as unknown as Cartesian3[])
 
         expect(result).toEqual([])
       })
 
       it('should return empty array for undefined positions', () => {
-        const result = computeGatheringPlacePositions(undefined as any)
+        const result = computeGatheringPlacePositions(undefined as unknown as Cartesian3[])
 
         expect(result).toEqual([])
       })

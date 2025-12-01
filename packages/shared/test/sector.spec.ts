@@ -175,13 +175,13 @@ describe('sector', () => {
 
     describe('Boundary conditions', () => {
       it('should return empty array for null positions', () => {
-        const result = computeSectorPositions(null as any)
+        const result = computeSectorPositions(null as unknown as Cartesian3[])
 
         expect(result).toEqual([])
       })
 
       it('should return empty array for undefined positions', () => {
-        const result = computeSectorPositions(undefined as any)
+        const result = computeSectorPositions(undefined as unknown as Cartesian3[])
 
         expect(result).toEqual([])
       })
@@ -576,13 +576,13 @@ describe('sector', () => {
 
     describe('Boundary conditions', () => {
       it('should return null for null positions', () => {
-        const params = getSectorParams(null as any)
+        const params = getSectorParams(null as unknown as Cartesian3[])
 
         expect(params).toBeNull()
       })
 
       it('should return null for undefined positions', () => {
-        const params = getSectorParams(undefined as any)
+        const params = getSectorParams(undefined as unknown as Cartesian3[])
 
         expect(params).toBeNull()
       })

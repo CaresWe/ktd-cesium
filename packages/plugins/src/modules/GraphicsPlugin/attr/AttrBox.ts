@@ -57,10 +57,7 @@ export interface GeoJSONFeature {
 /**
  * 样式赋值到 entity
  */
-export function style2Entity(
-  style?: BoxStyleConfig,
-  entityattr?: BoxEntityAttr | Cesium.BoxGraphics
-): BoxEntityAttr {
+export function style2Entity(style?: BoxStyleConfig, entityattr?: BoxEntityAttr | Cesium.BoxGraphics): BoxEntityAttr {
   const finalStyle = style || {}
 
   if (entityattr == null) {
@@ -88,9 +85,12 @@ export function style2Entity(
       case 'outlineColor':
         {
           const colorString = typeof value === 'string' ? value : '#FFFF00'
-          const outlineAlpha = typeof finalStyle.outlineOpacity === 'number'
-            ? finalStyle.outlineOpacity
-            : (typeof finalStyle.opacity === 'number' ? finalStyle.opacity : 1.0)
+          const outlineAlpha =
+            typeof finalStyle.outlineOpacity === 'number'
+              ? finalStyle.outlineOpacity
+              : typeof finalStyle.opacity === 'number'
+                ? finalStyle.opacity
+                : 1.0
           attr.outlineColor = new Cesium.ConstantProperty(
             Cesium.Color.fromCssColorString(colorString).withAlpha(outlineAlpha)
           )

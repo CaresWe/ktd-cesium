@@ -32,7 +32,8 @@
   },
   "dependencies": {
     "@ktd-cesium/core": "workspace:*",
-    "@ktd-cesium/shared": "workspace:*"
+    "@ktd-cesium/shared": "workspace:*",
+    "@turf/turf": "^7.2.0"
   },
   "devDependencies": {
     "cesium": "^1.135.0",

@@ -112,11 +112,7 @@ export class StyleManager {
       }
 
       // 金属度和粗糙度通过自定义着色器实现
-      if (
-        config.metallic !== undefined ||
-        config.roughness !== undefined ||
-        config.customShader
-      ) {
+      if (config.metallic !== undefined || config.roughness !== undefined || config.customShader) {
         console.warn('Metallic, roughness, and custom shaders require Cesium3DTileset customShader API')
       }
 
@@ -130,20 +126,14 @@ export class StyleManager {
   /**
    * 根据属性创建条件样式
    */
-  createConditionalStyle(
-    propertyName: string,
-    colorMap: Map<string | number, Color>,
-    defaultColor?: Color
-  ): void {
+  createConditionalStyle(propertyName: string, colorMap: Map<string | number, Color>, defaultColor?: Color): void {
     try {
       const conditions: Array<[string, string]> = []
 
       // 添加映射条件
       colorMap.forEach((color, value) => {
         const condition =
-          typeof value === 'string'
-            ? `\${${propertyName}} === '${value}'`
-            : `\${${propertyName}} === ${value}`
+          typeof value === 'string' ? `\${${propertyName}} === '${value}'` : `\${${propertyName}} === ${value}`
 
         conditions.push([condition, `color('${color.toCssColorString()}')`])
       })
@@ -165,11 +155,7 @@ export class StyleManager {
   /**
    * 创建分层显示样式（用于楼层分层）
    */
-  createFloorStyle(
-    propertyName: string,
-    visibleFloors: number[],
-    floorColorMap?: Map<number, Color>
-  ): void {
+  createFloorStyle(propertyName: string, visibleFloors: number[], floorColorMap?: Map<number, Color>): void {
     try {
       const conditions: Array<[string, string]> = []
       const showConditions: Array<[string, boolean]> = []
@@ -181,10 +167,7 @@ export class StyleManager {
         // 设置颜色
         if (floorColorMap?.has(floor)) {
           const color = floorColorMap.get(floor)!
-          conditions.push([
-            `\${${propertyName}} === ${floor}`,
-            `color('${color.toCssColorString()}')`
-          ])
+          conditions.push([`\${${propertyName}} === ${floor}`, `color('${color.toCssColorString()}')`])
         }
       })
 
@@ -250,9 +233,7 @@ export class StyleManager {
     try {
       const conditions = values.map((value) => {
         const condition =
-          typeof value === 'string'
-            ? `\${${propertyName}} === '${value}'`
-            : `\${${propertyName}} === ${value}`
+          typeof value === 'string' ? `\${${propertyName}} === '${value}'` : `\${${propertyName}} === ${value}`
         return condition
       })
 

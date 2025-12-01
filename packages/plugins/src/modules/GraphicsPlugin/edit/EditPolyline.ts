@@ -45,7 +45,15 @@ export class EditPolyline extends EditBase {
    * 获取图形对象
    * 子类可以重写此方法返回更具体的类型
    */
-  getGraphic(): Cesium.PolylineGraphics | Cesium.PolygonGraphics | Cesium.EllipseGraphics | Cesium.CorridorGraphics | Cesium.CylinderGraphics | Cesium.PolylineVolumeGraphics | Cesium.RectangleGraphics | Cesium.WallGraphics {
+  getGraphic():
+    | Cesium.PolylineGraphics
+    | Cesium.PolygonGraphics
+    | Cesium.EllipseGraphics
+    | Cesium.CorridorGraphics
+    | Cesium.CylinderGraphics
+    | Cesium.PolylineVolumeGraphics
+    | Cesium.RectangleGraphics
+    | Cesium.WallGraphics {
     try {
       if (!this.entity) {
         throw new Error('实体对象不存在')
@@ -110,10 +118,12 @@ export class EditPolyline extends EditBase {
           throw error
         }
 
-        if (!Cesium.defined(positions[i]) ||
-            !Number.isFinite(positions[i].x) ||
-            !Number.isFinite(positions[i].y) ||
-            !Number.isFinite(positions[i].z)) {
+        if (
+          !Cesium.defined(positions[i]) ||
+          !Number.isFinite(positions[i].x) ||
+          !Number.isFinite(positions[i].y) ||
+          !Number.isFinite(positions[i].z)
+        ) {
           const error = new Error(`位置[${i}]的坐标值无效`)
           console.error('EditPolyline.setPositions:', error.message)
           throw error
@@ -316,16 +326,11 @@ export class EditPolyline extends EditBase {
                 const graphic = this.getGraphic()
                 if ('extrudedHeight' in graphic && graphic.extrudedHeight) {
                   const extrudedHeightProp = graphic.extrudedHeight as Cesium.Property
-                  const extrudedHeight = extrudedHeightProp.getValue(
-                    this.viewer.clock.currentTime
-                  ) as number
+                  const extrudedHeight = extrudedHeightProp.getValue(this.viewer.clock.currentTime) as number
                   if (Number.isFinite(extrudedHeight) && draggerEntity.index !== undefined) {
                     const heightDragger = this.heightDraggers[draggerEntity.index]
                     if (heightDragger) {
-                      const newHeightPos = setPositionsHeight(
-                        updatedPosition,
-                        extrudedHeight
-                      ) as Cesium.Cartesian3
+                      const newHeightPos = setPositionsHeight(updatedPosition, extrudedHeight) as Cesium.Cartesian3
                       heightDragger.position = newHeightPos
                     }
                   }
@@ -418,11 +423,7 @@ export class EditPolyline extends EditBase {
 
         const nextPosition = positions[nextPositionIdx]
         if (nextPosition && this.draggers[draggersIdx]) {
-          let midpoint = Cesium.Cartesian3.midpoint(
-            position,
-            nextPosition,
-            new Cesium.Cartesian3()
-          )
+          let midpoint = Cesium.Cartesian3.midpoint(position, nextPosition, new Cesium.Cartesian3())
           midpoint = this.updatePositionsHeightByAttr(midpoint)
           this.draggers[draggersIdx].position = midpoint
         }

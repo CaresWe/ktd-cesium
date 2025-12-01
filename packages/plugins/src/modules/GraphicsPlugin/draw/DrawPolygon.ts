@@ -323,11 +323,7 @@ export class DrawPolygon extends DrawPolyline {
         const mpt1 = positions[positions.length - 1]
         const mpt2 = positions[positions.length - 2]
 
-        if (
-          Math.abs(mpt1.x - mpt2.x) < 1 &&
-          Math.abs(mpt1.y - mpt2.y) < 1 &&
-          Math.abs(mpt1.z - mpt2.z) < 1
-        ) {
+        if (Math.abs(mpt1.x - mpt2.x) < 1 && Math.abs(mpt1.y - mpt2.y) < 1 && Math.abs(mpt1.z - mpt2.z) < 1) {
           positions.pop()
         }
       }
@@ -380,9 +376,7 @@ export class DrawPolygon extends DrawPolyline {
         const maxHight = getMaxHeight(positions as Cesium.Cartesian3[])
         if (this.entity.polygon) {
           // 使用 ConstantProperty 包装数字值
-          this.entity.polygon.extrudedHeight = new Cesium.ConstantProperty(
-            maxHight + Number(style.extrudedHeight)
-          )
+          this.entity.polygon.extrudedHeight = new Cesium.ConstantProperty(maxHight + Number(style.extrudedHeight))
         }
       } catch (error) {
         console.warn('DrawPolygon.updateAttrForDrawing: 更新高度失败', error)

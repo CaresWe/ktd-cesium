@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { Cartesian3, Viewer, Scene, Globe, Cartographic } from 'cesium'
+import { Cartesian3, Viewer, Cartographic } from 'cesium'
 import {
   getMaxHeight,
   getMinHeight,
@@ -34,8 +34,8 @@ describe('position', () => {
     })
 
     it('should return default value for null input', () => {
-      expect(getMaxHeight(null as any)).toBe(0)
-      expect(getMaxHeight(null as any, 200)).toBe(200)
+      expect(getMaxHeight(null as unknown as Cartesian3[])).toBe(0)
+      expect(getMaxHeight(null as unknown as Cartesian3[], 200)).toBe(200)
     })
 
     it('should handle single position', () => {
@@ -72,7 +72,7 @@ describe('position', () => {
     })
 
     it('should return default value for null input', () => {
-      expect(getMinHeight(null as any)).toBe(0)
+      expect(getMinHeight(null as unknown as Cartesian3[])).toBe(0)
     })
 
     it('should handle negative heights', () => {
@@ -110,7 +110,7 @@ describe('position', () => {
     })
 
     it('should return 0 for null input', () => {
-      expect(getAverageHeight(null as any)).toBe(0)
+      expect(getAverageHeight(null as unknown as Cartesian3[])).toBe(0)
     })
 
     it('should format to 2 decimal places', () => {
@@ -171,7 +171,7 @@ describe('position', () => {
 
     it('should handle string numbers', () => {
       const position = Cartesian3.fromDegrees(116.391, 39.907, 100)
-      const result = addPositionsHeight(position, '50' as any) as Cartesian3
+      const result = addPositionsHeight(position, '50' as unknown as number) as Cartesian3
 
       const carto = Cartographic.fromCartesian(result)
       expect(carto.height).toBeCloseTo(150, 1)
@@ -255,7 +255,7 @@ describe('position', () => {
     })
 
     it('should return 0 for null input', () => {
-      expect(getTotalDistance(null as any)).toBe(0)
+      expect(getTotalDistance(null as unknown as Cartesian3[])).toBe(0)
     })
 
     it('should return 0 for single position', () => {
@@ -289,7 +289,7 @@ describe('position', () => {
     })
 
     it('should return null for null input', () => {
-      expect(getCenterPosition(null as any)).toBeNull()
+      expect(getCenterPosition(null as unknown as Cartesian3[])).toBeNull()
     })
 
     it('should return the position itself for single position', () => {
@@ -392,7 +392,7 @@ describe('position', () => {
         globe: {
           getHeight: vi.fn().mockReturnValue(undefined)
         }
-      } as any
+      } as unknown as Parameters<typeof setPositionSurfaceHeight>[0]
 
       const result = setPositionSurfaceHeight(mockScene, position)
 
@@ -407,7 +407,7 @@ describe('position', () => {
         globe: {
           getHeight: vi.fn()
         }
-      } as any
+      } as unknown as Parameters<typeof setPositionSurfaceHeight>[0]
 
       const result = setPositionSurfaceHeight(mockScene, position)
 
@@ -423,7 +423,7 @@ describe('position', () => {
         globe: {
           getHeight: vi.fn().mockReturnValue(200)
         }
-      } as any
+      } as unknown as Parameters<typeof setPositionSurfaceHeight>[0]
 
       const result = setPositionSurfaceHeight(mockScene, position)
 
@@ -439,7 +439,7 @@ describe('position', () => {
         globe: {
           getHeight: vi.fn()
         }
-      } as any
+      } as unknown as Parameters<typeof setPositionSurfaceHeight>[0]
 
       // Create a mock that passes instanceof check by using Object.create
       const mockViewer = Object.create(Viewer.prototype)
@@ -464,7 +464,7 @@ describe('position', () => {
         globe: {
           getHeight: vi.fn()
         }
-      } as any
+      } as unknown as Parameters<typeof setPositionSurfaceHeight>[0]
 
       const result = setPositionSurfaceHeight(mockScene, position)
 
@@ -479,7 +479,7 @@ describe('position', () => {
         globe: {
           getHeight: vi.fn().mockReturnValue(-2000)
         }
-      } as any
+      } as unknown as Parameters<typeof setPositionSurfaceHeight>[0]
 
       const result = setPositionSurfaceHeight(mockScene, position)
 

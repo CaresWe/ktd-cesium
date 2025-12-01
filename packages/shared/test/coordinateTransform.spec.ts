@@ -224,7 +224,7 @@ describe('coordinateTransform', () => {
     })
 
     it('should return empty array for null input', () => {
-      expect(cartesians2lonlats(null as any)).toEqual([])
+      expect(cartesians2lonlats(null as unknown as Cartesian3[])).toEqual([])
     })
   })
 
@@ -287,7 +287,7 @@ describe('coordinateTransform', () => {
     })
 
     it('should return empty array for null input', () => {
-      expect(lonlats2cartesians(null as any)).toEqual([])
+      expect(lonlats2cartesians(null as unknown as number[][])).toEqual([])
     })
 
     it('should prioritize coordinate height over default height', () => {

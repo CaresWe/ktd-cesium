@@ -120,11 +120,7 @@ export class EditWater extends EditBase implements EditController {
     // 创建中间点（用于添加新顶点）
     for (let i = 0; i < positions.length; i++) {
       const nextIndex = (i + 1) % positions.length
-      const midPosition = Cesium.Cartesian3.midpoint(
-        positions[i],
-        positions[nextIndex],
-        new Cesium.Cartesian3()
-      )
+      const midPosition = Cesium.Cartesian3.midpoint(positions[i], positions[nextIndex], new Cesium.Cartesian3())
       this.createMidDragger(midPosition, i)
     }
   }
@@ -195,11 +191,7 @@ export class EditWater extends EditBase implements EditController {
   /**
    * 中间点拖拽处理（插入新顶点）
    */
-  private onDragMidPoint(
-    _dragger: ExtendedEntity,
-    newPosition: Cesium.Cartesian3,
-    afterIndex: number
-  ): void {
+  private onDragMidPoint(_dragger: ExtendedEntity, newPosition: Cesium.Cartesian3, afterIndex: number): void {
     if (!this._positions_draw) return
 
     // 在 afterIndex 后插入新顶点
@@ -282,6 +274,6 @@ export class EditWater extends EditBase implements EditController {
    * 获取位置
    */
   getPositions(): Cesium.Cartesian3[] {
-    return this._positions_draw?.map(p => p.clone()) || []
+    return this._positions_draw?.map((p) => p.clone()) || []
   }
 }
