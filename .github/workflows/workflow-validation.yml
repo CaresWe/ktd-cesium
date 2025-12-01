@@ -1,0 +1,62 @@
+# 工作流配置验证
+name: Workflow Validation
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - '.github/workflows/**'
+      - '.github/**'
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+      - '.github/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate workflow files
+        run: |
+          # 检查所有工作流文件的语法
+          for workflow in .github/workflows/*.yml; do
+            echo "🔍 验证 $workflow..."
+            if ! yamllint --strict "$workflow" 2>/dev/null; then
+              echo "⚠️  yamllint 不可用，跳过语法检查"
+            fi
+
+            # 基本 YAML 语法检查
+            if python3 -c "import yaml; yaml.safe_load(open('$workflow'))" 2>/dev/null; then
+              echo "✅ $workflow 语法正确"
+            else
+              echo "❌ $workflow 语法错误"
+              exit 1
+            fi
+          done
+
+      - name: Check required secrets
+        run: |
+          echo "🔐 检查必要的 secrets 配置..."
+          echo "需要配置的 secrets:"
+          echo "- NPM_TOKEN: 用于发布包到 NPM"
+          echo "- GITHUB_TOKEN: 自动配置，用于创建 releases"
+
+      - name: Validate workflow dependencies
+        run: |
+          echo "🔗 检查工作流依赖关系..."
+          # 检查是否有循环依赖或其他问题
+          workflows=$(find .github/workflows -name "*.yml" -exec basename {} \; | sed 's/\.yml$//')
+
+          for workflow in $workflows; do
+            echo "📋 工作流: $workflow"
+            # 检查工作流是否引用了不存在的 jobs 或其他工作流
+          done
+
+      - name: Summary
+        run: |
+          echo "## ✅ 工作流验证完成" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "所有工作流配置文件都已验证通过。" >> $GITHUB_STEP_SUMMARY

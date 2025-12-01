@@ -48,6 +48,7 @@ export default defineConfig({
             { text: '安装', link: '/guide/installation' },
             { text: '最佳实践', link: '/guide/best-practices' },
             { text: '常见问题', link: '/guide/faq' },
+            { text: '工作流指南', link: '/guide/workflows' },
           ]
         }
       ],

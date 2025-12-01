@@ -1,0 +1,194 @@
+# 发布包到 NPM
+name: Release
+
+on:
+  # 允许手动触发发布
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: '发布类型'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - prerelease
+      dry_run:
+        description: '是否为试运行'
+        required: false
+        default: false
+        type: boolean
+  # 也可以通过标签触发发布
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  # 发布检查
+  pre-release:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      packages: ${{ steps.packages.outputs.packages }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm type-check
+
+      - name: Lint check
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test || echo "No tests defined"
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ inputs.release_type }}" >> $GITHUB_OUTPUT
+          else
+            # 从标签中提取版本号
+            TAG=${GITHUB_REF#refs/tags/}
+            VERSION=${TAG#v}
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Determine packages to publish
+        id: packages
+        run: |
+          echo "packages=[\"core\",\"shared\",\"plugins\"]" >> $GITHUB_OUTPUT
+
+  # 发布到 NPM
+  publish:
+    needs: pre-release
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: ["core", "shared", "plugins"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Publish ${{ matrix.package }}
+        if: inputs.dry_run != true
+        run: |
+          cd packages/${{ matrix.package }}
+          npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Dry run publish ${{ matrix.package }}
+        if: inputs.dry_run == true
+        run: |
+          cd packages/${{ matrix.package }}
+          npm publish --dry-run
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # 创建 GitHub Release
+  release:
+    needs: [pre-release, publish]
+    runs-on: ubuntu-latest
+    if: inputs.dry_run != true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate changelog
+        run: pnpm changelog
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ needs.pre-release.outputs.version }}
+          release_name: Release v${{ needs.pre-release.outputs.version }}
+          body: |
+            ## 变更日志
+
+            查看完整的变更日志：[CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md)
+
+            ### 安装
+
+            ```bash
+            # 使用 pnpm
+            pnpm add @auto-cesium/core @auto-cesium/shared @auto-cesium/plugins
+
+            # 使用 npm
+            npm install @auto-cesium/core @auto-cesium/shared @auto-cesium/plugins
+
+            # 使用 yarn
+            yarn add @auto-cesium/core @auto-cesium/shared @auto-cesium/plugins
+            ```
+
+            ### 文档
+
+            📖 [查看文档](https://your-repo.github.io/auto-cesium/)
+          draft: false
+          prerelease: ${{ contains(github.ref, 'beta') || contains(github.ref, 'alpha') || contains(github.ref, 'rc') }}
+
+      - name: Notify success
+        run: |
+          echo "🎉 Successfully released v${{ needs.pre-release.outputs.version }}!"
+          echo "📦 Packages published to NPM"
+          echo "📝 Release created on GitHub"

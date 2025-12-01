@@ -20,7 +20,8 @@
     "commit": "git-cz",
     "release": "node scripts/release.js",
     "release:pkg": "node scripts/release-package.js",
-    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s"
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
+    "setup:github-pages": "node scripts/setup-github-pages.js"
   },
   "config": {
     "commitizen": {

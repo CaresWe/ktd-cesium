@@ -1,0 +1,30 @@
+# 依赖审查
+name: Dependency Review
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          # 可选：检查许可证兼容性
+          license-check: true
+          # 可选：检查漏洞
+          vulnerability-check: true
+          # 可选：允许的许可证列表
+          allow-licenses: MIT, BSD-3-Clause, BSD-2-Clause, Apache-2.0, ISC, CC0-1.0
+          # 可选：失败时阻止合并
+          fail-on-severity: moderate
+          # 可选：允许的 GHSA IDs（如果有已知但可接受的漏洞）
+          allow-ghsa-ids: GHSA-xxxx-xxxx-xxxx

@@ -70,6 +70,7 @@ Auto-Cesium 采用 Monorepo 架构，包含以下三个核心包：
 - [安装](/guide/installation) - 查看详细的安装指南
 - [最佳实践](/guide/best-practices) - 学习推荐做法和模式
 - [常见问题](/guide/faq) - 查看常见问题解答
+- [工作流指南](/guide/workflows) - 了解自动化工作流
 - [Shared 包](/packages/shared/overview) - 探索工具函数
 - [Core 包](/packages/core/overview) - 了解核心功能
 - [Plugins 包](/packages/plugins/overview) - 使用插件系统
