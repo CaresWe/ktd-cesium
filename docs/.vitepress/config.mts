@@ -4,8 +4,33 @@ export default defineConfig({
   title: 'Auto-Cesium',
   description: 'Cesium 二次封装库',
   base: '/',
+  lang: 'zh-CN',
 
   themeConfig: {
+    langMenuLabel: '选择语言',
+    returnToTopLabel: '返回顶部',
+    sidebarMenuLabel: '菜单',
+    darkModeSwitchLabel: '主题',
+    lightModeSwitchTitle: '切换到浅色模式',
+    darkModeSwitchTitle: '切换到深色模式',
+
+    outline: {
+      level: [2, 3],
+      label: '页面导航'
+    },
+
+    docFooter: {
+      prev: '上一页',
+      next: '下一页'
+    },
+
+    lastUpdated: {
+      text: '最后更新于',
+      formatOptions: {
+        dateStyle: 'short',
+        timeStyle: 'medium'
+      }
+    },
     nav: [
       { text: '指南', link: '/guide/introduction' },
       { text: '地图公共方法包', link: '/packages/shared/overview' },
@@ -52,7 +77,7 @@ export default defineConfig({
           text: '核心包',
           items: [
             { text: '概述', link: '/packages/core/overview' },
-            { text: 'AutpViewer', link: '/packages/core/viewer' },
+            { text: 'AutoViewer', link: '/packages/core/viewer' },
           ]
         }
       ],
