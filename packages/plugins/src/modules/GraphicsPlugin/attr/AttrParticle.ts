@@ -1,5 +1,5 @@
 import * as Cesium from 'cesium'
-import { cartesians2lonlats } from '@ktd-cesium/shared'
+import { cartesians2lonlats } from '@auto-cesium/shared'
 import type { ParticleSystemOptions } from '../draw/DrawParticle'
 
 /**

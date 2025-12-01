@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium'
 import { EditPolygonEx } from './EditPolygonEx'
-import { computeGatheringPlacePositions } from '@ktd-cesium/shared'
+import { computeGatheringPlacePositions } from '@auto-cesium/shared'
 import type { ExtendedEntity } from './EditBase'
 import type { GatheringPlaceEditEntity } from '../types/index'
 

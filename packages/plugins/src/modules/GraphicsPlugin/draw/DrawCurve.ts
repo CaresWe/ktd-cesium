@@ -1,7 +1,7 @@
 import * as Cesium from 'cesium'
 import { DrawPolyline } from './DrawPolyline'
 import { EditCurve } from '../edit/EditCurve'
-import { line2curve } from '@ktd-cesium/shared'
+import { line2curve } from '@auto-cesium/shared'
 import type { EditClassConstructor, CurveExtendedEntity } from '../types'
 import type { EditBase } from '../edit/EditBase'
 

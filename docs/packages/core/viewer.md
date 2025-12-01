@@ -1,26 +1,26 @@
-# KtdViewer
+# AutoViewer
 
-KtdViewer 是对 Cesium.Viewer 的增强封装，提供了插件系统支持，同时保留了 Cesium.Viewer 的所有功能。
+AutoViewer 是对 Cesium.Viewer 的增强封装，提供了插件系统支持，同时保留了 Cesium.Viewer 的所有功能。
 
 ## 导入
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import type { KtdViewerOptions, ViewerPlugin } from '@ktd-cesium/core'
+import { AutoViewer } from '@auto-cesium/core'
+import type { AutoViewerOptions, ViewerPlugin } from '@auto-cesium/core'
 ```
 
 ## 构造函数
 
-### KtdViewer
+### AutoViewer
 
-创建一个 KtdViewer 实例。
+创建一个 AutoViewer 实例。
 
 **类型签名**
 
 ```typescript
 constructor(
   viewer: Cesium.Viewer,
-  options?: KtdViewerOptions
+  options?: AutoViewerOptions
 )
 ```
 
@@ -32,22 +32,22 @@ constructor(
 
 **返回值**
 
-- `KtdViewer`: KtdViewer 实例（通过 Proxy 代理）
+- `AutoViewer`: AutoViewer 实例（通过 Proxy 代理）
 
 **示例**
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
+import { AutoViewer } from '@auto-cesium/core'
 import * as Cesium from 'cesium'
 
 // 基础用法
 const cesiumViewer = new Cesium.Viewer('cesiumContainer')
-const viewer = new KtdViewer(cesiumViewer)
+const viewer = new AutoViewer(cesiumViewer)
 
 // 带预装插件
-import { BaseLayerPlugin, CameraPlugin } from '@ktd-cesium/plugins'
+import { BaseLayerPlugin, CameraPlugin } from '@auto-cesium/plugins'
 
-const viewerWithPlugins = new KtdViewer(cesiumViewer, {
+const viewerWithPlugins = new AutoViewer(cesiumViewer, {
   plugins: [BaseLayerPlugin, CameraPlugin]
 })
 ```
@@ -140,7 +140,7 @@ use<T extends ViewerPlugin>(
 **示例**
 
 ```typescript
-import { BaseLayerPlugin, CameraPlugin } from '@ktd-cesium/plugins'
+import { BaseLayerPlugin, CameraPlugin } from '@auto-cesium/plugins'
 
 // 安装插件
 const baseLayer = viewer.use(BaseLayerPlugin)
@@ -203,20 +203,20 @@ destroy(): void
 viewer.destroy()
 
 // 检查是否已销毁
-console.log(viewer.destroyed)  // true
+console.log(viewer.destroyed) // true
 
 // 销毁后的操作会被忽略
-viewer.destroy()  // 不会重复销毁
+viewer.destroy() // 不会重复销毁
 ```
 
 ## 类型定义
 
-### KtdViewerOptions
+### AutoViewerOptions
 
 Viewer 配置选项。
 
 ```typescript
-interface KtdViewerOptions {
+interface AutoViewerOptions {
   /** 预装载的插件 */
   plugins?: ViewerPluginConstructor[]
 }
@@ -235,7 +235,7 @@ interface ViewerPlugin {
   readonly installed: boolean
 
   /** 安装插件 */
-  install(viewer: KtdViewer): void | Promise<void>
+  install(viewer: AutoViewer): void | Promise<void>
 
   /** 销毁插件 */
   destroy?(): void | Promise<void>
@@ -264,17 +264,17 @@ interface ViewerPluginConstructor<T extends ViewerPlugin = ViewerPlugin> {
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { KtdViewer } from '@ktd-cesium/core'
-import { BaseLayerPlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { BaseLayerPlugin } from '@auto-cesium/plugins'
 import * as Cesium from 'cesium'
 
 const containerRef = ref<HTMLElement>()
-let viewer: KtdViewer
+let viewer: AutoViewer
 
 onMounted(() => {
   if (containerRef.value) {
     const cesiumViewer = new Cesium.Viewer(containerRef.value)
-    viewer = new KtdViewer(cesiumViewer, {
+    viewer = new AutoViewer(cesiumViewer, {
       plugins: [BaseLayerPlugin]
     })
 
@@ -294,18 +294,18 @@ onBeforeUnmount(() => {
 
 ```tsx
 import { useEffect, useRef } from 'react'
-import { KtdViewer } from '@ktd-cesium/core'
-import { BaseLayerPlugin, CameraPlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { BaseLayerPlugin, CameraPlugin } from '@auto-cesium/plugins'
 import * as Cesium from 'cesium'
 
 function MapComponent() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const viewerRef = useRef<KtdViewer>()
+  const viewerRef = useRef<AutoViewer>()
 
   useEffect(() => {
     if (containerRef.current) {
       const cesiumViewer = new Cesium.Viewer(containerRef.current)
-      const viewer = new KtdViewer(cesiumViewer, {
+      const viewer = new AutoViewer(cesiumViewer, {
         plugins: [BaseLayerPlugin, CameraPlugin]
       })
 
@@ -330,10 +330,10 @@ function MapComponent() {
 
 ```typescript
 class PluginManager {
-  private viewer: KtdViewer
+  private viewer: AutoViewer
   private installedPlugins: Set<string> = new Set()
 
-  constructor(viewer: KtdViewer) {
+  constructor(viewer: AutoViewer) {
     this.viewer = viewer
   }
 
@@ -362,20 +362,20 @@ class PluginManager {
 ### 场景 4：自定义插件
 
 ```typescript
-import type { ViewerPlugin, KtdViewer } from '@ktd-cesium/core'
+import type { ViewerPlugin, AutoViewer } from '@auto-cesium/core'
 
 class MyCustomPlugin implements ViewerPlugin {
   static readonly pluginName = 'MyCustomPlugin'
 
   readonly name = 'MyCustomPlugin'
   private _installed = false
-  private viewer?: KtdViewer
+  private viewer?: AutoViewer
 
   get installed() {
     return this._installed
   }
 
-  install(viewer: KtdViewer) {
+  install(viewer: AutoViewer) {
     this.viewer = viewer
     this._installed = true
 
@@ -408,7 +408,7 @@ class MyCustomPlugin implements ViewerPlugin {
 }
 
 // 使用自定义插件
-const viewer = new KtdViewer(cesiumViewer)
+const viewer = new AutoViewer(cesiumViewer)
 const myPlugin = viewer.use(MyCustomPlugin)
 myPlugin.doSomething()
 ```
@@ -433,7 +433,7 @@ function createViewer(container: string, features: string[]) {
     plugins.push(EventPlugin)
   }
 
-  return new KtdViewer(cesiumViewer, { plugins })
+  return new AutoViewer(cesiumViewer, { plugins })
 }
 
 // 使用
@@ -442,7 +442,7 @@ const viewer = createViewer('cesiumContainer', ['baseLayer', 'camera'])
 
 ## Proxy 代理说明
 
-KtdViewer 使用 Proxy 模式，自动代理所有 Cesium.Viewer 的属性和方法：
+AutoViewer 使用 Proxy 模式，自动代理所有 Cesium.Viewer 的属性和方法：
 
 ```typescript
 // 这些都是有效的
@@ -450,14 +450,15 @@ viewer.scene.globe.enableLighting = true  // 设置属性
 viewer.entities.add({...})                // 调用方法
 viewer.camera.flyTo({...})                // 调用方法
 
-// 同时保留 KtdViewer 的功能
-viewer.use(Plugin)                        // KtdViewer 方法
-viewer.getPlugin('name')                  // KtdViewer 方法
-viewer.destroy()                          // KtdViewer 方法
+// 同时保留 AutoViewer 的功能
+viewer.use(Plugin)                        // AutoViewer 方法
+viewer.getPlugin('name')                  // AutoViewer 方法
+viewer.destroy()                          // AutoViewer 方法
 ```
 
 访问优先级：
-1. 优先访问 KtdViewer 自己的属性和方法
+
+1. 优先访问 AutoViewer 自己的属性和方法
 2. 如果不存在，则代理到 Cesium.Viewer
 
 ## 注意事项
@@ -466,7 +467,7 @@ viewer.destroy()                          // KtdViewer 方法
 2. **插件唯一性**：每个插件在一个 Viewer 中只能安装一次
 3. **异步插件**：插件的 `install` 和 `destroy` 方法可以返回 Promise
 4. **Proxy 限制**：某些高级用法（如 `instanceof` 检查）可能不适用于代理对象
-5. **类型安全**：使用 TypeScript 时，KtdViewer 会提供完整的类型提示
+5. **类型安全**：使用 TypeScript 时，AutoViewer 会提供完整的类型提示
 
 ## 最佳实践
 

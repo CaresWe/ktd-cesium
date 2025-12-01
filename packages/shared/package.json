@@ -1,5 +1,5 @@
 {
-  "name": "@ktd-cesium/shared",
+  "name": "@auto-cesium/shared",
   "version": "1.0.0",
   "description": "Cesium共享基础库",
   "type": "module",

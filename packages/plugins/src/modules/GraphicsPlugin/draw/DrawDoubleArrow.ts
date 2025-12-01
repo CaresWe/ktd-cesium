@@ -1,7 +1,7 @@
 import * as Cesium from 'cesium'
 import { DrawPolygonEx } from './DrawPolygonEx'
 import { EditDoubleArrow } from '../edit/EditDoubleArrow'
-import { computeDoubleArrowPositions } from '@ktd-cesium/shared'
+import { computeDoubleArrowPositions } from '@auto-cesium/shared'
 import type { EditClassConstructor } from '../types'
 
 /**

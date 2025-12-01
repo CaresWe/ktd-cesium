@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium'
 import { EditPolygonEx } from './EditPolygonEx'
-import { computeIsoscelesTrianglePositions } from '@ktd-cesium/shared'
+import { computeIsoscelesTrianglePositions } from '@auto-cesium/shared'
 import type { ExtendedEntity } from './EditBase'
 import type { IsoscelesTriangleEditEntity } from '../types/index'
 

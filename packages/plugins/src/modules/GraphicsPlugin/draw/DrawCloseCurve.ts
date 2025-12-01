@@ -1,7 +1,7 @@
 import * as Cesium from 'cesium'
 import { DrawPolygonEx } from './DrawPolygonEx'
 import { EditCloseCurve } from '../edit/EditCloseCurve'
-import { computeCloseCurvePositions } from '@ktd-cesium/shared'
+import { computeCloseCurvePositions } from '@auto-cesium/shared'
 import type { EditClassConstructor } from '../types'
 
 /**

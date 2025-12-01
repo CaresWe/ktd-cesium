@@ -5,14 +5,14 @@
 ## 导入
 
 ```typescript
-import { TooltipCore, createTooltip, VueRenderer, ReactRenderer, defaultMessages } from '@ktd-cesium/plugins'
+import { TooltipCore, createTooltip, VueRenderer, ReactRenderer, defaultMessages } from '@auto-cesium/plugins'
 import type {
   TooltipOptions,
   TooltipPosition,
   TooltipContent,
   TooltipVNode,
   TooltipReactNode
-} from '@ktd-cesium/plugins'
+} from '@auto-cesium/plugins'
 ```
 
 ## 核心特性
@@ -28,7 +28,7 @@ import type {
 TooltipPlugin 是一个工具类，不需要通过 `viewer.use()` 安装，直接创建实例即可使用。
 
 ```typescript
-import { createTooltip } from '@ktd-cesium/plugins'
+import { createTooltip } from '@auto-cesium/plugins'
 
 const tooltip = createTooltip({
   container: document.getElementById('cesiumContainer')!,
@@ -42,7 +42,7 @@ const tooltip = createTooltip({
 ### HTML 内容
 
 ```typescript
-import { createTooltip } from '@ktd-cesium/plugins'
+import { createTooltip } from '@auto-cesium/plugins'
 
 const tooltip = createTooltip({
   container: viewer.cesiumViewer.container as HTMLElement
@@ -75,7 +75,7 @@ const tooltip = createTooltip({
 ### 基础配置
 
 ```typescript
-import { createTooltip, VueRenderer } from '@ktd-cesium/plugins'
+import { createTooltip, VueRenderer } from '@auto-cesium/plugins'
 import { createApp, h } from 'vue'
 import MyTooltipComponent from './MyTooltipComponent.vue'
 
@@ -140,7 +140,7 @@ defineProps<Props>()
 ### 基础配置
 
 ```typescript
-import { createTooltip, ReactRenderer } from '@ktd-cesium/plugins'
+import { createTooltip, ReactRenderer } from '@auto-cesium/plugins'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import MyTooltipComponent from './MyTooltipComponent'
@@ -357,7 +357,7 @@ function showTooltipAtMouse(event: MouseEvent) {
 ### 实现自定义渲染器
 
 ```typescript
-import type { TooltipRenderer, TooltipContent } from '@ktd-cesium/plugins'
+import type { TooltipRenderer, TooltipContent } from '@auto-cesium/plugins'
 
 class CustomRenderer implements TooltipRenderer {
   render(container: HTMLElement, content: TooltipContent): void {
@@ -390,7 +390,7 @@ const tooltip = createTooltip({
 ### 使用默认消息
 
 ```typescript
-import { defaultMessages } from '@ktd-cesium/plugins'
+import { defaultMessages } from '@auto-cesium/plugins'
 
 // 绘制提示
 const drawMessage = defaultMessages.draw.polyline.start
@@ -406,7 +406,7 @@ const draggerMessage = defaultMessages.dragger.def
 ### 自定义消息
 
 ```typescript
-import { defaultMessages } from '@ktd-cesium/plugins'
+import { defaultMessages } from '@auto-cesium/plugins'
 
 // 修改默认消息
 defaultMessages.draw.point.start = '点击地图完成绘制'
@@ -420,7 +420,7 @@ tooltip.showAt(position, defaultMessages.draw.point.start)
 ### 场景 1：绘制提示
 
 ```typescript
-import { createTooltip, defaultMessages } from '@ktd-cesium/plugins'
+import { createTooltip, defaultMessages } from '@auto-cesium/plugins'
 
 const tooltip = createTooltip({
   container: viewer.cesiumViewer.container as HTMLElement,
@@ -481,7 +481,7 @@ viewer.cesiumViewer.canvas.addEventListener('mousemove', (event) => {
 ### 场景 3：Vue 组件提示
 
 ```typescript
-import { createTooltip, VueRenderer } from '@ktd-cesium/plugins'
+import { createTooltip, VueRenderer } from '@auto-cesium/plugins'
 import { createApp, h } from 'vue'
 import TooltipContent from './TooltipContent.vue'
 
@@ -510,7 +510,7 @@ function showEntityTooltip(entity: Cesium.Entity, position: { x: number; y: numb
 ### 场景 4：React 组件提示
 
 ```typescript
-import { createTooltip, ReactRenderer } from '@ktd-cesium/plugins'
+import { createTooltip, ReactRenderer } from '@auto-cesium/plugins'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import TooltipContent from './TooltipContent'
@@ -653,8 +653,8 @@ document.head.appendChild(style)
 ### 场景 8：与 GraphicsPlugin 集成
 
 ```typescript
-import { GraphicsPlugin } from '@ktd-cesium/plugins'
-import { createTooltip, defaultMessages } from '@ktd-cesium/plugins'
+import { GraphicsPlugin } from '@auto-cesium/plugins'
+import { createTooltip, defaultMessages } from '@auto-cesium/plugins'
 
 const graphics = viewer.use(GraphicsPlugin)
 const tooltip = createTooltip({

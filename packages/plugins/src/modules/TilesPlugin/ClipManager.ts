@@ -13,7 +13,7 @@ import {
   PolygonHierarchy,
   JulianDate
 } from 'cesium'
-import type { KtdViewer } from '@ktd-cesium/core'
+import type { AutoViewer } from '@auto-cesium/core'
 import type { BoxClipConfig, ModelClipConfig } from './types'
 import type { GraphicsPlugin } from '../GraphicsPlugin'
 
@@ -29,7 +29,7 @@ export class ClipManager {
   private clippingPlanes: ClippingPlaneCollection | null = null
   private boxEntity: unknown = null // Entity from GraphicsPlugin
 
-  constructor(tileset: Cesium3DTileset, viewer: KtdViewer) {
+  constructor(tileset: Cesium3DTileset, viewer: AutoViewer) {
     this.tileset = tileset
     this.graphicsPlugin = viewer.getPlugin('graphics') as GraphicsPlugin | undefined
   }

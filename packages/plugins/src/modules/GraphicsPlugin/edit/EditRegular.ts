@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium'
 import { EditPolygonEx } from './EditPolygonEx'
-import { computeRegularPositions } from '@ktd-cesium/shared'
+import { computeRegularPositions } from '@auto-cesium/shared'
 import type { ExtendedEntity } from './EditBase'
 import type { RegularEditEntity } from '../types'
 

@@ -1,4 +1,4 @@
-import { CoordinateOffset } from '@ktd-cesium/shared'
+import { CoordinateOffset } from '@auto-cesium/shared'
 
 /**
  * 支持的坐标系类型

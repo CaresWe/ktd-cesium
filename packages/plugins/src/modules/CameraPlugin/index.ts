@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium'
 import { BasePlugin } from '../../BasePlugin'
-import type { KtdViewer } from '@ktd-cesium/core'
+import type { AutoViewer } from '@auto-cesium/core'
 import { RoamingManager } from './RoamingManager'
 import { KeyboardRoamingManager } from './KeyboardRoamingManager'
 import { IndoorRoamingManager } from './IndoorRoamingManager'
@@ -65,7 +65,7 @@ export class CameraPlugin extends BasePlugin {
   /** 室内漫游管理器 */
   public indoorRoaming!: IndoorRoamingManager
 
-  protected onInstall(viewer: KtdViewer): void {
+  protected onInstall(viewer: AutoViewer): void {
     this.roaming = new RoamingManager(this.cesiumViewer)
     this.indoorRoaming = new IndoorRoamingManager(this.cesiumViewer)
 

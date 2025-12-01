@@ -1,4 +1,4 @@
-import type { ViewerPlugin, KtdViewer } from '@ktd-cesium/core'
+import type { ViewerPlugin, AutoViewer } from '@auto-cesium/core'
 import type { Viewer as CesiumViewer } from 'cesium'
 
 /**
@@ -10,21 +10,21 @@ export abstract class BasePlugin implements ViewerPlugin {
   abstract readonly name: string
 
   /** Viewer 实例 */
-  protected viewer: KtdViewer | null = null
+  protected viewer: AutoViewer | null = null
 
   /** 插件是否已安装 */
   private _installed = false
 
   /**
    * 获取 Cesium Viewer 实例（带完整类型）
-   * KtdViewer 通过 Proxy 实现，运行时具有所有 Cesium Viewer 的属性
+   * AutoViewer 通过 Proxy 实现，运行时具有所有 Cesium Viewer 的属性
    * 此 getter 提供类型安全的访问方式
    */
   protected get cesiumViewer(): CesiumViewer {
     if (!this.viewer) {
       throw new Error(`Plugin "${this.name}" is not installed`)
     }
-    // 使用 KtdViewer 提供的 cesiumViewer 属性来获取原始 Viewer
+    // 使用 AutoViewer 提供的 cesiumViewer 属性来获取原始 Viewer
     // 这是类型安全的方式
     return this.viewer.cesiumViewer
   }
@@ -40,7 +40,7 @@ export abstract class BasePlugin implements ViewerPlugin {
       return
     }
 
-    // 类型断言：viewer 运行时就是 KtdViewer
+    // 类型断言：viewer 运行时就是 AutoViewer
     // 使用 Object.assign 来绕过类型检查，同时保持类型安全
     Object.assign(this, { viewer })
     this._installed = true
@@ -55,7 +55,7 @@ export abstract class BasePlugin implements ViewerPlugin {
    * 插件安装时的回调
    * 子类应该重写此方法
    */
-  protected abstract onInstall(viewer: KtdViewer): void | Promise<void>
+  protected abstract onInstall(viewer: AutoViewer): void | Promise<void>
 
   /**
    * 销毁插件

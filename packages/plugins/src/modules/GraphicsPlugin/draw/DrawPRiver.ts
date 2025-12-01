@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium'
 import { DrawPWater } from './DrawPWater'
-import { getCurrentMousePosition, line2curve } from '@ktd-cesium/shared'
+import { getCurrentMousePosition, line2curve } from '@auto-cesium/shared'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { GraphicsEventType } from '../../EventPlugin'
 import type { RiverPrimitiveAttribute, RiverCrossSection, RiverAnimationState, RiverPrimitiveObject } from '../types'

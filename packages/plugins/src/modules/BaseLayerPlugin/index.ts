@@ -15,7 +15,7 @@ import {
   GeographicTilingScheme
 } from 'cesium'
 import { BasePlugin } from '../../BasePlugin'
-import type { KtdViewer } from '@ktd-cesium/core'
+import type { AutoViewer } from '@auto-cesium/core'
 import type {
   BaseLayerOptions,
   XYZLayerOptions,
@@ -52,7 +52,7 @@ export class BaseLayerPlugin extends BasePlugin {
   /** 图层集合 */
   private layers: Map<string, ImageryLayer> = new Map()
 
-  protected onInstall(_viewer: KtdViewer): void {
+  protected onInstall(_viewer: AutoViewer): void {
     // Layer plugin installed
   }
 
@@ -791,4 +791,4 @@ export {
   wgs84ToBd09,
   bd09ToWgs84,
   transformCoordinate
-} from '@ktd-cesium/shared'
+} from '@auto-cesium/shared'

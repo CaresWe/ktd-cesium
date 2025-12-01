@@ -1,5 +1,5 @@
 import * as Cesium from 'cesium'
-import { getPositionByGeoJSON, type GeoJSONFeature, type GeoJSONGeometry } from '@ktd-cesium/shared'
+import { getPositionByGeoJSON, type GeoJSONFeature, type GeoJSONGeometry } from '@auto-cesium/shared'
 import { GraphicsEventType } from '../../EventPlugin'
 import type { EventPlugin, PickInfo } from '../../EventPlugin'
 import type {

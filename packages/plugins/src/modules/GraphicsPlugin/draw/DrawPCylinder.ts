@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium'
 import { DrawPPoint } from './DrawPPoint'
-import { getCurrentMousePosition } from '@ktd-cesium/shared'
+import { getCurrentMousePosition } from '@auto-cesium/shared'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { GraphicsEventType } from '../../EventPlugin'
 import type { CylinderPrimitiveAttribute } from '../types'

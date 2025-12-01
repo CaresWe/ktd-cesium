@@ -5,17 +5,17 @@
 ## 导入
 
 ```typescript
-import { PopupPlugin } from '@ktd-cesium/plugins'
-import { PopupAlignment } from '@ktd-cesium/plugins'
+import { PopupPlugin } from '@auto-cesium/plugins'
+import { PopupAlignment } from '@auto-cesium/plugins'
 ```
 
 ## 安装
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import { PopupPlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { PopupPlugin } from '@auto-cesium/plugins'
 
-const viewer = new KtdViewer(cesiumViewer)
+const viewer = new AutoViewer(cesiumViewer)
 const popup = viewer.use(PopupPlugin)
 ```
 
@@ -35,17 +35,17 @@ const popup = viewer.use(PopupPlugin)
 
 ```typescript
 const popupId = await popup.create({
-  type: 'html',                    // 'html' | 'vue' | 'react'
-  content: '<div>内容</div>',       // 弹窗内容
-  positionType: 'world',            // 'screen' | 'world'
-  position: [116.4, 39.9, 0],      // 位置
-  alignment: PopupAlignment.TOP_CENTER,  // 对齐方式
-  offset: [0, -30],                // 偏移 [x, y]
-  show: true,                       // 是否显示
-  className: 'my-popup',            // 自定义类名
-  draggable: true,                  // 是否可拖拽
-  closeOnClickOutside: true,        // 点击外部关闭
-  onClose: () => {}                 // 关闭回调
+  type: 'html', // 'html' | 'vue' | 'react'
+  content: '<div>内容</div>', // 弹窗内容
+  positionType: 'world', // 'screen' | 'world'
+  position: [116.4, 39.9, 0], // 位置
+  alignment: PopupAlignment.TOP_CENTER, // 对齐方式
+  offset: [0, -30], // 偏移 [x, y]
+  show: true, // 是否显示
+  className: 'my-popup', // 自定义类名
+  draggable: true, // 是否可拖拽
+  closeOnClickOutside: true, // 点击外部关闭
+  onClose: () => {} // 关闭回调
 })
 ```
 
@@ -55,8 +55,8 @@ const popupId = await popup.create({
 
 ```typescript
 const popupId = await popup.createHTML(
-  '<h3>标题</h3><p>内容</p>',  // HTML 字符串或 HTMLElement
-  [116.4, 39.9, 0],            // 世界坐标 或 [x, y] 屏幕坐标
+  '<h3>标题</h3><p>内容</p>', // HTML 字符串或 HTMLElement
+  [116.4, 39.9, 0], // 世界坐标 或 [x, y] 屏幕坐标
   {
     alignment: PopupAlignment.BOTTOM_CENTER,
     offset: [0, 20],
@@ -132,8 +132,8 @@ popup.hide(popupId)
 移除弹窗。
 
 ```typescript
-popup.remove(popupId)      // 移除指定弹窗
-popup.removeAll()          // 移除所有弹窗
+popup.remove(popupId) // 移除指定弹窗
+popup.removeAll() // 移除所有弹窗
 ```
 
 ### updatePosition(id, position)
@@ -155,17 +155,17 @@ await popup.updateContent(popupId, '<div>新内容</div>')
 ## 对齐方式
 
 ```typescript
-import { PopupAlignment } from '@ktd-cesium/plugins'
+import { PopupAlignment } from '@auto-cesium/plugins'
 
-PopupAlignment.TOP_LEFT      // 左上角
-PopupAlignment.TOP_CENTER    // 顶部居中
-PopupAlignment.TOP_RIGHT     // 右上角
-PopupAlignment.MIDDLE_LEFT   // 左侧居中
-PopupAlignment.CENTER        // 正中央
-PopupAlignment.MIDDLE_RIGHT  // 右侧居中
-PopupAlignment.BOTTOM_LEFT   // 左下角
+PopupAlignment.TOP_LEFT // 左上角
+PopupAlignment.TOP_CENTER // 顶部居中
+PopupAlignment.TOP_RIGHT // 右上角
+PopupAlignment.MIDDLE_LEFT // 左侧居中
+PopupAlignment.CENTER // 正中央
+PopupAlignment.MIDDLE_RIGHT // 右侧居中
+PopupAlignment.BOTTOM_LEFT // 左下角
 PopupAlignment.BOTTOM_CENTER // 底部居中
-PopupAlignment.BOTTOM_RIGHT  // 右下角
+PopupAlignment.BOTTOM_RIGHT // 右下角
 ```
 
 ## 使用场景
@@ -232,7 +232,7 @@ function handleClose() {
   padding: 15px;
   background: white;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   min-width: 250px;
 }
 </style>
@@ -273,13 +273,15 @@ interface PopupContentProps {
 
 function PopupContent({ title, data, onClose }: PopupContentProps) {
   return (
-    <div style={{
-      padding: '15px',
-      background: 'white',
-      borderRadius: '8px',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-      minWidth: '250px'
-    }}>
+    <div
+      style={{
+        padding: '15px',
+        background: 'white',
+        borderRadius: '8px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        minWidth: '250px'
+      }}
+    >
       <h3>{title}</h3>
       <div>
         <p>经度: {data.longitude}</p>
@@ -325,7 +327,7 @@ const popupId = await popup.createHTML(
     <p style="margin: 5px 0 0 0;">数据加载成功！</p>
   </div>
   `,
-  [window.innerWidth - 250, 50],  // 屏幕坐标 [x, y]
+  [window.innerWidth - 250, 50], // 屏幕坐标 [x, y]
   {
     alignment: PopupAlignment.TOP_RIGHT
   }
@@ -356,10 +358,7 @@ const popupId = await popup.createHTML(
 ### 场景 6：动态更新弹窗
 
 ```typescript
-const popupId = await popup.createHTML(
-  '<div id="countdown">倒计时: 10</div>',
-  [116.4, 39.9, 0]
-)
+const popupId = await popup.createHTML('<div id="countdown">倒计时: 10</div>', [116.4, 39.9, 0])
 
 let count = 10
 const timer = setInterval(() => {
@@ -386,16 +385,13 @@ const positions = [
 ]
 
 for (const pos of positions) {
-  const id = await popup.createHTML(
-    `<div>位置: ${pos[0]}, ${pos[1]}</div>`,
-    pos as [number, number, number]
-  )
+  const id = await popup.createHTML(`<div>位置: ${pos[0]}, ${pos[1]}</div>`, pos as [number, number, number])
   popups.push(id)
 }
 
 // 批量关闭
 function closeAll() {
-  popups.forEach(id => popup.remove(id))
+  popups.forEach((id) => popup.remove(id))
   popups.length = 0
 }
 ```
@@ -411,20 +407,20 @@ function closeAll() {
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { KtdViewer } from '@ktd-cesium/core'
-import { EventPlugin, PopupPlugin } from '@ktd-cesium/plugins'
-import { PopupAlignment } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { EventPlugin, PopupPlugin } from '@auto-cesium/plugins'
+import { PopupAlignment } from '@auto-cesium/plugins'
 import * as Cesium from 'cesium'
 import PopupContent from './PopupContent.vue'
 
 const containerRef = ref<HTMLElement>()
-let viewer: KtdViewer
+let viewer: AutoViewer
 let popup: PopupPlugin
 
 onMounted(() => {
   if (containerRef.value) {
     const cesiumViewer = new Cesium.Viewer(containerRef.value)
-    viewer = new KtdViewer(cesiumViewer)
+    viewer = new AutoViewer(cesiumViewer)
 
     const events = viewer.use(EventPlugin)
     popup = viewer.use(PopupPlugin)
@@ -461,7 +457,7 @@ onBeforeUnmount(() => {
 ### 场景 8：与 DataLayerPlugin 配合使用
 
 ```typescript
-import { DataLayerPlugin, PopupPlugin } from '@ktd-cesium/plugins'
+import { DataLayerPlugin, PopupPlugin } from '@auto-cesium/plugins'
 
 const dataLayer = viewer.use(DataLayerPlugin)
 const popup = viewer.use(PopupPlugin)
@@ -472,11 +468,11 @@ const layerId = dataLayer.createLayer({
   type: 'entity',
   popup: {
     enabled: true,
-    title: item => item.data?.name || '兴趣点',
+    title: (item) => item.data?.name || '兴趣点',
     fields: [
       { field: 'address', label: '地址' },
       { field: 'phone', label: '电话' },
-      { field: 'rating', label: '评分', formatter: v => `${v} 星` }
+      { field: 'rating', label: '评分', formatter: (v) => `${v} 星` }
     ]
   }
 })
@@ -499,17 +495,14 @@ const layerId2 = dataLayer.createLayer({
 
 ```typescript
 // 创建可更新的弹窗
-const popupId = await popup.createHTML(
-  '<div id="status">等待数据...</div>',
-  [116.4, 39.9, 0]
-)
+const popupId = await popup.createHTML('<div id="status">等待数据...</div>', [116.4, 39.9, 0])
 
 // 模拟数据加载
 async function loadData() {
   popup.updateContent(popupId, '<div id="status">加载中...</div>')
-  
-  const data = await fetch('/api/data').then(r => r.json())
-  
+
+  const data = await fetch('/api/data').then((r) => r.json())
+
   popup.updateContent(
     popupId,
     `<div>
@@ -526,23 +519,20 @@ loadData()
 ### 场景 10：弹窗实例操作
 
 ```typescript
-const popupId = await popup.createHTML(
-  '<div>内容</div>',
-  [116.4, 39.9, 0]
-)
+const popupId = await popup.createHTML('<div>内容</div>', [116.4, 39.9, 0])
 
 const instance = popup.get(popupId)
 if (instance) {
   // 显示/隐藏
   instance.hide()
   setTimeout(() => instance.show(), 1000)
-  
+
   // 更新位置
   instance.updatePosition([116.5, 40.0, 0])
-  
+
   // 更新内容
   await instance.updateContent('<div>新内容</div>')
-  
+
   // 销毁
   instance.destroy()
 }
@@ -552,21 +542,17 @@ if (instance) {
 
 ```typescript
 // 创建带关闭回调的弹窗
-const popupId = await popup.createHTML(
-  '<div>重要提示</div>',
-  [116.4, 39.9, 0],
-  {
-    closeOnClickOutside: true,
-    onClose: () => {
-      console.log('弹窗已关闭')
-      // 可以执行清理操作
-      cleanup()
-    }
+const popupId = await popup.createHTML('<div>重要提示</div>', [116.4, 39.9, 0], {
+  closeOnClickOutside: true,
+  onClose: () => {
+    console.log('弹窗已关闭')
+    // 可以执行清理操作
+    cleanup()
   }
-)
+})
 
 // 手动关闭
-popup.remove(popupId)  // 会触发 onClose 回调
+popup.remove(popupId) // 会触发 onClose 回调
 ```
 
 ### 场景 12：批量管理弹窗
@@ -586,15 +572,11 @@ popup.removeAll()
 ### 场景 13：自定义样式弹窗
 
 ```typescript
-const popupId = await popup.createHTML(
-  '<div class="custom-popup">自定义样式内容</div>',
-  [116.4, 39.9, 0],
-  {
-    className: 'my-custom-popup',
-    alignment: PopupAlignment.TOP_CENTER,
-    offset: [0, -30]
-  }
-)
+const popupId = await popup.createHTML('<div class="custom-popup">自定义样式内容</div>', [116.4, 39.9, 0], {
+  className: 'my-custom-popup',
+  alignment: PopupAlignment.TOP_CENTER,
+  offset: [0, -30]
+})
 
 // 在 CSS 中定义样式
 // .my-custom-popup {
@@ -612,25 +594,25 @@ const popupId = await popup.createHTML(
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { KtdViewer } from '@ktd-cesium/core'
-import { EventPlugin, PopupPlugin, PopupAlignment } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { EventPlugin, PopupPlugin, PopupAlignment } from '@auto-cesium/plugins'
 import * as Cesium from 'cesium'
 import PopupContent from './PopupContent'
 
 export function MapWithPopup() {
   const containerRef = useRef<HTMLDivElement>(null)
-  
+
   useEffect(() => {
     if (!containerRef.current) return
-    
+
     const cesiumViewer = new Cesium.Viewer(containerRef.current)
-    const viewer = new KtdViewer(cesiumViewer)
+    const viewer = new AutoViewer(cesiumViewer)
     const events = viewer.use(EventPlugin)
     const popup = viewer.use(PopupPlugin)
-    
+
     // 注册 React 渲染器（如果使用 React 组件弹窗）
     popup.registerReactRenderer()
-    
+
     const clickId = events.onLeftClick(async (info) => {
       if (info.coordinates) {
         await popup.createReact(
@@ -650,13 +632,13 @@ export function MapWithPopup() {
         )
       }
     })
-    
+
     return () => {
       events.off(clickId)
       viewer.destroy()
     }
   }, [])
-  
+
   return <div ref={containerRef} className="map-container" />
 }
 ```
@@ -665,13 +647,13 @@ export function MapWithPopup() {
 
 弹窗实例提供以下方法：
 
-| 方法 | 说明 |
-| --- | --- |
-| `show()` | 显示弹窗 |
-| `hide()` | 隐藏弹窗 |
+| 方法                       | 说明                               |
+| -------------------------- | ---------------------------------- |
+| `show()`                   | 显示弹窗                           |
+| `hide()`                   | 隐藏弹窗                           |
 | `updatePosition(position)` | 更新位置（支持世界坐标或屏幕坐标） |
-| `updateContent(content)` | 更新内容（异步方法） |
-| `destroy()` | 销毁弹窗 |
+| `updateContent(content)`   | 更新内容（异步方法）               |
+| `destroy()`                | 销毁弹窗                           |
 
 ## 注意事项
 

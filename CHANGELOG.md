@@ -10,9 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 ### Added
 
 - 初始版本发布
-- Cesium 核心功能封装 (@ktd-cesium/core)
-- 插件系统 (@ktd-cesium/plugins)
-- 共享工具库 (@ktd-cesium/shared)
+- Cesium 核心功能封装 (@auto-cesium/core)
+- 插件系统 (@auto-cesium/plugins)
+- 共享工具库 (@auto-cesium/shared)
 - 相机插件 (CameraPlugin)
   - 相机飞行功能
   - 相机视图设置

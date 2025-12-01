@@ -3,7 +3,7 @@ import { EditPolygon } from './EditPolygon'
 import * as draggerCtl from './Dragger'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { getEllipseOuterPositions } from '../attr/AttrCircle'
-import { setPositionSurfaceHeight } from '@ktd-cesium/shared'
+import { setPositionSurfaceHeight } from '@auto-cesium/shared'
 import type { ExtendedEntity } from './EditBase'
 import type { CircleEditEntity, CircleDragger } from '../types'
 

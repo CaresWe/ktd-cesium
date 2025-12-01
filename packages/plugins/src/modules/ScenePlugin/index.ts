@@ -1,5 +1,5 @@
 import { BasePlugin } from '../../BasePlugin'
-import type { KtdViewer } from '@ktd-cesium/core'
+import type { AutoViewer } from '@auto-cesium/core'
 import type {
   SceneEffectType,
   SceneEffect,
@@ -63,7 +63,7 @@ export class ScenePlugin extends BasePlugin {
   /** 效果存储 */
   private effects: Map<string, SceneEffect> = new Map()
 
-  protected onInstall(_viewer: KtdViewer, _options?: ScenePluginOptions): void {
+  protected onInstall(_viewer: AutoViewer, _options?: ScenePluginOptions): void {
     // Plugin installed
   }
 

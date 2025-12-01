@@ -21,13 +21,13 @@ src/
 
 ```typescript
 // cesium/viewer.ts
-import { KtdViewer } from '@ktd-cesium/core'
+import { AutoViewer } from '@auto-cesium/core'
 import * as Cesium from 'cesium'
-import type { KtdViewer as KtdViewerType } from '@ktd-cesium/core'
+import type { AutoViewer as AutoViewerType } from '@auto-cesium/core'
 
-let viewer: KtdViewerType | null = null
+let viewer: AutoViewerType | null = null
 
-export function initViewer(container: HTMLElement | string): KtdViewerType {
+export function initViewer(container: HTMLElement | string): AutoViewerType {
   if (viewer) {
     console.warn('Viewer already initialized')
     return viewer
@@ -47,11 +47,11 @@ export function initViewer(container: HTMLElement | string): KtdViewerType {
     navigationInstructionsInitiallyVisible: false
   })
 
-  viewer = new KtdViewer(cesiumViewer)
+  viewer = new AutoViewer(cesiumViewer)
   return viewer
 }
 
-export function getViewer(): KtdViewerType | null {
+export function getViewer(): AutoViewerType | null {
   return viewer
 }
 
@@ -67,10 +67,10 @@ export function destroyViewer(): void {
 
 ```typescript
 // cesium/plugins.ts
-import type { KtdViewer } from '@ktd-cesium/core'
-import { BaseLayerPlugin, CameraPlugin, EventPlugin, GraphicsPlugin, PopupPlugin } from '@ktd-cesium/plugins'
+import type { AutoViewer } from '@auto-cesium/core'
+import { BaseLayerPlugin, CameraPlugin, EventPlugin, GraphicsPlugin, PopupPlugin } from '@auto-cesium/plugins'
 
-export function setupPlugins(viewer: KtdViewer) {
+export function setupPlugins(viewer: AutoViewer) {
   // 基础图层
   const baseLayer = viewer.use(BaseLayerPlugin)
   baseLayer.addLayer({
@@ -170,7 +170,7 @@ onBeforeUnmount(() => {
 ```typescript
 try {
   const cesiumViewer = new Cesium.Viewer('cesiumContainer')
-  const viewer = new KtdViewer(cesiumViewer)
+  const viewer = new AutoViewer(cesiumViewer)
 } catch (error) {
   console.error('Failed to initialize viewer:', error)
   // 显示错误提示
@@ -207,7 +207,7 @@ graphics
 ### 1. 使用类型断言
 
 ```typescript
-import type { GraphicsPlugin } from '@ktd-cesium/plugins'
+import type { GraphicsPlugin } from '@auto-cesium/plugins'
 
 const graphics = viewer.use(GraphicsPlugin)
 const plugin = viewer.getPlugin<GraphicsPlugin>('graphics')
@@ -235,10 +235,10 @@ export interface CustomEntity extends Entity {
 
 ```typescript
 // utils/map-operations.ts
-import type { KtdViewer } from '@ktd-cesium/core'
-import { CameraPlugin } from '@ktd-cesium/plugins'
+import type { AutoViewer } from '@auto-cesium/core'
+import { CameraPlugin } from '@auto-cesium/plugins'
 
-export function flyToBeijing(viewer: KtdViewer) {
+export function flyToBeijing(viewer: AutoViewer) {
   const camera = viewer.getPlugin<CameraPlugin>('camera')
   if (camera) {
     camera.flyTo({
@@ -254,16 +254,16 @@ export function flyToBeijing(viewer: KtdViewer) {
 ```typescript
 // composables/useCesium.ts
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { KtdViewer } from '@ktd-cesium/core'
+import { AutoViewer } from '@auto-cesium/core'
 import * as Cesium from 'cesium'
 
 export function useCesium(container: Ref<HTMLElement | undefined>) {
-  const viewer = ref<KtdViewer | null>(null)
+  const viewer = ref<AutoViewer | null>(null)
 
   onMounted(() => {
     if (container.value) {
       const cesiumViewer = new Cesium.Viewer(container.value)
-      viewer.value = new KtdViewer(cesiumViewer)
+      viewer.value = new AutoViewer(cesiumViewer)
     }
   })
 
@@ -282,17 +282,17 @@ export function useCesium(container: Ref<HTMLElement | undefined>) {
 ```typescript
 // hooks/useCesium.ts
 import { useEffect, useRef, useState } from 'react'
-import { KtdViewer } from '@ktd-cesium/core'
+import { AutoViewer } from '@auto-cesium/core'
 import * as Cesium from 'cesium'
 
 export function useCesium() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [viewer, setViewer] = useState<KtdViewer | null>(null)
+  const [viewer, setViewer] = useState<AutoViewer | null>(null)
 
   useEffect(() => {
     if (containerRef.current) {
       const cesiumViewer = new Cesium.Viewer(containerRef.current)
-      const ktdViewer = new KtdViewer(cesiumViewer)
+      const ktdViewer = new AutoViewer(cesiumViewer)
       setViewer(ktdViewer)
 
       return () => {
@@ -344,12 +344,12 @@ console.log('Graphics plugin:', graphics)
 ```typescript
 // 确保只有一个 Viewer 实例
 class ViewerManager {
-  private static instance: KtdViewer | null = null
+  private static instance: AutoViewer | null = null
 
-  static getInstance(container?: HTMLElement | string): KtdViewer {
+  static getInstance(container?: HTMLElement | string): AutoViewer {
     if (!this.instance && container) {
       const cesiumViewer = new Cesium.Viewer(container)
-      this.instance = new KtdViewer(cesiumViewer)
+      this.instance = new AutoViewer(cesiumViewer)
     }
     return this.instance!
   }
@@ -368,7 +368,7 @@ class ViewerManager {
 ```typescript
 // 使用事件系统实现观察者模式
 class MapObserver {
-  constructor(private viewer: KtdViewer) {
+  constructor(private viewer: AutoViewer) {
     this.setupListeners()
   }
 
@@ -408,7 +408,7 @@ class MapObserver {
    - 优化大量数据的渲染
 
 3. **版本兼容**：
-   - 确保所有 `@ktd-cesium/*` 包版本一致
+   - 确保所有 `@auto-cesium/*` 包版本一致
    - 注意 Cesium 版本兼容性
 
 4. **类型安全**：

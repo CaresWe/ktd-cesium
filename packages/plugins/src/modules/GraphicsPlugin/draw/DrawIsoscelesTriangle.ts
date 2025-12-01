@@ -1,7 +1,7 @@
 import * as Cesium from 'cesium'
 import { DrawPolygonEx } from './DrawPolygonEx'
 import { EditIsoscelesTriangle } from '../edit/EditIsoscelesTriangle'
-import { computeIsoscelesTrianglePositions } from '@ktd-cesium/shared'
+import { computeIsoscelesTrianglePositions } from '@auto-cesium/shared'
 import type { EditClassConstructor } from '../types'
 
 /**

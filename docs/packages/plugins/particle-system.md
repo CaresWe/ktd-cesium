@@ -7,8 +7,8 @@ GraphicsPlugin 提供了强大的粒子系统绘制功能，支持火焰、水�
 ### 基本用法
 
 ```typescript
-import { GraphicsPlugin } from '@ktd-cesium/plugins'
-import { createFireEffect } from '@ktd-cesium/plugins'
+import { GraphicsPlugin } from '@auto-cesium/plugins'
+import { createFireEffect } from '@auto-cesium/plugins'
 
 const graphics = viewer.use(GraphicsPlugin)
 
@@ -33,7 +33,7 @@ GraphicsPlugin 提供了 5 种预设的粒子效果，可以直接使用：
 ### 1. 火焰效果 (Fire)
 
 ```typescript
-import { createFireEffect } from '@ktd-cesium/plugins'
+import { createFireEffect } from '@auto-cesium/plugins'
 
 graphics.startDraw({
   type: 'particle',
@@ -42,6 +42,7 @@ graphics.startDraw({
 ```
 
 **效果特点**：
+
 - 锥形发射器（45度）
 - 白色到红色渐变
 - 向上运动
@@ -49,7 +50,7 @@ graphics.startDraw({
 ### 2. 水枪效果 (Water)
 
 ```typescript
-import { createWaterEffect } from '@ktd-cesium/plugins'
+import { createWaterEffect } from '@auto-cesium/plugins'
 
 graphics.startDraw({
   type: 'particle',
@@ -58,6 +59,7 @@ graphics.startDraw({
 ```
 
 **效果特点**：
+
 - 圆形发射器
 - 蓝白色渐变
 - 重力下落效果
@@ -65,7 +67,7 @@ graphics.startDraw({
 ### 3. 爆炸效果 (Explosion)
 
 ```typescript
-import { createExplosionEffect } from '@ktd-cesium/plugins'
+import { createExplosionEffect } from '@auto-cesium/plugins'
 
 graphics.startDraw({
   type: 'particle',
@@ -74,6 +76,7 @@ graphics.startDraw({
 ```
 
 **效果特点**：
+
 - 大范围圆形发射
 - 红色到黄色渐变
 - 爆炸扩散效果
@@ -81,7 +84,7 @@ graphics.startDraw({
 ### 4. 喷雾效果 (Spray)
 
 ```typescript
-import { createSprayEffect } from '@ktd-cesium/plugins'
+import { createSprayEffect } from '@auto-cesium/plugins'
 
 graphics.startDraw({
   type: 'particle',
@@ -90,6 +93,7 @@ graphics.startDraw({
 ```
 
 **效果特点**：
+
 - 小角度锥形发射
 - 白色半透明
 - 轻微重力和扩散
@@ -97,7 +101,7 @@ graphics.startDraw({
 ### 5. 烟雾效果 (Smoke)
 
 ```typescript
-import { createSmokeEffect } from '@ktd-cesium/plugins'
+import { createSmokeEffect } from '@auto-cesium/plugins'
 
 graphics.startDraw({
   type: 'particle',
@@ -106,6 +110,7 @@ graphics.startDraw({
 ```
 
 **效果特点**：
+
 - 圆形发射器
 - 黑色到白色渐变
 - 向上飘散效果
@@ -122,8 +127,8 @@ graphics.startDraw({
     image: '/path/to/particle.png',
 
     // 颜色配置
-    startColor: '#ffffff',  // 或 Cesium.Color.WHITE
-    endColor: '#ff0000',    // 或 Cesium.Color.RED.withAlpha(0)
+    startColor: '#ffffff', // 或 Cesium.Color.WHITE
+    endColor: '#ff0000', // 或 Cesium.Color.RED.withAlpha(0)
 
     // 缩放配置
     startScale: 0.0,
@@ -153,10 +158,10 @@ graphics.startDraw({
     sizeInMeters: true,
 
     // 发射器类型
-    emitterType: 'cone',  // 'cone' | 'box' | 'circle' | 'sphere'
+    emitterType: 'cone', // 'cone' | 'box' | 'circle' | 'sphere'
 
     // 发射器参数
-    emitterOptions: 45.0,  // 圆锥角度（度）
+    emitterOptions: 45.0, // 圆锥角度（度）
 
     // 发射器位置偏移
     emitterOffset: { x: -4.0, y: 0.0, z: 1.4 },
@@ -165,25 +170,25 @@ graphics.startDraw({
     emitterRotation: { heading: 0, pitch: 0, roll: 0 },
 
     // 重力类型
-    gravityType: 'none'  // 'none' | 'water' | 'smoke' | 'spray'
+    gravityType: 'none' // 'none' | 'water' | 'smoke' | 'spray'
   }
 })
 ```
 
 ### 发射器类型说明
 
-| 类型 | 参数 | 说明 |
-|------|------|------|
-| `cone` | `number` (角度) | 锥形发射器，参数为锥角（度） |
-| `box` | `{x, y, z}` | 盒形发射器，参数为盒子尺寸 |
+| 类型     | 参数            | 说明                         |
+| -------- | --------------- | ---------------------------- |
+| `cone`   | `number` (角度) | 锥形发射器，参数为锥角（度） |
+| `box`    | `{x, y, z}`     | 盒形发射器，参数为盒子尺寸   |
 | `circle` | `number` (半径) | 圆形发射器，参数为半径（米） |
 | `sphere` | `number` (半径) | 球形发射器，参数为半径（米） |
 
 ### 重力效果类型
 
-| 类型 | 效果 |
-|------|------|
-| `none` | 无重力效果 |
+| 类型    | 效果         |
+| ------- | ------------ |
+| `none`  | 无重力效果   |
 | `water` | 水流下落效果 |
 | `smoke` | 烟雾上升效果 |
 | `spray` | 喷雾扩散效果 |
@@ -196,7 +201,7 @@ graphics.startDraw({
 
 ```typescript
 const graphics = viewer.use(GraphicsPlugin, {
-  hasEdit: true  // 启用编辑功能
+  hasEdit: true // 启用编辑功能
 })
 
 // 绘制粒子系统后，点击选中即可拖拽移动位置
@@ -209,12 +214,15 @@ const graphics = viewer.use(GraphicsPlugin, {
 const entity = graphics.getCurrentEntity()
 
 // 更新粒子系统样式
-graphics.updateAttribute({
-  style: {
-    emissionRate: 10.0,  // 增加发射率
-    particleSize: 30.0    // 增大粒子
-  }
-}, entity)
+graphics.updateAttribute(
+  {
+    style: {
+      emissionRate: 10.0, // 增加发射率
+      particleSize: 30.0 // 增大粒子
+    }
+  },
+  entity
+)
 ```
 
 ## GeoJSON 导入导出
@@ -237,7 +245,7 @@ const particleGeoJSON = {
   type: 'Feature',
   geometry: {
     type: 'Point',
-    coordinates: [116.39, 39.90, 100]  // [经度, 纬度, 高度]
+    coordinates: [116.39, 39.9, 100] // [经度, 纬度, 高度]
   },
   properties: {
     type: 'particle',
@@ -259,7 +267,7 @@ graphics.loadJson(particleGeoJSON)
 使用 `getParticleEffect` 函数快速获取预设效果：
 
 ```typescript
-import { getParticleEffect } from '@ktd-cesium/plugins'
+import { getParticleEffect } from '@auto-cesium/plugins'
 
 graphics.startDraw({
   type: 'particle',
@@ -279,11 +287,11 @@ graphics.startDraw({
 ## 完整示例
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import { GraphicsPlugin, createFireEffect, createSmokeEffect } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { GraphicsPlugin, createFireEffect, createSmokeEffect } from '@auto-cesium/plugins'
 
 // 初始化
-const viewer = new KtdViewer(cesiumViewer)
+const viewer = new AutoViewer(cesiumViewer)
 const graphics = viewer.use(GraphicsPlugin, {
   hasEdit: true
 })
@@ -317,7 +325,7 @@ const geoJSON = {
       type: 'Feature',
       geometry: {
         type: 'Point',
-        coordinates: [116.39, 39.90, 100]
+        coordinates: [116.39, 39.9, 100]
       },
       properties: {
         type: 'particle',
@@ -328,7 +336,7 @@ const geoJSON = {
 }
 
 graphics.loadJson(geoJSON, {
-  flyTo: true  // 加载后飞到该位置
+  flyTo: true // 加载后飞到该位置
 })
 
 // 导出所有图形

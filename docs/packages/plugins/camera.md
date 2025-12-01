@@ -18,10 +18,10 @@ CameraPlugin 提供全面的相机控制功能，包括基础的飞行、视角�
 ## 快速开始
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import { CameraPlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { CameraPlugin } from '@auto-cesium/plugins'
 
-const viewer = new KtdViewer(cesiumViewer)
+const viewer = new AutoViewer(cesiumViewer)
 const camera = viewer.use(CameraPlugin)
 
 // 飞行到指定位置
@@ -50,17 +50,18 @@ camera.startCameraRoaming({
 
 ```typescript
 await camera.flyTo({
-  destination: [116.4, 39.9, 10000],  // [经度, 纬度, 高度]
-  duration: 3,                         // 飞行时长（秒）
-  heading: 0,                          // 航向角（度，0 = 正北）
-  pitch: -45,                          // 俯仰角（度，-90 = 正下方）
-  roll: 0,                             // 翻滚角（度）
+  destination: [116.4, 39.9, 10000], // [经度, 纬度, 高度]
+  duration: 3, // 飞行时长（秒）
+  heading: 0, // 航向角（度，0 = 正北）
+  pitch: -45, // 俯仰角（度，-90 = 正下方）
+  roll: 0, // 翻滚角（度）
   complete: () => console.log('飞行完成'),
   cancel: () => console.log('飞行取消')
 })
 ```
 
 **参数说明：**
+
 - `destination`: [经度, 纬度, 高度（米）]
 - `duration`: 飞行时长，默认 3 秒
 - `heading`: 航向角，0° = 正北，90° = 正东
@@ -91,10 +92,10 @@ camera.setView({
 
 ```typescript
 camera.lookAt({
-  target: [116.4, 39.9, 0],           // 观察目标点
-  heading: 0,                         // 航向角
-  pitch: -45,                         // 俯仰角
-  range: 10000                        // 距离（米）
+  target: [116.4, 39.9, 0], // 观察目标点
+  heading: 0, // 航向角
+  pitch: -45, // 俯仰角
+  range: 10000 // 距离（米）
 })
 ```
 
@@ -126,10 +127,7 @@ console.log(`
 camera.zoomToEntity(entity)
 
 // 缩放到实体（带偏移）
-camera.zoomToEntity(
-  entity,
-  new Cesium.HeadingPitchRange(0, Cesium.Math.toRadians(-45), 1000)
-)
+camera.zoomToEntity(entity, new Cesium.HeadingPitchRange(0, Cesium.Math.toRadians(-45), 1000))
 
 // 飞行到实体
 await camera.flyToEntity(entity, {
@@ -156,19 +154,20 @@ camera.startCameraRoaming({
   waypoints: [
     [114.35231209, 30.53542614, 1000],
     [114.40782845, 30.51011682, 100],
-    [114.45, 30.50, 500]
+    [114.45, 30.5, 500]
   ],
-  duration: 20,                        // 总时长 20 秒
-  speedMultiplier: 1.5,                // 速度倍率 1.5x
-  loop: false,                         // 不循环
-  interpolation: 'hermite',            // Hermite 插值（平滑）
-  interpolationDegree: 100,            // 插值度数
-  cameraOffset: {                      // 相机偏移
+  duration: 20, // 总时长 20 秒
+  speedMultiplier: 1.5, // 速度倍率 1.5x
+  loop: false, // 不循环
+  interpolation: 'hermite', // Hermite 插值（平滑）
+  interpolationDegree: 100, // 插值度数
+  cameraOffset: {
+    // 相机偏移
     heading: 0,
     pitch: -30,
     range: 200
   },
-  showPath: true,                      // 显示路径
+  showPath: true, // 显示路径
   pathOptions: {
     width: 2,
     material: Cesium.Color.YELLOW,
@@ -279,13 +278,13 @@ camera.startModelRoaming({
 
 ```typescript
 camera.startCircleAroundPoint({
-  center: [120, 30, 100000],           // 中心点
-  radius: 500000,                      // 半径（米）
-  pitch: -30,                          // 俯仰角
-  duration: 10,                        // 飞行时长
-  clockwise: true,                     // 顺时针
-  loop: true,                          // 循环
-  anglePerSecond: 36                   // 每秒旋转角度（可选）
+  center: [120, 30, 100000], // 中心点
+  radius: 500000, // 半径（米）
+  pitch: -30, // 俯仰角
+  duration: 10, // 飞行时长
+  clockwise: true, // 顺时针
+  loop: true, // 循环
+  anglePerSecond: 36 // 每秒旋转角度（可选）
 })
 ```
 
@@ -345,7 +344,7 @@ camera.stopRoaming()
 漫游过程中可以切换不同的观察视角。
 
 ```typescript
-import { ViewMode } from '@ktd-cesium/plugins'
+import { ViewMode } from '@auto-cesium/plugins'
 
 // 1. 跟随模式（第一人称）
 camera.changeRoamingView(ViewMode.FOLLOW)
@@ -358,20 +357,20 @@ camera.changeRoamingView(ViewMode.SIDE_VIEW)
 
 // 4. 自定义视角
 camera.changeRoamingView(ViewMode.CUSTOM, {
-  heading: 45,        // 航向角 45°
-  pitch: -60,         // 俯仰角 -60°
-  range: 5000         // 距离 5000 米
+  heading: 45, // 航向角 45°
+  pitch: -60, // 俯仰角 -60°
+  range: 5000 // 距离 5000 米
 })
 ```
 
 **视角说明：**
 
-| 模式 | 说明 | 默认参数 |
-|------|------|----------|
-| FOLLOW | 跟随模式 | 跟踪实体，相机跟随移动 |
-| TOP_DOWN | 俯视模式 | heading=0, pitch=-90 |
+| 模式      | 说明     | 默认参数                           |
+| --------- | -------- | ---------------------------------- |
+| FOLLOW    | 跟随模式 | 跟踪实体，相机跟随移动             |
+| TOP_DOWN  | 俯视模式 | heading=0, pitch=-90               |
 | SIDE_VIEW | 侧视模式 | heading=-90, pitch=-15, range=8000 |
-| CUSTOM | 自定义 | 可自定义 heading、pitch、range |
+| CUSTOM    | 自定义   | 可自定义 heading、pitch、range     |
 
 ---
 
@@ -403,19 +402,19 @@ const data = camera.getRoamingData()
 
 ```typescript
 interface RoamingData {
-  isRoaming: boolean              // 是否正在漫游
-  longitude: number               // 当前经度
-  latitude: number                // 当前纬度
-  elevation: number               // 当前高程（米）
-  terrainHeight: number           // 地面高程（米）
-  heightAboveTerrain: number      // 离地高度（米）
-  totalDuration: number           // 总时长（秒）
-  elapsedDuration: number         // 已用时长（秒）
-  totalDistance: number           // 总距离（米）
-  elapsedDistance: number         // 已飞距离（米）
-  progress: number                // 进度（0-100）
-  totalDurationFormatted: string  // 格式化总时长（如 "1小时20分钟"）
-  elapsedDurationFormatted: string// 格式化已用时长
+  isRoaming: boolean // 是否正在漫游
+  longitude: number // 当前经度
+  latitude: number // 当前纬度
+  elevation: number // 当前高程（米）
+  terrainHeight: number // 地面高程（米）
+  heightAboveTerrain: number // 离地高度（米）
+  totalDuration: number // 总时长（秒）
+  elapsedDuration: number // 已用时长（秒）
+  totalDistance: number // 总距离（米）
+  elapsedDistance: number // 已飞距离（米）
+  progress: number // 进度（0-100）
+  totalDurationFormatted: string // 格式化总时长（如 "1小时20分钟"）
+  elapsedDurationFormatted: string // 格式化已用时长
 }
 ```
 
@@ -437,14 +436,14 @@ camera.startCameraRoaming({
   duration: 60,
   cameraOffset: {
     heading: 0,
-    pitch: -45,        // 向下 45 度航拍
+    pitch: -45, // 向下 45 度航拍
     range: 500
   },
   showPath: true,
-  showFrustum: true,   // 显示相机视锥体
+  showFrustum: true, // 显示相机视锥体
   frustumOptions: {
-    length: 100,       // 视锥体长度 100 米
-    fov: 60,           // 视野角度 60 度
+    length: 100, // 视锥体长度 100 米
+    fov: 60, // 视野角度 60 度
     color: Cesium.Color.BLUE.withAlpha(0.3),
     outlineColor: Cesium.Color.BLUE
   }
@@ -452,6 +451,7 @@ camera.startCameraRoaming({
 ```
 
 **视锥体参数：**
+
 - `length`：视锥体长度（米），默认 100
 - `fov`：视野角度（度），默认 60
 - `color`：填充颜色，默认半透明蓝色
@@ -462,24 +462,24 @@ camera.startCameraRoaming({
 ### 示例 1：城市巡航
 
 ```typescript
-import { CameraPlugin, ViewMode } from '@ktd-cesium/plugins'
+import { CameraPlugin, ViewMode } from '@auto-cesium/plugins'
 
 const camera = viewer.use(CameraPlugin)
 
 // 定义城市巡航路线
 const cityTour = [
-  [116.391, 39.916, 1000],  // 天安门
-  [116.407, 39.904, 1500],  // 故宫
-  [116.413, 39.982, 800],   // 鸟巢
-  [116.288, 39.988, 1200]   // 颐和园
+  [116.391, 39.916, 1000], // 天安门
+  [116.407, 39.904, 1500], // 故宫
+  [116.413, 39.982, 800], // 鸟巢
+  [116.288, 39.988, 1200] // 颐和园
 ]
 
 // 开始巡航
 camera.startCameraRoaming({
   waypoints: cityTour,
-  duration: 60,                    // 60 秒完成
+  duration: 60, // 60 秒完成
   speedMultiplier: 1,
-  loop: true,                      // 循环巡航
+  loop: true, // 循环巡航
   interpolation: 'hermite',
   cameraOffset: {
     heading: 0,
@@ -491,7 +491,7 @@ camera.startCameraRoaming({
     width: 3,
     material: Cesium.Color.CYAN
   },
-  showFrustum: true,               // 显示航拍视野
+  showFrustum: true, // 显示航拍视野
   frustumOptions: {
     length: 150,
     fov: 70,
@@ -502,10 +502,8 @@ camera.startCameraRoaming({
 // 监听实时数据
 camera.onRoamingDataUpdate((data) => {
   document.getElementById('progress').textContent = `${data.progress}%`
-  document.getElementById('location').textContent =
-    `${data.longitude.toFixed(4)}, ${data.latitude.toFixed(4)}`
-  document.getElementById('altitude').textContent =
-    `${data.heightAboveTerrain.toFixed(1)} 米`
+  document.getElementById('location').textContent = `${data.longitude.toFixed(4)}, ${data.latitude.toFixed(4)}`
+  document.getElementById('altitude').textContent = `${data.heightAboveTerrain.toFixed(1)} 米`
 })
 
 // 控制按钮
@@ -544,7 +542,7 @@ document.getElementById('sideView').onclick = () => {
 ### 示例 2：飞机飞行模拟
 
 ```typescript
-import { CameraPlugin } from '@ktd-cesium/plugins'
+import { CameraPlugin } from '@auto-cesium/plugins'
 
 const camera = viewer.use(CameraPlugin)
 
@@ -591,9 +589,9 @@ camera.startModelRoaming({
     material: Cesium.Color.CYAN.withAlpha(0.5)
   },
 
-  showFrustum: true,          // 显示机载相机视野
+  showFrustum: true, // 显示机载相机视野
   frustumOptions: {
-    length: 200,              // 航拍距离 200 米
+    length: 200, // 航拍距离 200 米
     fov: 60,
     color: Cesium.Color.GREEN.withAlpha(0.2),
     outlineColor: Cesium.Color.GREEN
@@ -617,10 +615,10 @@ const camera = viewer.use(CameraPlugin)
 
 // 环绕鸟巢
 camera.startCircleAroundPoint({
-  center: [116.3972, 39.9926, 0],    // 鸟巢坐标
-  radius: 1000,                      // 1km 半径
-  pitch: -30,                        // 俯角 30°
-  duration: 20,                      // 20 秒一圈
+  center: [116.3972, 39.9926, 0], // 鸟巢坐标
+  radius: 1000, // 1km 半径
+  pitch: -30, // 俯角 30°
+  duration: 20, // 20 秒一圈
   clockwise: true,
   loop: true
 })
@@ -669,22 +667,22 @@ setTimeout(() => {
 ### 基础用法
 
 ```typescript
-import { CameraPlugin } from '@ktd-cesium/plugins'
+import { CameraPlugin } from '@auto-cesium/plugins'
 
 const camera = viewer.use(CameraPlugin)
 
 // 启动室内漫游
 camera.startIndoorRoaming({
   waypoints: [
-    [116.4, 39.9, 10],      // 起点
-    [116.41, 39.91, 10],    // 中间点
-    [116.42, 39.92, 10]     // 终点
+    [116.4, 39.9, 10], // 起点
+    [116.41, 39.91, 10], // 中间点
+    [116.42, 39.92, 10] // 终点
   ],
-  duration: 30,              // 30 秒完成
-  interpolation: 'hermite',  // 平滑插值
-  cameraHeight: 1.7,         // 人眼高度 1.7 米
-  pitchAngle: 0,             // 水平视角
-  showPath: true             // 显示路径
+  duration: 30, // 30 秒完成
+  interpolation: 'hermite', // 平滑插值
+  cameraHeight: 1.7, // 人眼高度 1.7 米
+  pitchAngle: 0, // 水平视角
+  showPath: true // 显示路径
 })
 
 // 停止漫游
@@ -695,29 +693,29 @@ camera.stopIndoorRoaming()
 
 ```typescript
 interface IndoorRoamingOptions {
-  waypoints: [number, number, number][]  // 航点（经度、纬度、高度）
-  duration?: number                      // 总时长（秒），默认 60
-  speedMultiplier?: number               // 速度倍率，默认 1
-  loop?: boolean                         // 是否循环，默认 false
+  waypoints: [number, number, number][] // 航点（经度、纬度、高度）
+  duration?: number // 总时长（秒），默认 60
+  speedMultiplier?: number // 速度倍率，默认 1
+  loop?: boolean // 是否循环，默认 false
   interpolation?: 'hermite' | 'lagrange' // 插值算法，默认 hermite
-  interpolationDegree?: number           // 插值度数，默认 100（hermite）或 5（lagrange）
-  cameraHeight?: number                  // 相机高度（米），默认 1.7
-  pitchAngle?: number                    // 俯仰角（度），默认 0
-  lookAheadDistance?: number             // 向前看的距离（米），默认 10
-  showPath?: boolean                     // 是否显示路径，默认 false
+  interpolationDegree?: number // 插值度数，默认 100（hermite）或 5（lagrange）
+  cameraHeight?: number // 相机高度（米），默认 1.7
+  pitchAngle?: number // 俯仰角（度），默认 0
+  lookAheadDistance?: number // 向前看的距离（米），默认 10
+  showPath?: boolean // 是否显示路径，默认 false
   pathOptions?: {
-    width?: number                       // 路径宽度
-    material?: Cesium.Color              // 路径颜色
+    width?: number // 路径宽度
+    material?: Cesium.Color // 路径颜色
   }
-  showFrustum?: boolean                  // 是否显示相机视锥体，默认 false
+  showFrustum?: boolean // 是否显示相机视锥体，默认 false
   frustumOptions?: {
-    length?: number                      // 视锥体长度（米），默认 50
-    fov?: number                         // 视野角度（度），默认 60
-    color?: Cesium.Color                 // 视锥体颜色，默认半透明黄色
-    outlineColor?: Cesium.Color          // 线框颜色，默认黄色
-    outlineWidth?: number                // 线框宽度，默认 2
-    fill?: boolean                       // 是否显示填充，默认 true
-    outline?: boolean                    // 是否显示线框，默认 true
+    length?: number // 视锥体长度（米），默认 50
+    fov?: number // 视野角度（度），默认 60
+    color?: Cesium.Color // 视锥体颜色，默认半透明黄色
+    outlineColor?: Cesium.Color // 线框颜色，默认黄色
+    outlineWidth?: number // 线框宽度，默认 2
+    fill?: boolean // 是否显示填充，默认 true
+    outline?: boolean // 是否显示线框，默认 true
   }
 }
 ```
@@ -752,11 +750,11 @@ const camera = viewer.use(CameraPlugin)
 // 室内展厅漫游
 camera.startIndoorRoaming({
   waypoints: [
-    [116.40, 39.90, 5],   // 入口
-    [116.41, 39.90, 5],   // 走廊
-    [116.41, 39.91, 5],   // 展厅 1
-    [116.40, 39.91, 5],   // 展厅 2
-    [116.40, 39.90, 5]    // 回到入口
+    [116.4, 39.9, 5], // 入口
+    [116.41, 39.9, 5], // 走廊
+    [116.41, 39.91, 5], // 展厅 1
+    [116.4, 39.91, 5], // 展厅 2
+    [116.4, 39.9, 5] // 回到入口
   ],
   duration: 60,
   loop: true,
@@ -769,10 +767,10 @@ camera.startIndoorRoaming({
     width: 2,
     material: Cesium.Color.CYAN
   },
-  showFrustum: true,          // 显示相机视锥体
+  showFrustum: true, // 显示相机视锥体
   frustumOptions: {
-    length: 50,               // 视锥体长度 50 米
-    fov: 60,                  // 视野角度 60 度
+    length: 50, // 视锥体长度 50 米
+    fov: 60, // 视野角度 60 度
     color: Cesium.Color.YELLOW.withAlpha(0.3),
     outlineColor: Cesium.Color.YELLOW,
     outlineWidth: 2
@@ -810,20 +808,20 @@ document.getElementById('stop').onclick = () => {
 ```typescript
 camera.startIndoorRoaming({
   waypoints: [
-    [116.40, 39.90, 5],
+    [116.4, 39.9, 5],
     [116.41, 39.91, 5],
     [116.42, 39.92, 5]
   ],
   duration: 30,
-  showFrustum: true,      // 启用视锥体
+  showFrustum: true, // 启用视锥体
   frustumOptions: {
-    length: 50,           // 视锥体长度（米）
-    fov: 60,              // 视野角度（度）
-    color: Cesium.Color.YELLOW.withAlpha(0.3),  // 填充颜色
-    outlineColor: Cesium.Color.YELLOW,          // 线框颜色
-    outlineWidth: 2,                            // 线框宽度
-    fill: true,                                 // 显示填充
-    outline: true                               // 显示线框
+    length: 50, // 视锥体长度（米）
+    fov: 60, // 视野角度（度）
+    color: Cesium.Color.YELLOW.withAlpha(0.3), // 填充颜色
+    outlineColor: Cesium.Color.YELLOW, // 线框颜色
+    outlineWidth: 2, // 线框宽度
+    fill: true, // 显示填充
+    outline: true // 显示线框
   }
 })
 ```
@@ -850,20 +848,20 @@ camera.startIndoorRoaming({
 ```typescript
 camera.startIndoorRoaming({
   waypoints: [
-    [116.40, 39.90, 3],   // 大厅
-    [116.41, 39.90, 3],   // 展品 A
-    [116.41, 39.91, 3],   // 展品 B
-    [116.40, 39.91, 3]    // 展品 C
+    [116.4, 39.9, 3], // 大厅
+    [116.41, 39.9, 3], // 展品 A
+    [116.41, 39.91, 3], // 展品 B
+    [116.4, 39.91, 3] // 展品 C
   ],
   duration: 60,
   loop: true,
   cameraHeight: 1.7,
-  pitchAngle: -10,        // 略微向下 10 度
+  pitchAngle: -10, // 略微向下 10 度
   showPath: true,
-  showFrustum: true,      // 显示视锥体，便于调整航点
+  showFrustum: true, // 显示视锥体，便于调整航点
   frustumOptions: {
-    length: 30,           // 室内场景使用较短的视距
-    fov: 70,              // 较宽的视野角度
+    length: 30, // 室内场景使用较短的视距
+    fov: 70, // 较宽的视野角度
     color: Cesium.Color.CYAN.withAlpha(0.2),
     outlineColor: Cesium.Color.CYAN
   }
@@ -879,7 +877,7 @@ camera.startIndoorRoaming({
 ### 基础用法
 
 ```typescript
-import { CameraPlugin, EventPlugin } from '@ktd-cesium/plugins'
+import { CameraPlugin, EventPlugin } from '@auto-cesium/plugins'
 
 // 推荐：结合 EventPlugin 使用（统一事件管理）
 const event = viewer.use(EventPlugin)
@@ -887,10 +885,10 @@ const camera = viewer.use(CameraPlugin)
 
 // 启动键盘漫游
 camera.startKeyboardRoaming({
-  moveSpeed: 10,           // 移动速度 10 米/秒
-  rotateSpeed: 0.002,      // 旋转速度
-  enableCollision: true,   // 启用碰撞检测
-  minHeight: 1.5           // 最小高度 1.5 米
+  moveSpeed: 10, // 移动速度 10 米/秒
+  rotateSpeed: 0.002, // 旋转速度
+  enableCollision: true, // 启用碰撞检测
+  minHeight: 1.5 // 最小高度 1.5 米
 })
 
 // 停止键盘漫游
@@ -901,33 +899,33 @@ camera.stopKeyboardRoaming()
 
 ### 键盘控制
 
-| 按键 | 功能 |
-|------|------|
-| W / ↑ | 前进 |
-| S / ↓ | 后退 |
-| A / ← | 左移 |
-| D / → | 右移 |
-| Q | 上升 |
-| E | 下降 |
+| 按键  | 功能         |
+| ----- | ------------ |
+| W / ↑ | 前进         |
+| S / ↓ | 后退         |
+| A / ← | 左移         |
+| D / → | 右移         |
+| Q     | 上升         |
+| E     | 下降         |
 | Shift | 加速（按住） |
 
 ### 鼠标控制
 
-| 操作 | 功能 |
-|------|------|
-| 右键拖拽 | 旋转视角 |
-| 滚轮 | 调整移动速度 |
+| 操作     | 功能         |
+| -------- | ------------ |
+| 右键拖拽 | 旋转视角     |
+| 滚轮     | 调整移动速度 |
 
 ### 配置选项
 
 ```typescript
 interface KeyboardRoamingOptions {
-  moveSpeed?: number         // 移动速度（米/秒），默认 10
-  rotateSpeed?: number       // 旋转速度（弧度/像素），默认 0.002
-  verticalSpeed?: number     // 垂直移动速度（米/秒），默认 5
-  speedMultiplier?: number   // Shift 加速倍率，默认 3
-  enableCollision?: boolean  // 是否启用碰撞检测，默认 true
-  minHeight?: number         // 最小高度（米），默认 1.5
+  moveSpeed?: number // 移动速度（米/秒），默认 10
+  rotateSpeed?: number // 旋转速度（弧度/像素），默认 0.002
+  verticalSpeed?: number // 垂直移动速度（米/秒），默认 5
+  speedMultiplier?: number // Shift 加速倍率，默认 3
+  enableCollision?: boolean // 是否启用碰撞检测，默认 true
+  minHeight?: number // 最小高度（米），默认 1.5
 }
 ```
 
@@ -938,7 +936,7 @@ interface KeyboardRoamingOptions {
 const isEnabled = camera.isKeyboardRoamingEnabled()
 
 // 设置移动速度
-camera.setKeyboardRoamingSpeed(20)  // 20 米/秒
+camera.setKeyboardRoamingSpeed(20) // 20 米/秒
 
 // 获取当前速度
 const speed = camera.getKeyboardRoamingSpeed()
@@ -950,10 +948,10 @@ camera.stopKeyboardRoaming()
 ### 完整示例
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import { CameraPlugin, EventPlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { CameraPlugin, EventPlugin } from '@auto-cesium/plugins'
 
-const ktdViewer = new KtdViewer(cesiumViewer)
+const ktdViewer = new AutoViewer(cesiumViewer)
 
 // 1. 先安装 EventPlugin（推荐，提供统一的事件管理）
 const event = ktdViewer.use(EventPlugin)
@@ -1010,28 +1008,28 @@ document.getElementById('exit').onclick = () => {
 // 方式 1：使用 EventPlugin（推荐）
 const event = viewer.use(EventPlugin)
 const camera = viewer.use(CameraPlugin)
-camera.startKeyboardRoaming()  // 自动使用 EventPlugin
+camera.startKeyboardRoaming() // 自动使用 EventPlugin
 
 // 方式 2：不使用 EventPlugin（降级方案）
 const camera = viewer.use(CameraPlugin)
-camera.startKeyboardRoaming()  // 使用直接 DOM 事件绑定
+camera.startKeyboardRoaming() // 使用直接 DOM 事件绑定
 ```
 
 ---
 
 ## 室内漫游 vs 键盘漫游
 
-| 特性 | 室内漫游 | 键盘漫游 |
-|------|----------|----------|
-| 控制方式 | 自动沿航点 | 键盘+鼠标手动控制 |
-| 适用场景 | 自动展示、演示 | 交互探索、游戏化体验 |
-| 路径规划 | 需要预定义航点 | 自由移动 |
-| 插值平滑 | ✅ 支持 | ❌ 不支持 |
-| 碰撞检测 | ❌ 不支持 | ✅ 支持 |
-| 速度控制 | 速度倍率 | 实时调整+加速键 |
-| 视角控制 | 自动朝向运动方向 | 鼠标自由旋转 |
-| 事件管理 | Cesium 时钟事件 | EventPlugin（推荐）或 DOM 事件 |
-| 依赖插件 | 无 | EventPlugin（可选） |
+| 特性     | 室内漫游         | 键盘漫游                       |
+| -------- | ---------------- | ------------------------------ |
+| 控制方式 | 自动沿航点       | 键盘+鼠标手动控制              |
+| 适用场景 | 自动展示、演示   | 交互探索、游戏化体验           |
+| 路径规划 | 需要预定义航点   | 自由移动                       |
+| 插值平滑 | ✅ 支持          | ❌ 不支持                      |
+| 碰撞检测 | ❌ 不支持        | ✅ 支持                        |
+| 速度控制 | 速度倍率         | 实时调整+加速键                |
+| 视角控制 | 自动朝向运动方向 | 鼠标自由旋转                   |
+| 事件管理 | Cesium 时钟事件  | EventPlugin（推荐）或 DOM 事件 |
+| 依赖插件 | 无               | EventPlugin（可选）            |
 
 ---
 
@@ -1052,7 +1050,7 @@ camera.startKeyboardRoaming()  // 使用直接 DOM 事件绑定
 
 ## 作者
 
-ktd-cesium 团队
+auto-cesium 团队
 
 ## 许可
 

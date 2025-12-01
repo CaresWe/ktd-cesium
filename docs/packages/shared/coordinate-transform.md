@@ -18,7 +18,7 @@ import {
   cartesian2lonlat,
   lonlats2cartesians,
   lonlat2cartesian
-} from '@ktd-cesium/shared'
+} from '@auto-cesium/shared'
 ```
 
 ## 坐标系说明
@@ -65,7 +65,7 @@ function wgs84ToGcj02(lng: number, lat: number): [number, number]
 **示例**
 
 ```typescript
-import { wgs84ToGcj02 } from '@ktd-cesium/shared'
+import { wgs84ToGcj02 } from '@auto-cesium/shared'
 
 // 北京天安门 WGS84 坐标
 const [gcjLng, gcjLat] = wgs84ToGcj02(116.3974, 39.9093)
@@ -94,7 +94,7 @@ function gcj02ToWgs84(lng: number, lat: number): [number, number]
 **示例**
 
 ```typescript
-import { gcj02ToWgs84 } from '@ktd-cesium/shared'
+import { gcj02ToWgs84 } from '@auto-cesium/shared'
 
 // 高德地图坐标转 WGS84
 const [wgsLng, wgsLat] = gcj02ToWgs84(116.4039, 39.9151)
@@ -113,7 +113,7 @@ function gcj02ToBd09(lng: number, lat: number): [number, number]
 **示例**
 
 ```typescript
-import { gcj02ToBd09 } from '@ktd-cesium/shared'
+import { gcj02ToBd09 } from '@auto-cesium/shared'
 
 const [bdLng, bdLat] = gcj02ToBd09(116.4039, 39.9151)
 ```
@@ -131,7 +131,7 @@ function bd09ToGcj02(lng: number, lat: number): [number, number]
 **示例**
 
 ```typescript
-import { bd09ToGcj02 } from '@ktd-cesium/shared'
+import { bd09ToGcj02 } from '@auto-cesium/shared'
 
 const [gcjLng, gcjLat] = bd09ToGcj02(116.4104, 39.9216)
 ```
@@ -149,7 +149,7 @@ function wgs84ToBd09(lng: number, lat: number): [number, number]
 **示例**
 
 ```typescript
-import { wgs84ToBd09 } from '@ktd-cesium/shared'
+import { wgs84ToBd09 } from '@auto-cesium/shared'
 
 const [bdLng, bdLat] = wgs84ToBd09(116.3974, 39.9093)
 ```
@@ -167,7 +167,7 @@ function bd09ToWgs84(lng: number, lat: number): [number, number]
 **示例**
 
 ```typescript
-import { bd09ToWgs84 } from '@ktd-cesium/shared'
+import { bd09ToWgs84 } from '@auto-cesium/shared'
 
 const [wgsLng, wgsLat] = bd09ToWgs84(116.4104, 39.9216)
 ```
@@ -196,7 +196,7 @@ function transformCoordinate(lng: number, lat: number, from: CoordinateOffset, t
 **示例**
 
 ```typescript
-import { transformCoordinate, CoordinateOffset } from '@ktd-cesium/shared'
+import { transformCoordinate, CoordinateOffset } from '@auto-cesium/shared'
 
 // GCJ-02 转 BD-09
 const [bdLng, bdLat] = transformCoordinate(116.4039, 39.9151, CoordinateOffset.GCJ02, CoordinateOffset.BD09)
@@ -222,7 +222,7 @@ function cartesians2lonlats(cartesians: Cesium.Cartesian3[]): number[][]
 **示例**
 
 ```typescript
-import { cartesians2lonlats } from '@ktd-cesium/shared'
+import { cartesians2lonlats } from '@auto-cesium/shared'
 import * as Cesium from 'cesium'
 
 const cartesians = [Cesium.Cartesian3.fromDegrees(116.4, 39.9, 0), Cesium.Cartesian3.fromDegrees(116.5, 39.9, 100)]
@@ -248,7 +248,7 @@ function cartesian2lonlat(cartesian: Cesium.Cartesian3): number[]
 **示例**
 
 ```typescript
-import { cartesian2lonlat } from '@ktd-cesium/shared'
+import { cartesian2lonlat } from '@auto-cesium/shared'
 
 const cartesian = Cesium.Cartesian3.fromDegrees(116.4, 39.9, 100)
 const lonlat = cartesian2lonlat(cartesian)
@@ -277,7 +277,7 @@ function lonlats2cartesians(lonlats: number[][], defHeight?: number): Cesium.Car
 **示例**
 
 ```typescript
-import { lonlats2cartesians } from '@ktd-cesium/shared'
+import { lonlats2cartesians } from '@auto-cesium/shared'
 
 const lonlats = [
   [116.4, 39.9],
@@ -310,7 +310,7 @@ function lonlat2cartesian(lonlat: number[], defHeight?: number): Cesium.Cartesia
 **示例**
 
 ```typescript
-import { lonlat2cartesian } from '@ktd-cesium/shared'
+import { lonlat2cartesian } from '@auto-cesium/shared'
 
 const lonlat = [116.4, 39.9]
 const cartesian = lonlat2cartesian(lonlat, 100)
@@ -321,7 +321,7 @@ const cartesian = lonlat2cartesian(lonlat, 100)
 ### 场景 1：高德地图坐标转 Cesium
 
 ```typescript
-import { gcj02ToWgs84, lonlat2cartesian } from '@ktd-cesium/shared'
+import { gcj02ToWgs84, lonlat2cartesian } from '@auto-cesium/shared'
 
 // 高德地图返回的 GCJ-02 坐标
 const amapLng = 116.4039
@@ -343,7 +343,7 @@ viewer.entities.add({
 ### 场景 2：百度地图坐标转 Cesium
 
 ```typescript
-import { bd09ToWgs84, lonlat2cartesian } from '@ktd-cesium/shared'
+import { bd09ToWgs84, lonlat2cartesian } from '@auto-cesium/shared'
 
 // 百度地图返回的 BD-09 坐标
 const baiduLng = 116.4104
@@ -359,7 +359,7 @@ const position = lonlat2cartesian([wgsLng, wgsLat, 0])
 ### 场景 3：批量转换坐标数组
 
 ```typescript
-import { gcj02ToWgs84, lonlats2cartesians } from '@ktd-cesium/shared'
+import { gcj02ToWgs84, lonlats2cartesians } from '@auto-cesium/shared'
 
 // 高德地图返回的坐标数组（GCJ-02）
 const amapCoords = [
@@ -378,7 +378,7 @@ const cartesians = lonlats2cartesians(wgsCoords, 0)
 ### 场景 4：使用工厂函数转换
 
 ```typescript
-import { transformCoordinate, CoordinateOffset } from '@ktd-cesium/shared'
+import { transformCoordinate, CoordinateOffset } from '@auto-cesium/shared'
 
 // 从高德地图（GCJ-02）转换到百度地图（BD-09）
 function convertAmapToBaidu(amapLng: number, amapLat: number) {
@@ -392,7 +392,7 @@ const [baiduLng, baiduLat] = convertAmapToBaidu(116.4039, 39.9151)
 ### 场景 5：坐标数组与 Cesium 实体互转
 
 ```typescript
-import { cartesians2lonlats, lonlats2cartesians } from '@ktd-cesium/shared'
+import { cartesians2lonlats, lonlats2cartesians } from '@auto-cesium/shared'
 
 // 从 Cesium 实体获取坐标
 const entity = viewer.entities.values[0]

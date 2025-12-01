@@ -1,7 +1,7 @@
 import * as Cesium from 'cesium'
 import { DrawPolygon } from './DrawPolygon'
 import { PolylineEntity } from '../attr/AttrPolyline'
-import type { GeoJSONFeature } from '@ktd-cesium/shared'
+import type { GeoJSONFeature } from '@auto-cesium/shared'
 import type { PolygonExExtendedEntity } from '../types'
 
 /**

@@ -15,10 +15,10 @@ TilesPlugin 提供 3D Tiles 模型的加载、管理和高级特效功能。
 ## 快速开始
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import { TilesPlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { TilesPlugin } from '@auto-cesium/plugins'
 
-const viewer = new KtdViewer(cesiumViewer)
+const viewer = new AutoViewer(cesiumViewer)
 const tiles = viewer.use(TilesPlugin)
 
 // 加载 3D Tiles 模型
@@ -71,9 +71,9 @@ const layer = tiles.getLayer(layerId)
 
 // 启用雨水滴
 layer.enableRainDrops({
-  intensity: 0.7,        // 水滴强度 0-1
-  dropSize: 0.06,        // 水滴大小
-  flowSpeed: 1.5,        // 流淌速度
+  intensity: 0.7, // 水滴强度 0-1
+  dropSize: 0.06, // 水滴大小
+  flowSpeed: 1.5, // 流淌速度
   dropColor: new Cesium.Color(0.5, 0.5, 0.6, 0.8)
 })
 
@@ -85,6 +85,7 @@ layer.disableWeatherEffect()
 ```
 
 **效果原理：**
+
 - 通过法线检测，只在接近水平向上的表面（如屋顶）显示水滴
 - 多层水滴图案叠加，形成自然效果
 - 基于帧数的流淌动画
@@ -97,10 +98,10 @@ layer.disableWeatherEffect()
 ```typescript
 // 启用积雪
 layer.enableSnowAccumulation({
-  thickness: 0.8,             // 积雪厚度 0-1
-  coverageThreshold: 0.5,     // 覆盖阈值（法线 Y 值）
+  thickness: 0.8, // 积雪厚度 0-1
+  coverageThreshold: 0.5, // 覆盖阈值（法线 Y 值）
   snowColor: new Cesium.Color(0.95, 0.95, 0.98, 1.0),
-  roughness: 0.8              // 积雪表面粗糙度
+  roughness: 0.8 // 积雪表面粗糙度
 })
 
 // 动态调整厚度
@@ -111,6 +112,7 @@ layer.disableWeatherEffect()
 ```
 
 **效果原理：**
+
 - 根据表面法线检测朝上程度，只在朝上的表面积雪
 - 添加噪声变化，使积雪分布更自然
 - 根据模型高度调整积雪厚度
@@ -134,7 +136,7 @@ if (effectType === 'rainDrops') {
 ### 完整示例：动态天气切换
 
 ```typescript
-import { TilesPlugin } from '@ktd-cesium/plugins'
+import { TilesPlugin } from '@auto-cesium/plugins'
 
 const tiles = viewer.use(TilesPlugin)
 
@@ -170,8 +172,8 @@ function setWeather(type: 'clear' | 'rain' | 'snow') {
 }
 
 // 使用
-setWeather('rain')  // 切换到雨天
-setWeather('snow')  // 切换到雪天
+setWeather('rain') // 切换到雨天
+setWeather('snow') // 切换到雪天
 setWeather('clear') // 切换到晴天
 ```
 
@@ -180,7 +182,7 @@ setWeather('clear') // 切换到晴天
 天气效果可以与 ScenePlugin 配合使用，实现全场景天气模拟：
 
 ```typescript
-import { TilesPlugin, ScenePlugin } from '@ktd-cesium/plugins'
+import { TilesPlugin, ScenePlugin } from '@auto-cesium/plugins'
 
 const tiles = viewer.use(TilesPlugin)
 const scene = viewer.use(ScenePlugin)
@@ -440,14 +442,14 @@ viewer.camera.changed.addEventListener(() => {
 const layerId = await tiles.createLayer({
   name: '建筑模型',
   url: '/data/tileset.json',
-  maximumScreenSpaceError: 32  // 默认 16
+  maximumScreenSpaceError: 32 // 默认 16
 })
 
 // 限制内存使用
 const layerId2 = await tiles.createLayer({
   name: '大型模型',
   url: '/data/large-tileset.json',
-  maximumMemoryUsage: 256  // 默认 512
+  maximumMemoryUsage: 256 // 默认 512
 })
 ```
 
@@ -472,7 +474,7 @@ const layerId2 = await tiles.createLayer({
 
 ## 作者
 
-ktd-cesium 团队
+auto-cesium 团队
 
 ## 许可
 

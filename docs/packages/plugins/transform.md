@@ -5,8 +5,8 @@
 ## 导入
 
 ```typescript
-import { TransformPlugin, TransformMode, TransformSpace, Axis } from '@ktd-cesium/plugins'
-import type { TransformPluginOptions, TransformData, TransformEventData } from '@ktd-cesium/plugins'
+import { TransformPlugin, TransformMode, TransformSpace, Axis } from '@auto-cesium/plugins'
+import type { TransformPluginOptions, TransformData, TransformEventData } from '@auto-cesium/plugins'
 ```
 
 ## 核心特性
@@ -22,10 +22,10 @@ import type { TransformPluginOptions, TransformData, TransformEventData } from '
 ## 安装
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import { TransformPlugin, TransformMode, TransformSpace } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { TransformPlugin, TransformMode, TransformSpace } from '@auto-cesium/plugins'
 
-const viewer = new KtdViewer(cesiumViewer)
+const viewer = new AutoViewer(cesiumViewer)
 
 const transform = viewer.use(TransformPlugin, {
   mode: TransformMode.TRANSLATE, // 默认模式：平移
@@ -414,7 +414,7 @@ interface TransformEventData {
 ### 场景 1：Entity 模型变换
 
 ```typescript
-import { TransformPlugin, TransformMode } from '@ktd-cesium/plugins'
+import { TransformPlugin, TransformMode } from '@auto-cesium/plugins'
 
 const transform = viewer.use(TransformPlugin, {
   mode: TransformMode.TRANSLATE,
@@ -440,7 +440,7 @@ transform.attach(model)
 ### 场景 2：Primitive 模型变换
 
 ```typescript
-import { TransformPlugin, TransformMode } from '@ktd-cesium/plugins'
+import { TransformPlugin, TransformMode } from '@auto-cesium/plugins'
 
 const transform = viewer.use(TransformPlugin, {
   mode: TransformMode.ROTATE,
@@ -543,7 +543,7 @@ function restoreTransform() {
 ### 场景 5：与 GraphicsPlugin 集成
 
 ```typescript
-import { GraphicsPlugin, TransformPlugin, TransformMode } from '@ktd-cesium/plugins'
+import { GraphicsPlugin, TransformPlugin, TransformMode } from '@auto-cesium/plugins'
 
 const graphics = viewer.use(GraphicsPlugin, {
   transform: {
@@ -641,7 +641,7 @@ class MultiSelectTransform {
   private centerEntity: Cesium.Entity | null = null
 
   constructor(
-    private viewer: KtdViewer,
+    private viewer: AutoViewer,
     private transform: TransformPlugin
   ) {}
 

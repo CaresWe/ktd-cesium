@@ -1,5 +1,5 @@
 import * as Cesium from 'cesium'
-import { isNumber, getMaxHeight } from '@ktd-cesium/shared'
+import { isNumber, getMaxHeight } from '@auto-cesium/shared'
 import { DrawPolyline } from './DrawPolyline'
 import * as attr from '../attr/AttrRectangle'
 import { EditRectangle } from '../edit/EditRectangle'

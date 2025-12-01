@@ -4,7 +4,7 @@ import type { ExtendedEntity } from './EditBase'
 import * as draggerCtl from './Dragger'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import * as circleAttr from '../attr/AttrCircle'
-import { addPositionsHeight } from '@ktd-cesium/shared'
+import { addPositionsHeight } from '@auto-cesium/shared'
 import type { PModelEditEntity, ScaleDragger } from '../types'
 
 /**

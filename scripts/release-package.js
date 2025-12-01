@@ -56,14 +56,14 @@ function updatePackageVersion(pkgName, newVersion) {
  * 生成包的 CHANGELOG
  */
 function generatePackageChangelog(pkgName) {
-  console.log(chalk.blue(`\n📝 生成 @ktd-cesium/${pkgName} 的 CHANGELOG...\n`))
+  console.log(chalk.blue(`\n📝 生成 @auto-cesium/${pkgName} 的 CHANGELOG...\n`))
 
   const pkgDir = resolve(packagesDir, pkgName)
   const changelogPath = resolve(pkgDir, 'CHANGELOG.md')
 
   try {
     // 使用 conventional-changelog 生成变更日志，过滤该包相关的提交
-    const cmd = `npx conventional-changelog -p angular -i CHANGELOG.md -s --commit-path . --lerna-package @ktd-cesium/${pkgName}`
+    const cmd = `npx conventional-changelog -p angular -i CHANGELOG.md -s --commit-path . --lerna-package @auto-cesium/${pkgName}`
     execSync(cmd, { cwd: pkgDir, stdio: 'inherit' })
     console.log(chalk.green(`✅ CHANGELOG 已生成: packages/${pkgName}/CHANGELOG.md\n`))
   } catch (error) {
@@ -73,7 +73,7 @@ function generatePackageChangelog(pkgName) {
     if (!existsSync(changelogPath)) {
       const initialChangelog = `# Changelog
 
-All notable changes to @ktd-cesium/${pkgName} will be documented in this file.
+All notable changes to @auto-cesium/${pkgName} will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/).
@@ -108,7 +108,7 @@ function createPackageTag(pkgName, version) {
   console.log(chalk.blue('\n🏷️  创建 Git 标签...\n'))
   const tagName = `${pkgName}@${version}`
   try {
-    execSync(`git tag ${tagName} -m "@ktd-cesium/${pkgName}@${version}"`, { cwd: rootDir })
+    execSync(`git tag ${tagName} -m "@auto-cesium/${pkgName}@${version}"`, { cwd: rootDir })
     console.log(chalk.green(`✅ 标签 ${tagName} 已创建！\n`))
     return tagName
   } catch (error) {
@@ -127,8 +127,8 @@ function getPackageDependencies(pkgName) {
 
   const allDeps = { ...pkgData.dependencies, ...pkgData.peerDependencies }
   for (const [name] of Object.entries(allDeps)) {
-    if (name.startsWith('@ktd-cesium/')) {
-      const depName = name.replace('@ktd-cesium/', '')
+    if (name.startsWith('@auto-cesium/')) {
+      const depName = name.replace('@auto-cesium/', '')
       if (availablePackages.includes(depName)) {
         deps.push(depName)
       }
@@ -158,9 +158,9 @@ async function updateDependentPackages(pkgName, newVersion) {
     return []
   }
 
-  console.log(chalk.yellow(`\n⚠️  以下包依赖 @ktd-cesium/${pkgName}:`))
+  console.log(chalk.yellow(`\n⚠️  以下包依赖 @auto-cesium/${pkgName}:`))
   dependents.forEach((dep) => {
-    console.log(chalk.gray(`   - @ktd-cesium/${dep}`))
+    console.log(chalk.gray(`   - @auto-cesium/${dep}`))
   })
 
   const { shouldUpdate } = await enquirer.prompt({
@@ -177,7 +177,7 @@ async function updateDependentPackages(pkgName, newVersion) {
       const pkgData = readPackageJson(pkgPath)
 
       let changed = false
-      const depKey = `@ktd-cesium/${pkgName}`
+      const depKey = `@auto-cesium/${pkgName}`
 
       if (pkgData.dependencies?.[depKey]) {
         pkgData.dependencies[depKey] = `^${newVersion}`
@@ -191,7 +191,7 @@ async function updateDependentPackages(pkgName, newVersion) {
       if (changed) {
         writePackageJson(pkgPath, pkgData)
         updated.push(depPkg)
-        console.log(chalk.green(`✓ 已更新 @ktd-cesium/${depPkg} 的依赖版本`))
+        console.log(chalk.green(`✓ 已更新 @auto-cesium/${depPkg} 的依赖版本`))
       }
     }
     return updated
@@ -204,7 +204,7 @@ async function updateDependentPackages(pkgName, newVersion) {
  * 主函数
  */
 async function main() {
-  console.log(chalk.cyan.bold('\n🚀 ktd-cesium 单包发布工具\n'))
+  console.log(chalk.cyan.bold('\n🚀 auto-cesium 单包发布工具\n'))
 
   // 获取命令行参数
   const args = process.argv.slice(2)
@@ -218,14 +218,14 @@ async function main() {
       message: '选择要发布的包:',
       choices: availablePackages.map((pkg) => ({
         name: pkg,
-        message: `@ktd-cesium/${pkg}`
+        message: `@auto-cesium/${pkg}`
       }))
     })
     selectedPackage = pkgName
   }
 
   const currentVersion = getPackageVersion(selectedPackage)
-  console.log(chalk.gray(`\n当前版本: @ktd-cesium/${selectedPackage}@${currentVersion}\n`))
+  console.log(chalk.gray(`\n当前版本: @auto-cesium/${selectedPackage}@${currentVersion}\n`))
 
   // 询问新版本号
   const { releaseType } = await enquirer.prompt({
@@ -267,7 +267,7 @@ async function main() {
   const { confirm } = await enquirer.prompt({
     type: 'confirm',
     name: 'confirm',
-    message: `确认发布 @ktd-cesium/${selectedPackage}: ${chalk.yellow(currentVersion)} → ${chalk.green(newVersion)}?`
+    message: `确认发布 @auto-cesium/${selectedPackage}: ${chalk.yellow(currentVersion)} → ${chalk.green(newVersion)}?`
   })
 
   if (!confirm) {
@@ -277,9 +277,9 @@ async function main() {
 
   try {
     // 1. 更新包版本
-    console.log(chalk.blue(`\n📦 更新 @ktd-cesium/${selectedPackage} 版本号...\n`))
+    console.log(chalk.blue(`\n📦 更新 @auto-cesium/${selectedPackage} 版本号...\n`))
     updatePackageVersion(selectedPackage, newVersion)
-    console.log(chalk.green(`✓ @ktd-cesium/${selectedPackage}: ${newVersion}\n`))
+    console.log(chalk.green(`✓ @auto-cesium/${selectedPackage}: ${newVersion}\n`))
 
     // 2. 检查并更新依赖的包
     const updatedPackages = await updateDependentPackages(selectedPackage, newVersion)
@@ -332,7 +332,7 @@ async function main() {
       }
     }
 
-    console.log(chalk.green.bold(`\n🎉 @ktd-cesium/${selectedPackage}@${newVersion} 发布完成！\n`))
+    console.log(chalk.green.bold(`\n🎉 @auto-cesium/${selectedPackage}@${newVersion} 发布完成！\n`))
 
     // 显示后续操作提示
     if (!shouldCommit) {

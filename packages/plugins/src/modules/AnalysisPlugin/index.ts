@@ -5,7 +5,7 @@
  */
 
 import { BasePlugin } from '../../BasePlugin'
-import type { KtdViewer } from '@ktd-cesium/core'
+import type { AutoViewer } from '@auto-cesium/core'
 import type { GraphicsPlugin } from '../GraphicsPlugin'
 import * as Cesium from 'cesium'
 import type { MeasureTypeString, MeasureStyle, MeasureResult, SnapConfig, MeasureOptions, MeasureConfig } from './types'
@@ -95,7 +95,7 @@ export class AnalysisPlugin extends BasePlugin {
   /**
    * 插件安装
    */
-  protected onInstall(viewer: KtdViewer, options?: AnalysisPluginOptions): void {
+  protected onInstall(viewer: AutoViewer, options?: AnalysisPluginOptions): void {
     this.options = { ...this.options, ...(options || {}) }
 
     // 获取图形插件实例

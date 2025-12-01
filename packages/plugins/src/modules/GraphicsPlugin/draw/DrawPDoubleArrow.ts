@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium'
 import { DrawPPolygonEx } from './DrawPPolygonEx'
-import { computeDoubleArrowPositions } from '@ktd-cesium/shared'
+import { computeDoubleArrowPositions } from '@auto-cesium/shared'
 
 /**
  * Primitive 方式的双箭头（钳击）绘制类

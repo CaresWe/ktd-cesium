@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium'
 import { EditPolyline } from './EditPolyline'
-import { setPositionsHeight } from '@ktd-cesium/shared'
+import { setPositionsHeight } from '@auto-cesium/shared'
 import type { ExtendedEntity } from './EditBase'
 import type { CorridorEditEntity } from '../types'
 

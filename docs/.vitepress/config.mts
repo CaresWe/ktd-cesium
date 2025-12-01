@@ -79,7 +79,7 @@ export default defineConfig({
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/your-repo/ktd-cesium' }
+      { icon: 'github', link: 'https://github.com/your-repo/auto-cesium' }
     ],
 
     search: {

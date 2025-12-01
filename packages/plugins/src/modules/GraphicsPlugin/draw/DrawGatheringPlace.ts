@@ -1,7 +1,7 @@
 import * as Cesium from 'cesium'
 import { DrawPolygonEx } from './DrawPolygonEx'
 import { EditGatheringPlace } from '../edit/EditGatheringPlace'
-import { computeGatheringPlacePositions } from '@ktd-cesium/shared'
+import { computeGatheringPlacePositions } from '@auto-cesium/shared'
 import type { EditClassConstructor } from '../types'
 
 /**

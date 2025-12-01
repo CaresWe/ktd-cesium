@@ -12,7 +12,7 @@ import {
   simpleBezierCurve,
   quadraticBezier,
   cubicBezier
-} from '@ktd-cesium/shared'
+} from '@auto-cesium/shared'
 ```
 
 ## API
@@ -39,7 +39,7 @@ function line2curve(positions: Cesium.Cartesian3[], closure?: boolean): Cesium.C
 **示例**
 
 ```typescript
-import { line2curve } from '@ktd-cesium/shared'
+import { line2curve } from '@auto-cesium/shared'
 
 // 原始折线
 const positions = [
@@ -84,7 +84,7 @@ function bezierInterpolation(points: number[][], resolution?: number): number[][
 **示例**
 
 ```typescript
-import { bezierInterpolation } from '@ktd-cesium/shared'
+import { bezierInterpolation } from '@auto-cesium/shared'
 
 const controlPoints = [
   [116.4, 39.9, 0],
@@ -121,7 +121,7 @@ function catmullRomSpline(p0: number[], p1: number[], p2: number[], p3: number[]
 **示例**
 
 ```typescript
-import { catmullRomSpline } from '@ktd-cesium/shared'
+import { catmullRomSpline } from '@auto-cesium/shared'
 
 const p0 = [116.3, 39.9, 0]
 const p1 = [116.4, 39.9, 0]
@@ -156,7 +156,7 @@ function quadraticBezier(p0: number[], p1: number[], p2: number[], t: number): n
 **示例**
 
 ```typescript
-import { quadraticBezier } from '@ktd-cesium/shared'
+import { quadraticBezier } from '@auto-cesium/shared'
 
 const start = [116.4, 39.9, 0]
 const control = [116.5, 40.0, 0]
@@ -194,7 +194,7 @@ function cubicBezier(p0: number[], p1: number[], p2: number[], p3: number[], t: 
 **示例**
 
 ```typescript
-import { cubicBezier } from '@ktd-cesium/shared'
+import { cubicBezier } from '@auto-cesium/shared'
 
 const p0 = [116.4, 39.9, 0]
 const p1 = [116.45, 40.0, 0]
@@ -209,7 +209,7 @@ const point = cubicBezier(p0, p1, p2, p3, 0.5)
 ### 场景 1：平滑路径
 
 ```typescript
-import { line2curve } from '@ktd-cesium/shared'
+import { line2curve } from '@auto-cesium/shared'
 
 // 用户绘制的折线
 const userDrawnLine = [
@@ -235,7 +235,7 @@ viewer.entities.add({
 ### 场景 2：闭合曲线
 
 ```typescript
-import { line2curve } from '@ktd-cesium/shared'
+import { line2curve } from '@auto-cesium/shared'
 
 // 创建闭合区域
 const boundary = [
@@ -259,7 +259,7 @@ viewer.entities.add({
 ### 场景 3：自定义插值密度
 
 ```typescript
-import { bezierInterpolation, lonlats2cartesians, cartesians2lonlats } from '@ktd-cesium/shared'
+import { bezierInterpolation, lonlats2cartesians, cartesians2lonlats } from '@auto-cesium/shared'
 
 function smoothLineWithDensity(positions: Cesium.Cartesian3[], density: number = 20) {
   // 转换为经纬度数组
@@ -282,7 +282,7 @@ const smoothLine = smoothLineWithDensity(originalLine, 50) // 高密度
 ### 场景 4：动画路径
 
 ```typescript
-import { line2curve, interpolatePositions } from '@ktd-cesium/shared'
+import { line2curve, interpolatePositions } from '@auto-cesium/shared'
 
 // 创建平滑的飞行路径
 const waypoints = [
@@ -322,7 +322,7 @@ keyframes.forEach((pos, index) => {
 ### 场景 5：曲线简化
 
 ```typescript
-import { line2curve } from '@ktd-cesium/shared'
+import { line2curve } from '@auto-cesium/shared'
 
 // 原始路径点过多，先简化再平滑
 function simplifyAndSmooth(positions: Cesium.Cartesian3[]): Cesium.Cartesian3[] {

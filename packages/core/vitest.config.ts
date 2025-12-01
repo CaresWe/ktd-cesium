@@ -3,7 +3,7 @@ import path from 'path'
 
 export default defineConfig({
   test: {
-    name: '@ktd-cesium/core',
+    name: '@auto-cesium/core',
     environment: 'happy-dom',
     globals: true,
 
@@ -27,7 +27,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@ktd-cesium/shared': path.resolve(__dirname, '../shared/src')
+      '@auto-cesium/shared': path.resolve(__dirname, '../shared/src')
     }
   }
 })

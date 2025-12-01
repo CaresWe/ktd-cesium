@@ -1,5 +1,5 @@
 {
-  "name": "@ktd-cesium/core",
+  "name": "@auto-cesium/core",
   "version": "1.0.0",
   "description": "Cesium核心功能封装",
   "type": "module",
@@ -46,7 +46,7 @@
     }
   },
   "dependencies": {
-    "@ktd-cesium/shared": "workspace:*"
+    "@auto-cesium/shared": "workspace:*"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^1.0.0",

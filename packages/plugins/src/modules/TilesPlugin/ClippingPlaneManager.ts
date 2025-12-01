@@ -9,7 +9,7 @@ import {
   Entity
 } from 'cesium'
 import type { ClippingPlanesConfig, ClippingPlaneConfig, EntityClippingConfig } from './types'
-import type { KtdViewer } from '@ktd-cesium/core'
+import type { AutoViewer } from '@auto-cesium/core'
 import type { GraphicsPlugin } from '../GraphicsPlugin'
 
 /**
@@ -18,13 +18,13 @@ import type { GraphicsPlugin } from '../GraphicsPlugin'
  */
 export class ClippingPlaneManager {
   private tileset: Cesium3DTileset
-  private _viewer?: KtdViewer
+  private _viewer?: AutoViewer
   private graphicsPlugin?: GraphicsPlugin
   private clippingPlanes: ClippingPlaneCollection | null = null
   private config: ClippingPlanesConfig | null = null
   private _entityConfig: EntityClippingConfig | null = null
 
-  constructor(tileset: Cesium3DTileset, viewer?: KtdViewer) {
+  constructor(tileset: Cesium3DTileset, viewer?: AutoViewer) {
     this.tileset = tileset
     this._viewer = viewer
     if (viewer) {

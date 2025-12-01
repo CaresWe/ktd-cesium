@@ -1,5 +1,5 @@
 import * as Cesium from 'cesium'
-import { getCurrentMousePosition, formatNum as utilFormatNum } from '@ktd-cesium/shared'
+import { getCurrentMousePosition, formatNum as utilFormatNum } from '@auto-cesium/shared'
 import { GraphicsEventType } from '../../EventPlugin'
 import * as draggerCtl from './Dragger'
 import type {

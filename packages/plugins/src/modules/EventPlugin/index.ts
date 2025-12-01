@@ -1,6 +1,6 @@
 import { ScreenSpaceEventHandler, ScreenSpaceEventType, Cartographic, Math as CesiumMath, defined } from 'cesium'
 import { BasePlugin } from '../../BasePlugin'
-import type { KtdViewer } from '@ktd-cesium/core'
+import type { AutoViewer } from '@auto-cesium/core'
 import type {
   MouseEventCallback,
   TouchEventCallback,
@@ -38,7 +38,7 @@ export class EventPlugin extends BasePlugin {
     enableCoordinates: true
   }
 
-  protected onInstall(viewer: KtdViewer): void {
+  protected onInstall(viewer: AutoViewer): void {
     // 使用 cesiumViewer 属性访问原始 Cesium Viewer
     this.handler = new ScreenSpaceEventHandler(viewer.cesiumViewer.canvas)
   }

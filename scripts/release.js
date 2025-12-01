@@ -61,7 +61,7 @@ function updateVersions(newVersion) {
     const pkgData = readPackageJson(pkgPath)
     pkgData.version = newVersion
     writePackageJson(pkgPath, pkgData)
-    console.log(chalk.green(`✓ @ktd-cesium/${pkg}: ${newVersion}`))
+    console.log(chalk.green(`✓ @auto-cesium/${pkg}: ${newVersion}`))
   }
 
   console.log(chalk.green('\n✅ 版本号更新完成！\n'))
@@ -111,7 +111,7 @@ function createTag(version) {
  * 主函数
  */
 async function main() {
-  console.log(chalk.cyan.bold('\n🚀 ktd-cesium 版本发布工具\n'))
+  console.log(chalk.cyan.bold('\n🚀 auto-cesium 版本发布工具\n'))
 
   const currentVersion = getCurrentVersion()
   console.log(chalk.gray(`当前版本: ${currentVersion}\n`))

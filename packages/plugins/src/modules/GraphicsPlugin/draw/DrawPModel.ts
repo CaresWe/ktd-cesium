@@ -8,7 +8,7 @@ import type {
   ModelPrimitiveAttribute,
   ExtendedModelPrimitive
 } from '../types'
-import { getCurrentMousePosition } from '@ktd-cesium/shared'
+import { getCurrentMousePosition } from '@auto-cesium/shared'
 import * as attr from '../attr/AttrModel'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { GraphicsEventType } from '../../EventPlugin'

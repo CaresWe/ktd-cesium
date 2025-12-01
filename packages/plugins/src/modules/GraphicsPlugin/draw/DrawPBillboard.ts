@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium'
 import { DrawPrimitiveBase } from './DrawPrimitiveBase'
-import { getCurrentMousePosition } from '@ktd-cesium/shared'
+import { getCurrentMousePosition } from '@auto-cesium/shared'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { GraphicsEventType } from '../../EventPlugin'
 import type { BillboardPrimitiveStyle, BillboardPrimitiveAttribute, PrimitiveObject } from '../types'

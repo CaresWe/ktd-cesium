@@ -1,7 +1,7 @@
 import * as Cesium from 'cesium'
 import { DrawPolygonEx } from './DrawPolygonEx'
 import { EditAttackArrowYW } from '../edit/EditAttackArrowYW'
-import { computeAttackArrowYWPositions } from '@ktd-cesium/shared'
+import { computeAttackArrowYWPositions } from '@auto-cesium/shared'
 import type { EditClassConstructor } from '../types'
 
 /**

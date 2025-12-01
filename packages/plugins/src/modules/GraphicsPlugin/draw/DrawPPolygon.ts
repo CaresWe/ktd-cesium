@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium'
 import { DrawPPolyline } from './DrawPPolyline'
-import { getCurrentMousePosition, addPositionsHeight } from '@ktd-cesium/shared'
+import { getCurrentMousePosition, addPositionsHeight } from '@auto-cesium/shared'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { GraphicsEventType } from '../../EventPlugin'
 import type { PolygonPrimitiveAttribute } from '../types'

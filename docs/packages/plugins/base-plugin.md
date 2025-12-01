@@ -5,7 +5,7 @@
 ## 导入
 
 ```typescript
-import { BasePlugin } from '@ktd-cesium/plugins'
+import { BasePlugin } from '@auto-cesium/plugins'
 ```
 
 ## 概述
@@ -53,12 +53,12 @@ if (plugin.installed) {
 
 ### viewer (protected)
 
-受保护属性，KtdViewer 实例。
+受保护属性，AutoViewer 实例。
 
 **类型**
 
 ```typescript
-protected viewer: KtdViewer | null
+protected viewer: AutoViewer | null
 ```
 
 **说明**
@@ -88,16 +88,17 @@ protected get cesiumViewer(): Cesium.Viewer
 **类型签名**
 
 ```typescript
-install(viewer: KtdViewer): void | Promise<void>
+install(viewer: AutoViewer): void | Promise<void>
 ```
 
 **参数**
 
-- `viewer`: KtdViewer 实例
+- `viewer`: AutoViewer 实例
 
 **说明**
 
 此方法会：
+
 1. 检查插件是否已安装
 2. 保存 viewer 引用
 3. 标记插件为已安装
@@ -117,12 +118,12 @@ const plugin = viewer.use(MyPlugin)
 **类型签名**
 
 ```typescript
-protected abstract onInstall(viewer: KtdViewer): void | Promise<void>
+protected abstract onInstall(viewer: AutoViewer): void | Promise<void>
 ```
 
 **参数**
 
-- `viewer`: KtdViewer 实例
+- `viewer`: AutoViewer 实例
 
 **说明**
 
@@ -141,6 +142,7 @@ destroy(): void | Promise<void>
 **说明**
 
 此方法会：
+
 1. 检查插件是否已安装
 2. 调用子类的 `onDestroy` 方法
 3. 清理 viewer 引用
@@ -179,8 +181,8 @@ protected ensureInstalled(): void
 ### 基础示例
 
 ```typescript
-import { BasePlugin } from '@ktd-cesium/plugins'
-import type { KtdViewer } from '@ktd-cesium/core'
+import { BasePlugin } from '@auto-cesium/plugins'
+import type { AutoViewer } from '@auto-cesium/core'
 
 export class MyPlugin extends BasePlugin {
   // 静态属性：插件名称（用于注册）
@@ -190,7 +192,7 @@ export class MyPlugin extends BasePlugin {
   readonly name = 'MyPlugin'
 
   // 实现安装方法
-  protected onInstall(viewer: KtdViewer): void {
+  protected onInstall(viewer: AutoViewer): void {
     console.log('MyPlugin installed')
 
     // 初始化插件功能
@@ -230,7 +232,7 @@ export class ViewerAccessPlugin extends BasePlugin {
   static readonly pluginName = 'ViewerAccessPlugin'
   readonly name = 'ViewerAccessPlugin'
 
-  protected onInstall(viewer: KtdViewer): void {
+  protected onInstall(viewer: AutoViewer): void {
     // 方式 1：使用 this.viewer（可能为 null）
     if (this.viewer) {
       console.log(this.viewer.scene.globe)
@@ -262,7 +264,7 @@ export class AsyncPlugin extends BasePlugin {
   static readonly pluginName = 'AsyncPlugin'
   readonly name = 'AsyncPlugin'
 
-  protected async onInstall(viewer: KtdViewer): Promise<void> {
+  protected async onInstall(viewer: AutoViewer): Promise<void> {
     console.log('Starting async initialization...')
 
     // 异步加载资源
@@ -273,7 +275,7 @@ export class AsyncPlugin extends BasePlugin {
 
   private async loadResources(): Promise<void> {
     // 模拟异步加载
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       setTimeout(() => {
         console.log('Resources loaded')
         resolve()
@@ -290,7 +292,7 @@ export class AsyncPlugin extends BasePlugin {
   }
 
   private async cleanup(): Promise<void> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       setTimeout(resolve, 500)
     })
   }
@@ -307,7 +309,7 @@ export class StatefulPlugin extends BasePlugin {
   private enabled = false
   private listeners: Array<() => void> = []
 
-  protected onInstall(viewer: KtdViewer): void {
+  protected onInstall(viewer: AutoViewer): void {
     this.enabled = true
     this.setupListeners()
   }
@@ -322,7 +324,7 @@ export class StatefulPlugin extends BasePlugin {
   }
 
   private removeListeners() {
-    this.listeners.forEach(remove => remove())
+    this.listeners.forEach((remove) => remove())
     this.listeners = []
   }
 
@@ -346,7 +348,7 @@ export class SafePlugin extends BasePlugin {
   static readonly pluginName = 'SafePlugin'
   readonly name = 'SafePlugin'
 
-  protected onInstall(viewer: KtdViewer): void {
+  protected onInstall(viewer: AutoViewer): void {
     try {
       this.initializeFeatures()
     } catch (error) {

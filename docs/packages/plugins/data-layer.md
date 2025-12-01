@@ -5,7 +5,7 @@
 ## 导入
 
 ```typescript
-import { DataLayerPlugin } from '@ktd-cesium/plugins'
+import { DataLayerPlugin } from '@auto-cesium/plugins'
 import type {
   DataLayerConfig,
   DataLayerInstance,
@@ -14,7 +14,7 @@ import type {
   ClusterConfig,
   PopupConfig,
   DataMappingConfig
-} from '@ktd-cesium/plugins'
+} from '@auto-cesium/plugins'
 ```
 
 ## 核心特性
@@ -29,10 +29,10 @@ import type {
 ## 安装
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import { DataLayerPlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { DataLayerPlugin } from '@auto-cesium/plugins'
 
-const viewer = new KtdViewer(cesiumViewer)
+const viewer = new AutoViewer(cesiumViewer)
 const dataLayer = viewer.use(DataLayerPlugin)
 ```
 
@@ -103,11 +103,7 @@ const layer = dataLayer.getLayer(layerId)
 const items = Array.from({ length: 10000 }, (_, i) => ({
   id: `point-${i}`,
   geometryType: 'point' as GeometryType,
-  position: [
-    116 + Math.random() * 0.1,
-    39 + Math.random() * 0.1,
-    0
-  ] as [number, number, number],
+  position: [116 + Math.random() * 0.1, 39 + Math.random() * 0.1, 0] as [number, number, number],
   data: { index: i }
 }))
 
@@ -116,19 +112,19 @@ layer.addItems(items)
 
 ## 支持的几何类型
 
-| 类型 | 说明 | 位置字段 | 样式配置 |
-| --- | --- | --- | --- |
-| `point` | 点 | `position` | `point` 或 `icon` |
-| `polyline` | 折线 | `positions` | `polyline` |
-| `polygon` | 面 | `positions` | `polygon` |
-| `model` | 3D模型 | `position` | `model` |
-| `circle` | 圆形 | `position` | `circle` |
-| `ellipse` | 椭圆 | `position` | `ellipse` |
-| `rectangle` | 矩形 | `geometry.rectangleBounds` | `rectangle` |
-| `corridor` | 走廊 | `positions` | `corridor` |
-| `wall` | 墙体 | `positions` | `wall` |
-| `cylinder` | 圆柱体 | `position` | `cylinder` |
-| `box` | 立方体 | `position` | `box` |
+| 类型        | 说明   | 位置字段                   | 样式配置          |
+| ----------- | ------ | -------------------------- | ----------------- |
+| `point`     | 点     | `position`                 | `point` 或 `icon` |
+| `polyline`  | 折线   | `positions`                | `polyline`        |
+| `polygon`   | 面     | `positions`                | `polygon`         |
+| `model`     | 3D模型 | `position`                 | `model`           |
+| `circle`    | 圆形   | `position`                 | `circle`          |
+| `ellipse`   | 椭圆   | `position`                 | `ellipse`         |
+| `rectangle` | 矩形   | `geometry.rectangleBounds` | `rectangle`       |
+| `corridor`  | 走廊   | `positions`                | `corridor`        |
+| `wall`      | 墙体   | `positions`                | `wall`            |
+| `cylinder`  | 圆柱体 | `position`                 | `cylinder`        |
+| `box`       | 立方体 | `position`                 | `box`             |
 
 ## API 概览
 
@@ -143,10 +139,18 @@ const layerId = dataLayer.createLayer({
   name: '图层名称',
   type: 'entity', // 'entity' | 'primitive'
   show: true,
-  defaultStyle: { /* 默认样式 */ },
-  clustering: { /* 聚合配置 */ },
-  popup: { /* 弹窗配置 */ },
-  onClick: (item, event) => { /* 点击回调 */ }
+  defaultStyle: {
+    /* 默认样式 */
+  },
+  clustering: {
+    /* 聚合配置 */
+  },
+  popup: {
+    /* 弹窗配置 */
+  },
+  onClick: (item, event) => {
+    /* 点击回调 */
+  }
 })
 ```
 
@@ -167,7 +171,9 @@ const layerId = dataLayer.createLayer({
 ```typescript
 const layer = dataLayer.getLayer(layerId)
 if (layer) {
-  layer.addItem({ /* ... */ })
+  layer.addItem({
+    /* ... */
+  })
   layer.setShow(false)
   layer.flyTo()
 }
@@ -225,7 +231,9 @@ layer.addItem({
   geometryType: 'point',
   position: [116.4074, 39.9042, 0],
   data: { name: '数据项' },
-  style: { /* 样式覆盖 */ }
+  style: {
+    /* 样式覆盖 */
+  }
 })
 ```
 
@@ -282,7 +290,7 @@ layer.updateItem('item-001', {
 
 ```typescript
 layer.setShow(false) // 隐藏
-layer.setShow(true)  // 显示
+layer.setShow(true) // 显示
 ```
 
 #### flyTo(duration?)
@@ -419,7 +427,7 @@ layer.addItem({
   style: {
     ellipse: {
       semiMajorAxis: 2000, // 长半轴（米）
-      semiMinorAxis: 1000,  // 短半轴（米）
+      semiMinorAxis: 1000, // 短半轴（米）
       material: Cesium.Color.GREEN.withAlpha(0.5)
     }
   }
@@ -525,7 +533,7 @@ layer.addItem({
       dimensions: {
         x: 1000, // 长度（米）
         y: 1000, // 宽度（米）
-        z: 500   // 高度（米）
+        z: 500 // 高度（米）
       },
       material: Cesium.Color.PINK.withAlpha(0.5)
     }
@@ -561,7 +569,7 @@ const layerId = dataLayer.createLayer({
   type: 'entity',
   clustering: {
     enabled: true,
-    pixelRange: 80,        // 聚合像素范围
+    pixelRange: 80, // 聚合像素范围
     minimumClusterSize: 3, // 最小聚合数量
     showLabels: true,
     clusterStyle: (clusteredEntities, cluster) => {
@@ -701,7 +709,7 @@ const layerId = dataLayer.createLayer({
   onClick: (item, event) => {
     console.log('点击了数据项:', item.id, item.data)
     console.log('点击位置:', event.position)
-    
+
     // 自定义处理逻辑
     if (item.data.type === 'warning') {
       alert('警告数据！')
@@ -738,8 +746,8 @@ dataLayer.importArrayData(layerId, rawData, {
     latField: 'lat'
   },
   styleMapping: {
-    'point.pixelSize': (item) => item.value > 150 ? 15 : 10,
-    'point.color': (item) => item.value > 150 ? Cesium.Color.RED : Cesium.Color.BLUE
+    'point.pixelSize': (item) => (item.value > 150 ? 15 : 10),
+    'point.color': (item) => (item.value > 150 ? Cesium.Color.RED : Cesium.Color.BLUE)
   }
 })
 ```
@@ -772,9 +780,7 @@ dataLayer.importArrayData(layerId, rawData, {
   },
   styleMapping: {
     'polygon.material': (item) => {
-      return item.status === 'active' 
-        ? Cesium.Color.GREEN.withAlpha(0.5)
-        : Cesium.Color.RED.withAlpha(0.5)
+      return item.status === 'active' ? Cesium.Color.GREEN.withAlpha(0.5) : Cesium.Color.RED.withAlpha(0.5)
     },
     'polygon.outlineColor': Cesium.Color.BLACK
   },
@@ -838,7 +844,7 @@ const poiLayerId = dataLayer.createLayer({
 async function loadPOIData() {
   const response = await fetch('/api/poi')
   const data = await response.json()
-  
+
   dataLayer.importArrayData(poiLayerId, data, {
     idField: 'id',
     geometryType: 'point',
@@ -850,7 +856,7 @@ async function loadPOIData() {
       'icon.image': (item) => `/icons/${item.category}.png`
     }
   })
-  
+
   // 飞行到数据
   const layer = dataLayer.getLayer(poiLayerId)
   await layer.flyTo()
@@ -900,8 +906,8 @@ const regionLayerId = dataLayer.createLayer({
     title: '区域统计',
     fields: [
       { field: 'name', label: '区域名称' },
-      { 
-        field: 'population', 
+      {
+        field: 'population',
         label: '人口',
         formatter: (value) => `${value.toLocaleString()} 人`
       },
@@ -969,11 +975,7 @@ const massiveLayerId = dataLayer.createLayer({
 const items = Array.from({ length: 100000 }, (_, i) => ({
   id: `item-${i}`,
   geometryType: 'point' as GeometryType,
-  position: [
-    116 + Math.random() * 0.5,
-    39 + Math.random() * 0.5,
-    0
-  ] as [number, number, number],
+  position: [116 + Math.random() * 0.5, 39 + Math.random() * 0.5, 0] as [number, number, number],
   data: { index: i, value: Math.random() * 100 }
 }))
 
@@ -995,27 +997,19 @@ const layer = dataLayer.getLayer(dynamicLayerId)
 setInterval(() => {
   // 更新现有数据项
   layer.updateItem('item-001', {
-    position: [
-      116.4074 + Math.random() * 0.01,
-      39.9042 + Math.random() * 0.01,
-      0
-    ],
+    position: [116.4074 + Math.random() * 0.01, 39.9042 + Math.random() * 0.01, 0],
     style: {
       point: {
         pixelSize: 10 + Math.random() * 5
       }
     }
   })
-  
+
   // 添加新数据
   layer.addItem({
     id: `item-${Date.now()}`,
     geometryType: 'point',
-    position: [
-      116.4074 + Math.random() * 0.1,
-      39.9042 + Math.random() * 0.1,
-      0
-    ],
+    position: [116.4074 + Math.random() * 0.1, 39.9042 + Math.random() * 0.1, 0],
     data: { timestamp: Date.now() }
   })
 }, 1000)
@@ -1027,39 +1021,39 @@ setInterval(() => {
 class LayerGroupManager {
   private dataLayer: DataLayerPlugin
   private groups: Map<string, string[]> = new Map()
-  
+
   constructor(dataLayer: DataLayerPlugin) {
     this.dataLayer = dataLayer
   }
-  
+
   createGroup(groupName: string, layerIds: string[]) {
     this.groups.set(groupName, layerIds)
   }
-  
+
   showGroup(groupName: string) {
     const layerIds = this.groups.get(groupName)
     if (!layerIds) return
-    
-    layerIds.forEach(id => {
+
+    layerIds.forEach((id) => {
       const layer = this.dataLayer.getLayer(id)
       layer?.setShow(true)
     })
   }
-  
+
   hideGroup(groupName: string) {
     const layerIds = this.groups.get(groupName)
     if (!layerIds) return
-    
-    layerIds.forEach(id => {
+
+    layerIds.forEach((id) => {
       const layer = this.dataLayer.getLayer(id)
       layer?.setShow(false)
     })
   }
-  
+
   flyToGroup(groupName: string) {
     const layerIds = this.groups.get(groupName)
     if (!layerIds) return
-    
+
     // 飞行到第一个图层
     const firstLayer = this.dataLayer.getLayer(layerIds[0])
     firstLayer?.flyTo()
@@ -1099,4 +1093,3 @@ manager.showGroup('基础图层')
    - 高度单位为米
 
 DataLayerPlugin 提供了完整的数据图层管理能力，适用于各种数据可视化场景，从简单的点位展示到复杂的海量数据渲染都能很好地支持。
-

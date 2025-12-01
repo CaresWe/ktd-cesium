@@ -5,13 +5,7 @@
 ## 导入
 
 ```typescript
-import {
-  formatCoordinate,
-  formatDistance,
-  formatArea,
-  formatHeight,
-  formatNumber
-} from '@ktd-cesium/shared'
+import { formatCoordinate, formatDistance, formatArea, formatHeight, formatNumber } from '@auto-cesium/shared'
 ```
 
 ## API
@@ -23,11 +17,7 @@ import {
 **类型签名**
 
 ```typescript
-function formatCoordinate(
-  longitude: number,
-  latitude: number,
-  precision?: number
-): string
+function formatCoordinate(longitude: number, latitude: number, precision?: number): string
 ```
 
 **参数**
@@ -43,7 +33,7 @@ function formatCoordinate(
 **示例**
 
 ```typescript
-import { formatCoordinate } from '@ktd-cesium/shared'
+import { formatCoordinate } from '@auto-cesium/shared'
 
 formatCoordinate(116.4074, 39.9042)
 // "39.9042°N, 116.4074°E"
@@ -66,10 +56,7 @@ formatCoordinate(116.40742, 39.90419, 2)
 **类型签名**
 
 ```typescript
-function formatDistance(
-  distance: number,
-  precision?: number
-): string
+function formatDistance(distance: number, precision?: number): string
 ```
 
 **参数**
@@ -84,7 +71,7 @@ function formatDistance(
 **示例**
 
 ```typescript
-import { formatDistance } from '@ktd-cesium/shared'
+import { formatDistance } from '@auto-cesium/shared'
 
 formatDistance(500)
 // "500.00 m"
@@ -110,10 +97,7 @@ console.log(`距离: ${formatDistance(distance)}`)
 **类型签名**
 
 ```typescript
-function formatArea(
-  area: number,
-  precision?: number
-): string
+function formatArea(area: number, precision?: number): string
 ```
 
 **参数**
@@ -128,7 +112,7 @@ function formatArea(
 **示例**
 
 ```typescript
-import { formatArea } from '@ktd-cesium/shared'
+import { formatArea } from '@auto-cesium/shared'
 
 formatArea(500)
 // "500.00 m²"
@@ -155,10 +139,7 @@ formatArea(50000, 1)
 **类型签名**
 
 ```typescript
-function formatHeight(
-  height: number,
-  precision?: number
-): string
+function formatHeight(height: number, precision?: number): string
 ```
 
 **参数**
@@ -173,7 +154,7 @@ function formatHeight(
 **示例**
 
 ```typescript
-import { formatHeight } from '@ktd-cesium/shared'
+import { formatHeight } from '@auto-cesium/shared'
 
 formatHeight(500)
 // "500.00 m"
@@ -195,10 +176,7 @@ formatHeight(100, 0)
 **类型签名**
 
 ```typescript
-function formatNumber(
-  value: number,
-  precision?: number
-): string
+function formatNumber(value: number, precision?: number): string
 ```
 
 **参数**
@@ -213,7 +191,7 @@ function formatNumber(
 **示例**
 
 ```typescript
-import { formatNumber } from '@ktd-cesium/shared'
+import { formatNumber } from '@auto-cesium/shared'
 
 formatNumber(123.456)
 // "123.46"
@@ -233,13 +211,10 @@ formatNumber(123)
 ### 场景 1：显示鼠标位置信息
 
 ```typescript
-import { cartesianToDegrees, formatCoordinate, formatHeight } from '@ktd-cesium/shared'
+import { cartesianToDegrees, formatCoordinate, formatHeight } from '@auto-cesium/shared'
 
 viewer.screenSpaceEventHandler.setInputAction((movement) => {
-  const cartesian = viewer.camera.pickEllipsoid(
-    movement.endPosition,
-    viewer.scene.globe.ellipsoid
-  )
+  const cartesian = viewer.camera.pickEllipsoid(movement.endPosition, viewer.scene.globe.ellipsoid)
 
   if (cartesian) {
     const { longitude, latitude, height } = cartesianToDegrees(cartesian)
@@ -258,11 +233,7 @@ viewer.screenSpaceEventHandler.setInputAction((movement) => {
 ### 场景 2：测量工具
 
 ```typescript
-import {
-  calculateDistance,
-  formatDistance,
-  formatCoordinate
-} from '@ktd-cesium/shared'
+import { calculateDistance, formatDistance, formatCoordinate } from '@auto-cesium/shared'
 
 class MeasureTool {
   constructor(viewer) {
@@ -299,7 +270,7 @@ class MeasureTool {
 ### 场景 3：实体信息面板
 
 ```typescript
-import { formatCoordinate, formatHeight, formatArea } from '@ktd-cesium/shared'
+import { formatCoordinate, formatHeight, formatArea } from '@auto-cesium/shared'
 
 function showEntityInfo(entity) {
   const position = entity.position.getValue(Cesium.JulianDate.now())
@@ -321,19 +292,19 @@ function showEntityInfo(entity) {
 ### 场景 4：数据表格
 
 ```typescript
-import { formatCoordinate, formatDistance, formatHeight } from '@ktd-cesium/shared'
+import { formatCoordinate, formatDistance, formatHeight } from '@auto-cesium/shared'
 
 const locations = [
   { name: '北京', longitude: 116.4074, latitude: 39.9042, height: 43.5 },
   { name: '上海', longitude: 121.4737, latitude: 31.2304, height: 4 },
-  { name: '广州', longitude: 113.2644, latitude: 23.1291, height: 21 },
+  { name: '广州', longitude: 113.2644, latitude: 23.1291, height: 21 }
 ]
 
 function generateTable() {
-  return locations.map(loc => ({
+  return locations.map((loc) => ({
     名称: loc.name,
     坐标: formatCoordinate(loc.longitude, loc.latitude),
-    海拔: formatHeight(loc.height),
+    海拔: formatHeight(loc.height)
   }))
 }
 
@@ -343,7 +314,7 @@ console.table(generateTable())
 ### 场景 5：统计信息显示
 
 ```typescript
-import { formatDistance, formatArea, formatNumber } from '@ktd-cesium/shared'
+import { formatDistance, formatArea, formatNumber } from '@auto-cesium/shared'
 
 class StatisticsPanel {
   constructor() {

@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium'
 import { DrawPPolygonEx } from './DrawPPolygonEx'
-import { computeLunePositions } from '@ktd-cesium/shared'
+import { computeLunePositions } from '@auto-cesium/shared'
 
 /**
  * Primitive 方式的弓形面绘制类

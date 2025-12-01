@@ -17,7 +17,7 @@ import {
   lerpPosition,
   interpolatePositions,
   setPositionSurfaceHeight
-} from '@ktd-cesium/shared'
+} from '@auto-cesium/shared'
 ```
 
 ## API
@@ -44,7 +44,7 @@ function getMaxHeight(positions: Cesium.Cartesian3[], defaultVal?: number): numb
 **示例**
 
 ```typescript
-import { getMaxHeight } from '@ktd-cesium/shared'
+import { getMaxHeight } from '@auto-cesium/shared'
 
 const positions = [
   Cesium.Cartesian3.fromDegrees(116.4, 39.9, 100),
@@ -69,7 +69,7 @@ function getMinHeight(positions: Cesium.Cartesian3[], defaultVal?: number): numb
 **示例**
 
 ```typescript
-import { getMinHeight } from '@ktd-cesium/shared'
+import { getMinHeight } from '@auto-cesium/shared'
 
 const minHeight = getMinHeight(positions)
 // 100
@@ -88,7 +88,7 @@ function getAverageHeight(positions: Cesium.Cartesian3[]): number
 **示例**
 
 ```typescript
-import { getAverageHeight } from '@ktd-cesium/shared'
+import { getAverageHeight } from '@auto-cesium/shared'
 
 const avgHeight = getAverageHeight(positions)
 // 150
@@ -119,7 +119,7 @@ function addPositionsHeight(
 **示例**
 
 ```typescript
-import { addPositionsHeight } from '@ktd-cesium/shared'
+import { addPositionsHeight } from '@auto-cesium/shared'
 
 // 单个位置
 const position = Cesium.Cartesian3.fromDegrees(116.4, 39.9, 100)
@@ -149,7 +149,7 @@ function setPositionsHeight(
 **示例**
 
 ```typescript
-import { setPositionsHeight } from '@ktd-cesium/shared'
+import { setPositionsHeight } from '@auto-cesium/shared'
 
 // 将所有位置设置为 100 米高度
 const fixedPositions = setPositionsHeight(positions, 100)
@@ -172,7 +172,7 @@ function getDistance(pos1: Cesium.Cartesian3, pos2: Cesium.Cartesian3): number
 **示例**
 
 ```typescript
-import { getDistance } from '@ktd-cesium/shared'
+import { getDistance } from '@auto-cesium/shared'
 
 const pos1 = Cesium.Cartesian3.fromDegrees(116.4, 39.9, 0)
 const pos2 = Cesium.Cartesian3.fromDegrees(116.5, 39.9, 0)
@@ -193,7 +193,7 @@ function getTotalDistance(positions: Cesium.Cartesian3[]): number
 **示例**
 
 ```typescript
-import { getTotalDistance } from '@ktd-cesium/shared'
+import { getTotalDistance } from '@auto-cesium/shared'
 
 const positions = [
   Cesium.Cartesian3.fromDegrees(116.4, 39.9, 0),
@@ -222,7 +222,7 @@ function getCenterPosition(positions: Cesium.Cartesian3[]): Cesium.Cartesian3 | 
 **示例**
 
 ```typescript
-import { getCenterPosition } from '@ktd-cesium/shared'
+import { getCenterPosition } from '@auto-cesium/shared'
 
 const center = getCenterPosition(positions)
 if (center) {
@@ -255,7 +255,7 @@ function lerpPosition(pos1: Cesium.Cartesian3, pos2: Cesium.Cartesian3, t: numbe
 **示例**
 
 ```typescript
-import { lerpPosition } from '@ktd-cesium/shared'
+import { lerpPosition } from '@auto-cesium/shared'
 
 const start = Cesium.Cartesian3.fromDegrees(116.4, 39.9, 0)
 const end = Cesium.Cartesian3.fromDegrees(116.5, 39.9, 0)
@@ -290,7 +290,7 @@ function interpolatePositions(pos1: Cesium.Cartesian3, pos2: Cesium.Cartesian3, 
 **示例**
 
 ```typescript
-import { interpolatePositions } from '@ktd-cesium/shared'
+import { interpolatePositions } from '@auto-cesium/shared'
 
 const start = Cesium.Cartesian3.fromDegrees(116.4, 39.9, 0)
 const end = Cesium.Cartesian3.fromDegrees(116.5, 39.9, 0)
@@ -325,7 +325,7 @@ function setPositionSurfaceHeight(
 **示例**
 
 ```typescript
-import { setPositionSurfaceHeight } from '@ktd-cesium/shared'
+import { setPositionSurfaceHeight } from '@auto-cesium/shared'
 
 const position = Cesium.Cartesian3.fromDegrees(116.4, 39.9, 0)
 const surfacePosition = setPositionSurfaceHeight(viewer, position)
@@ -343,7 +343,7 @@ if (surfacePosition) {
 ### 场景 1：计算路径总长度
 
 ```typescript
-import { getTotalDistance, formatDistance } from '@ktd-cesium/shared'
+import { getTotalDistance, formatDistance } from '@auto-cesium/shared'
 
 function calculatePathLength(entity: Cesium.Entity) {
   const positions = entity.polyline?.positions?.getValue(Cesium.JulianDate.now())
@@ -362,7 +362,7 @@ function calculatePathLength(entity: Cesium.Entity) {
 ### 场景 2：平滑路径插值
 
 ```typescript
-import { interpolatePositions } from '@ktd-cesium/shared'
+import { interpolatePositions } from '@auto-cesium/shared'
 
 function smoothPath(positions: Cesium.Cartesian3[]): Cesium.Cartesian3[] {
   if (positions.length < 2) return positions
@@ -383,7 +383,7 @@ function smoothPath(positions: Cesium.Cartesian3[]): Cesium.Cartesian3[] {
 ### 场景 3：计算多边形中心并设置高度
 
 ```typescript
-import { getCenterPosition, setPositionSurfaceHeight, getAverageHeight } from '@ktd-cesium/shared'
+import { getCenterPosition, setPositionSurfaceHeight, getAverageHeight } from '@auto-cesium/shared'
 
 function centerPolygon(entity: Cesium.Entity) {
   const positions = entity.polygon?.hierarchy?.getValue(Cesium.JulianDate.now())?.positions
@@ -421,7 +421,7 @@ function centerPolygon(entity: Cesium.Entity) {
 ### 场景 4：贴地/贴模型高度调整
 
 ```typescript
-import { setPositionSurfaceHeight } from '@ktd-cesium/shared'
+import { setPositionSurfaceHeight } from '@auto-cesium/shared'
 
 // 鼠标点击时，将点放置在地表或模型表面
 viewer.screenSpaceEventHandler.setInputAction((click) => {
@@ -456,7 +456,7 @@ viewer.screenSpaceEventHandler.setInputAction((click) => {
 ### 场景 5：批量调整高度
 
 ```typescript
-import { addPositionsHeight, setPositionsHeight } from '@ktd-cesium/shared'
+import { addPositionsHeight, setPositionsHeight } from '@auto-cesium/shared'
 
 // 将所有位置提升 100 米
 function raiseAllPositions(entity: Cesium.Entity, height: number) {

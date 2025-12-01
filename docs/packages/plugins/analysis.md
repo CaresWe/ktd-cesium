@@ -5,14 +5,14 @@
 ## 导入
 
 ```typescript
-import { AnalysisPlugin, MeasureType } from '@ktd-cesium/plugins'
+import { AnalysisPlugin, MeasureType } from '@auto-cesium/plugins'
 import type {
   AnalysisPluginOptions,
   MeasureOptions,
   MeasureResult,
   MeasureStyle,
   SnapConfig
-} from '@ktd-cesium/plugins'
+} from '@auto-cesium/plugins'
 ```
 
 ## 核心特性
@@ -29,10 +29,10 @@ import type {
 ## 安装
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import { AnalysisPlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { AnalysisPlugin } from '@auto-cesium/plugins'
 
-const viewer = new KtdViewer(cesiumViewer)
+const viewer = new AutoViewer(cesiumViewer)
 
 const analysis = viewer.use(AnalysisPlugin, {
   style: {
@@ -516,7 +516,7 @@ enum OverlayType {
 ### 基本用法
 
 ```typescript
-import { AnalysisPlugin, OverlayType } from '@ktd-cesium/plugins'
+import { AnalysisPlugin, OverlayType } from '@auto-cesium/plugins'
 
 // 1. 相交分析（求两个多边形的交集）
 analysis.startMeasure({
@@ -811,11 +811,11 @@ interface OverlayResult {
 ### 完整示例
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import { AnalysisPlugin, OverlayType } from '@ktd-cesium/plugins'
-import type { OverlayResult } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { AnalysisPlugin, OverlayType } from '@auto-cesium/plugins'
+import type { OverlayResult } from '@auto-cesium/plugins'
 
-const viewer = new KtdViewer(cesiumViewer)
+const viewer = new AutoViewer(cesiumViewer)
 const analysis = viewer.use(AnalysisPlugin)
 
 // 场景1：计算两个地块的重叠区域

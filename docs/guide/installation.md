@@ -14,7 +14,7 @@ KTD-Cesium 采用 Monorepo 架构，你可以根据需求选择安装不同的�
 安装所有核心包和 Cesium：
 
 ```bash
-pnpm add @ktd-cesium/core @ktd-cesium/shared @ktd-cesium/plugins cesium
+pnpm add @auto-cesium/core @auto-cesium/shared @auto-cesium/plugins cesium
 ```
 
 ### 按需安装
@@ -24,19 +24,19 @@ pnpm add @ktd-cesium/core @ktd-cesium/shared @ktd-cesium/plugins cesium
 #### 仅使用工具函数
 
 ```bash
-pnpm add @ktd-cesium/shared cesium
+pnpm add @auto-cesium/shared cesium
 ```
 
 #### 使用核心功能
 
 ```bash
-pnpm add @ktd-cesium/core @ktd-cesium/shared cesium
+pnpm add @auto-cesium/core @auto-cesium/shared cesium
 ```
 
 #### 使用插件系统
 
 ```bash
-pnpm add @ktd-cesium/plugins @ktd-cesium/core @ktd-cesium/shared cesium
+pnpm add @auto-cesium/plugins @auto-cesium/core @auto-cesium/shared cesium
 ```
 
 ## 配置 Vite
@@ -130,7 +130,7 @@ module.exports = {
 <script src="https://cesium.com/downloads/cesiumjs/releases/1.135/Build/Cesium/Cesium.js"></script>
 
 <!-- KTD-Cesium（需要自行构建和托管）-->
-<script src="path/to/ktd-cesium.umd.js"></script>
+<script src="path/to/auto-cesium.umd.js"></script>
 ```
 
 ## 验证安装
@@ -138,8 +138,8 @@ module.exports = {
 创建一个简单的示例来验证安装是否成功：
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import { degreesToCartesian } from '@ktd-cesium/shared'
+import { AutoViewer } from '@auto-cesium/core'
+import { degreesToCartesian } from '@auto-cesium/shared'
 import * as Cesium from 'cesium'
 
 console.log('KTD-Cesium 安装成功！')
@@ -150,7 +150,7 @@ console.log('坐标转换结果:', cartesian)
 
 // 创建地图（确保页面中有 id="cesiumContainer" 的元素）
 // const cesiumViewer = new Cesium.Viewer('cesiumContainer')
-// const viewer = new KtdViewer(cesiumViewer)
+// const viewer = new AutoViewer(cesiumViewer)
 // console.log('Viewer 创建成功:', viewer)
 ```
 
@@ -178,10 +178,10 @@ pnpm add -D @types/cesium
 
 **问题**：不同包版本不兼容
 
-**解决方案**：确保所有 `@ktd-cesium/*` 包使用相同的版本：
+**解决方案**：确保所有 `@auto-cesium/*` 包使用相同的版本：
 
 ```bash
-pnpm add @ktd-cesium/core@latest @ktd-cesium/shared@latest @ktd-cesium/plugins@latest
+pnpm add @auto-cesium/core@latest @auto-cesium/shared@latest @auto-cesium/plugins@latest
 ```
 
 ## 下一步

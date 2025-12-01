@@ -1,5 +1,5 @@
 import * as Cesium from 'cesium'
-import { cartesian2lonlat } from '@ktd-cesium/shared'
+import { cartesian2lonlat } from '@auto-cesium/shared'
 
 /**
  * 模型样式配置接口

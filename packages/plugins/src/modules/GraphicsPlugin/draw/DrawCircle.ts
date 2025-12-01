@@ -1,5 +1,5 @@
 import * as Cesium from 'cesium'
-import { isNumber } from '@ktd-cesium/shared'
+import { isNumber } from '@auto-cesium/shared'
 import { DrawPolyline } from './DrawPolyline'
 import type { AttrClass, EditClassConstructor, CircleDrawAttribute, CircleExtendedEntity } from '../types'
 import * as attr from '../attr/AttrCircle'

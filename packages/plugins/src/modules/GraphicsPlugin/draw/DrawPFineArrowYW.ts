@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium'
 import { DrawPPolygonEx } from './DrawPPolygonEx'
-import { computeFineArrowYWPositions } from '@ktd-cesium/shared'
+import { computeFineArrowYWPositions } from '@auto-cesium/shared'
 
 /**
  * Primitive 方式的细直箭头（燕尾）绘制类

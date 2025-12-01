@@ -1,7 +1,7 @@
 import * as Cesium from 'cesium'
 import { DrawBase } from './DrawBase'
 import type { AttrClass, PointDrawAttribute, PointExtendedEntity, PointStyleConfig } from '../types'
-import { getCurrentMousePosition } from '@ktd-cesium/shared'
+import { getCurrentMousePosition } from '@auto-cesium/shared'
 import * as attr from '../attr/AttrPoint'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { GraphicsEventType } from '../../EventPlugin'

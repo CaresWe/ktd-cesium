@@ -3,7 +3,7 @@ import path from 'path'
 
 export default defineConfig({
   test: {
-    name: '@ktd-cesium/shared',
+    name: '@auto-cesium/shared',
     environment: 'happy-dom',
     globals: true,
 

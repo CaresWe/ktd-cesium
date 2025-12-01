@@ -19,7 +19,7 @@ import type {
 } from './types'
 import type { EventPlugin } from '../EventPlugin'
 import type { PickInfo } from '../EventPlugin/types'
-import { formatAngle } from '@ktd-cesium/shared'
+import { formatAngle } from '@auto-cesium/shared'
 
 /**
  * 默认量算样式

@@ -1,12 +1,12 @@
 {
-  "name": "ktd-cesium",
+  "name": "auto-cesium",
   "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "Cesium二次封装库",
   "scripts": {
     "dev": "pnpm -r --parallel dev",
-    "build": "pnpm -r --filter=\"!@ktd-cesium/vue\" build && pnpm --filter @ktd-cesium/vue build",
+    "build": "pnpm -r --filter=\"!@auto-cesium/vue\" build && pnpm --filter @auto-cesium/vue build",
     "clean": "pnpm -r exec rm -rf dist node_modules",
     "lint": "pnpm lint:eslint && pnpm lint:prettier && pnpm lint:stylelint",
     "lint:eslint": "eslint . --ext .js,.jsx,.ts,.tsx,.vue --fix",

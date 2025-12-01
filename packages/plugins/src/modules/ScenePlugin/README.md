@@ -32,10 +32,10 @@ ScenePlugin/
 ## 快速开始
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import { ScenePlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { ScenePlugin } from '@auto-cesium/plugins'
 
-const viewer = new KtdViewer(cesiumViewer)
+const viewer = new AutoViewer(cesiumViewer)
 const scene = viewer.use(ScenePlugin)
 
 // 添加雨效果
@@ -89,6 +89,7 @@ const localRain2 = scene.addLocalRain({
 6. 雨滴落地后重置到随机高度
 
 **多边形判断算法（Ray Casting）**：
+
 - 从测试点向右侧发射一条射线
 - 统计射线与多边形边的交点数
 - 交点数为奇数时点在多边形内，偶数时在多边形外

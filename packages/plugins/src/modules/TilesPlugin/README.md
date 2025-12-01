@@ -16,10 +16,10 @@
 ### 1. 安装插件
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import { TilesPlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { TilesPlugin } from '@auto-cesium/plugins'
 
-const viewer = new KtdViewer(cesiumViewer)
+const viewer = new AutoViewer(cesiumViewer)
 viewer.use(TilesPlugin)
 
 const tilesPlugin = viewer.getPlugin<TilesPlugin>('tiles')
@@ -40,14 +40,14 @@ const layerId = await tilesPlugin.createLayer({
   name: '建筑模型',
   url: 'https://example.com/tileset.json',
   show: true,
-  maximumScreenSpaceError: 16,        // 屏幕空间误差
-  maximumMemoryUsage: 512,            // 最大内存使用（MB）
-  skipLevelOfDetail: true,            // 跳过细节层次
-  shadows: true,                      // 投射阴影
-  heightOffset: 10,                   // 高度偏移（米）
-  offset: [100, 200, 0],             // 位置偏移 [x, y, z]
-  rotation: [0, 0, 45],              // 旋转 [heading, pitch, roll] 度
-  scale: 1.5,                        // 缩放比例
+  maximumScreenSpaceError: 16, // 屏幕空间误差
+  maximumMemoryUsage: 512, // 最大内存使用（MB）
+  skipLevelOfDetail: true, // 跳过细节层次
+  shadows: true, // 投射阴影
+  heightOffset: 10, // 高度偏移（米）
+  offset: [100, 200, 0], // 位置偏移 [x, y, z]
+  rotation: [0, 0, 45], // 旋转 [heading, pitch, roll] 度
+  scale: 1.5, // 缩放比例
   onLoad: (tileset) => {
     console.log('模型加载完成', tileset)
   },
@@ -143,7 +143,7 @@ const layer = tilesPlugin.getLayer(layerId)
 const monomerId = layer.createMonomer({
   name: '楼层单体化',
   type: 'floor',
-  propertyName: 'floor',  // 楼层属性字段名
+  propertyName: 'floor', // 楼层属性字段名
   defaultColor: Color.GRAY,
   highlightColor: Color.YELLOW,
   selectedColor: Color.RED,
@@ -163,16 +163,16 @@ const monomerId = layer.createMonomer({
 const monomer = layer.getMonomer(monomerId)
 
 // 选中某一楼层
-monomer.select(5)  // 选中5楼
+monomer.select(5) // 选中5楼
 
 // 高亮某一楼层
-monomer.highlight(3)  // 高亮3楼
+monomer.highlight(3) // 高亮3楼
 
 // 显示/隐藏楼层
-monomer.show(5)    // 只显示5楼
-monomer.hide(3)    // 隐藏3楼
-monomer.showAll()  // 显示所有楼层
-monomer.hideAll()  // 隐藏所有楼层
+monomer.show(5) // 只显示5楼
+monomer.hide(3) // 隐藏3楼
+monomer.showAll() // 显示所有楼层
+monomer.hideAll() // 隐藏所有楼层
 
 // 设置楼层颜色
 monomer.setColor(5, Color.RED)
@@ -204,7 +204,7 @@ monomer.clearHighlight()
 const monomerId = layer.createMonomer({
   name: '单元单体化',
   type: 'unit',
-  propertyName: 'unit_id',  // 单元ID属性字段名
+  propertyName: 'unit_id', // 单元ID属性字段名
   defaultColor: Color.WHITE,
   highlightColor: Color.YELLOW,
   selectedColor: Color.GREEN,
@@ -260,10 +260,10 @@ const monomerId = layer.createMonomer({
   type: 'custom',
   propertyName: 'function_type',
   colorMap: new Map([
-    ['residential', Color.BLUE],      // 住宅
-    ['commercial', Color.RED],        // 商业
-    ['office', Color.GREEN],          // 办公
-    ['industrial', Color.GRAY]        // 工业
+    ['residential', Color.BLUE], // 住宅
+    ['commercial', Color.RED], // 商业
+    ['office', Color.GREEN], // 办公
+    ['industrial', Color.GRAY] // 工业
   ]),
   enableClick: true,
   onClick: (feature, funcType) => {
@@ -308,17 +308,13 @@ tilesPlugin.batchOperation(layerId, {
 
 // 批量隐藏
 tilesPlugin.batchOperation(layerId, {
-  filters: [
-    { propertyName: 'type', operator: '=', value: 'garage' }
-  ],
+  filters: [{ propertyName: 'type', operator: '=', value: 'garage' }],
   operation: 'hide'
 })
 
 // 批量设置颜色
 tilesPlugin.batchOperation(layerId, {
-  filters: [
-    { propertyName: 'status', operator: 'in', value: ['sold', 'reserved'] }
-  ],
+  filters: [{ propertyName: 'status', operator: 'in', value: ['sold', 'reserved'] }],
   operation: 'color',
   value: Color.RED
 })
@@ -359,12 +355,12 @@ unitMonomer.select('A01')
 ## 完整示例
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import { TilesPlugin, EventPlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { TilesPlugin, EventPlugin } from '@auto-cesium/plugins'
 import { Color } from 'cesium'
 
 // 初始化
-const viewer = new KtdViewer(cesiumViewer)
+const viewer = new AutoViewer(cesiumViewer)
 viewer.use(EventPlugin)
 viewer.use(TilesPlugin)
 

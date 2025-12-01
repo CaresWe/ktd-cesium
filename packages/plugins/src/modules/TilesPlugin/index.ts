@@ -11,7 +11,7 @@ import {
   Color
 } from 'cesium'
 import { BasePlugin } from '../../BasePlugin'
-import type { KtdViewer } from '@ktd-cesium/core'
+import type { AutoViewer } from '@auto-cesium/core'
 import type { EventPlugin } from '../EventPlugin'
 import { MonomerManager } from './MonomerManager'
 import { StyleManager } from './StyleManager'
@@ -97,7 +97,7 @@ export class TilesPlugin extends BasePlugin {
   /** 当前正在编辑的图层 */
   private editingLayer: TilesLayerInstance | null = null
 
-  protected onInstall(viewer: KtdViewer): void {
+  protected onInstall(viewer: AutoViewer): void {
     try {
       // 获取插件引用
       this.eventPlugin = viewer.getPlugin('event') as EventPlugin | undefined

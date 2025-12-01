@@ -43,7 +43,7 @@ export interface TooltipPluginInterface {
 }
 
 /**
- * 扩展的 Viewer 类型（支持 KtdViewer 的插件系统）
+ * 扩展的 Viewer 类型（支持 AutoViewer 的插件系统）
  */
 export interface ExtendedViewer {
   getPlugin?: <T = unknown>(name: string) => T | undefined

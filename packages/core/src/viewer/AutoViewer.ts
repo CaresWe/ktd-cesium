@@ -1,8 +1,8 @@
 import type { Viewer as CesiumViewer } from 'cesium'
 import type {
-  IKtdViewer,
-  KtdViewer as KtdViewerType,
-  KtdViewerOptions,
+  IAutoViewer,
+  AutoViewer as AutoViewerType,
+  AutoViewerOptions,
   ViewerPlugin,
   ViewerPluginConstructor
 } from './types'
@@ -12,7 +12,7 @@ import type {
  * 支持插件系统，可以挂载各种功能模块
  * 使用包装器模式
  */
-export class KtdViewer implements IKtdViewer {
+export class AutoViewer implements IAutoViewer {
   /** 原始 Cesium Viewer 实例 */
   private readonly viewer: CesiumViewer
 
@@ -22,7 +22,7 @@ export class KtdViewer implements IKtdViewer {
   /** 是否已销毁 */
   private _destroyed = false
 
-  constructor(viewer: CesiumViewer, options: KtdViewerOptions = {}) {
+  constructor(viewer: CesiumViewer, options: AutoViewerOptions = {}) {
     this.viewer = viewer
 
     // 安装预设插件
@@ -35,7 +35,7 @@ export class KtdViewer implements IKtdViewer {
     // 使用 Proxy 代理所有 viewer 的属性和方法
     return new Proxy(this, {
       get(target, prop, receiver) {
-        // 优先返回 KtdViewer 自己的属性和方法
+        // 优先返回 AutoViewer 自己的属性和方法
         if (prop in target) {
           return Reflect.get(target, prop, receiver)
         }
@@ -48,14 +48,14 @@ export class KtdViewer implements IKtdViewer {
         return value
       },
       set(target, prop, value) {
-        // 如果是 KtdViewer 自己的属性，直接设置
+        // 如果是 AutoViewer 自己的属性，直接设置
         if (prop in target) {
           return Reflect.set(target, prop, value)
         }
         // 否则设置到原始 viewer
         return Reflect.set(target.viewer, prop, value)
       }
-    }) as unknown as KtdViewer & CesiumViewer
+    }) as unknown as AutoViewer & CesiumViewer
   }
 
   /**
@@ -76,7 +76,7 @@ export class KtdViewer implements IKtdViewer {
     const plugin = new Plugin()
 
     // 安装插件（使用类型断言，因为 Proxy 会在运行时提供所有 CesiumViewer 的属性）
-    const result = plugin.install(this as unknown as KtdViewerType)
+    const result = plugin.install(this as unknown as AutoViewerType)
 
     // 如果安装返回 Promise，则等待完成
     if (result instanceof Promise) {

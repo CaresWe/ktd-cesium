@@ -2,7 +2,7 @@
 
 ## 概述
 
-本目录包含 ktd-cesium monorepo 的版本管理和发布脚本。
+本目录包含 auto-cesium monorepo 的版本管理和发布脚本。
 
 ## release.js - 全量发布
 
@@ -52,7 +52,7 @@ pnpm release
 ```bash
 $ pnpm release
 
-🚀 ktd-cesium 版本发布工具
+🚀 auto-cesium 版本发布工具
 
 当前版本: 1.0.0
 
@@ -66,9 +66,9 @@ $ pnpm release
 
 📦 更新包版本号...
 ✓ 根 package.json: 1.0.1
-✓ @ktd-cesium/core: 1.0.1
-✓ @ktd-cesium/shared: 1.0.1
-✓ @ktd-cesium/plugins: 1.0.1
+✓ @auto-cesium/core: 1.0.1
+✓ @auto-cesium/shared: 1.0.1
+✓ @auto-cesium/plugins: 1.0.1
 
 ✅ 版本号更新完成！
 
@@ -139,14 +139,14 @@ pnpm release:pkg plugins
 ```bash
 $ pnpm release:pkg
 
-🚀 ktd-cesium 单包发布工具
+🚀 auto-cesium 单包发布工具
 
 ? 选择要发布的包:
-❯ @ktd-cesium/core
-  @ktd-cesium/shared
-  @ktd-cesium/plugins
+❯ @auto-cesium/core
+  @auto-cesium/shared
+  @auto-cesium/plugins
 
-当前版本: @ktd-cesium/plugins@1.0.0
+当前版本: @auto-cesium/plugins@1.0.0
 
 ? 选择发布类型: (Use arrow keys)
 ❯ Patch (1.0.1) - 修复 bug
@@ -155,12 +155,12 @@ $ pnpm release:pkg
   Prerelease (1.0.1-beta.0) - 预发布版本
   自定义版本号
 
-? 确认发布 @ktd-cesium/plugins: 1.0.0 → 1.0.1? (y/N)
+? 确认发布 @auto-cesium/plugins: 1.0.0 → 1.0.1? (y/N)
 
-📦 更新 @ktd-cesium/plugins 版本号...
-✓ @ktd-cesium/plugins: 1.0.1
+📦 更新 @auto-cesium/plugins 版本号...
+✓ @auto-cesium/plugins: 1.0.1
 
-📝 生成 @ktd-cesium/plugins 的 CHANGELOG...
+📝 生成 @auto-cesium/plugins 的 CHANGELOG...
 ✅ CHANGELOG 已生成: packages/plugins/CHANGELOG.md
 
 ? 是否提交变更到 Git? (Y/n)
@@ -173,7 +173,7 @@ $ pnpm release:pkg
 
 ? 是否推送到远程仓库? (y/N)
 
-🎉 @ktd-cesium/plugins@1.0.1 发布完成！
+🎉 @auto-cesium/plugins@1.0.1 发布完成！
 ```
 
 ### 依赖管理
@@ -181,12 +181,12 @@ $ pnpm release:pkg
 当发布的包被其他包依赖时，脚本会自动检测并询问是否更新依赖版本：
 
 ```bash
-⚠️  以下包依赖 @ktd-cesium/core:
-   - @ktd-cesium/plugins
+⚠️  以下包依赖 @auto-cesium/core:
+   - @auto-cesium/plugins
 
 ? 是否同时更新这些包的依赖版本? (Y/n)
 
-✓ 已更新 @ktd-cesium/plugins 的依赖版本
+✓ 已更新 @auto-cesium/plugins 的依赖版本
 
 📋 依赖更新提示:
   以下包的依赖版本已更新: plugins

@@ -5,7 +5,7 @@ ScenePlugin 是 Ktd Cesium 的场景特效插件，提供丰富的天气效果�
 ## 导入
 
 ```typescript
-import { ScenePlugin } from '@ktd-cesium/plugins'
+import { ScenePlugin } from '@auto-cesium/plugins'
 import type {
   ScenePluginOptions,
   RainEffectOptions,
@@ -14,16 +14,16 @@ import type {
   LightningEffectOptions,
   HeightFogEffectOptions,
   LocalRainEffectOptions
-} from '@ktd-cesium/plugins'
+} from '@auto-cesium/plugins'
 ```
 
 ## 安装
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import { ScenePlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { ScenePlugin } from '@auto-cesium/plugins'
 
-const viewer = new KtdViewer(cesiumViewer)
+const viewer = new AutoViewer(cesiumViewer)
 const scene = viewer.use(ScenePlugin)
 ```
 
@@ -52,9 +52,9 @@ export interface ScenePluginOptions {
 
 ```typescript
 enum SceneEffectType {
-  RAIN = 'rain',           // 雨
-  SNOW = 'snow',           // 雪
-  FOG = 'fog',             // 雾
+  RAIN = 'rain', // 雨
+  SNOW = 'snow', // 雪
+  FOG = 'fog', // 雾
   LIGHTNING = 'lightning', // 闪电
   HEIGHT_FOG = 'heightFog', // 高度雾
   LOCAL_RAIN = 'localRain' // 局部下雨
@@ -72,6 +72,7 @@ addRain(options?: RainEffectOptions): RainEffect
 添加全屏雨效果。
 
 **参数:**
+
 - `options.name` - 效果名称，默认 `'rain-effect'`
 - `options.mixFactor` - 混合系数 0-1，控制效果强度
 
@@ -100,6 +101,7 @@ addSnow(options?: SnowEffectOptions): SnowEffect
 添加全屏雪效果。
 
 **参数:**
+
 - `options.name` - 效果名称，默认 `'snow-effect'`
 - `options.mixFactor` - 混合系数 0-1，控制效果强度
 
@@ -127,6 +129,7 @@ addFog(options?: FogEffectOptions): FogEffect
 添加全屏雾效果。
 
 **参数:**
+
 - `options.name` - 效果名称，默认 `'fog-effect'`
 - `options.color` - 雾颜色，支持 Cesium.Color 或 CSS 颜色字符串
 - `options.mixFactor` - 混合系数 0-1，控制雾的浓度
@@ -152,6 +155,7 @@ addLightning(options?: LightningEffectOptions): LightningEffect
 添加闪电效果，支持与雨效果叠加使用。
 
 **参数:**
+
 - `options.name` - 效果名称，默认 `'lightning-effect'`
 - `options.mixFactor` - 混合系数 0-1，默认 `0.35`
 - `options.fallInterval` - 下落间隔 0-1，默认 `0.8`
@@ -185,6 +189,7 @@ addHeightFog(options?: HeightFogEffectOptions): HeightFogEffect
 添加基于高度的雾效果，适合山地、高原等场景。
 
 **参数:**
+
 - `options.name` - 效果名称，默认 `'height-fog-effect'`
 - `options.fogColor` - 雾颜色，支持 Cesium.Color 或 `[r, g, b]` 数组
 - `options.fogHeight` - 雾高度（米），默认 `1000`
@@ -217,6 +222,7 @@ addLocalRain(options?: LocalRainEffectOptions): LocalRainEffect
 在指定区域内添加局部下雨效果，支持**多边形区域**和**矩形区域**，适合局部天气场景。
 
 **参数:**
+
 - `options.name` - 效果名称，默认 `'local-rain-effect'`
 - `options.positions` - **多边形区域坐标数组** `[longitude, latitude][]`，至少3个点（优先使用）
 - `options.minLongitude` - 最小经度，默认 `-100`（当未提供 positions 时使用矩形边界）
@@ -235,11 +241,11 @@ addLocalRain(options?: LocalRainEffectOptions): LocalRainEffect
 const localRain = scene.addLocalRain({
   name: 'city-rain',
   positions: [
-    [116.3, 39.9],  // 左下
-    [116.5, 39.9],  // 右下
-    [116.5, 40.1],  // 右上
+    [116.3, 39.9], // 左下
+    [116.5, 39.9], // 右下
+    [116.5, 40.1], // 右上
     [116.4, 40.15], // 顶部中心
-    [116.3, 40.1]   // 左上
+    [116.3, 40.1] // 左上
   ],
   dropCount: 8000,
   dropSpeed: 60
@@ -339,10 +345,10 @@ scene.showAllEffects()
 ### 雷雨天气
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import { ScenePlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { ScenePlugin } from '@auto-cesium/plugins'
 
-const viewer = new KtdViewer(cesiumViewer)
+const viewer = new AutoViewer(cesiumViewer)
 const scene = viewer.use(ScenePlugin)
 
 // 添加雨效果
@@ -540,8 +546,8 @@ scene.addLocalRain({
 
 // 从 GeoJSON 加载行政区划边界
 fetch('/data/beijing-boundary.geojson')
-  .then(res => res.json())
-  .then(geojson => {
+  .then((res) => res.json())
+  .then((geojson) => {
     const coordinates = geojson.features[0].geometry.coordinates[0]
     scene.addLocalRain({
       name: 'beijing-precise-rain',
@@ -618,6 +624,7 @@ export * from './effects'
 ```
 
 主要类型包括：
+
 - `SceneEffectType` - 效果类型枚举
 - `SceneEffect` - 效果基础接口
 - `RainEffectOptions` - 雨效果配置

@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium'
 import { EditPolyline } from './EditPolyline'
-import { line2curve } from '@ktd-cesium/shared'
+import { line2curve } from '@auto-cesium/shared'
 import type { ExtendedEntity } from './EditBase'
 import type { CurveEditEntity } from '../types'
 

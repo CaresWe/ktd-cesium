@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium'
 import { DrawPPolygonEx } from './DrawPPolygonEx'
-import { computeIsoscelesTrianglePositions } from '@ktd-cesium/shared'
+import { computeIsoscelesTrianglePositions } from '@auto-cesium/shared'
 
 /**
  * Primitive 方式的等腰三角形绘制类

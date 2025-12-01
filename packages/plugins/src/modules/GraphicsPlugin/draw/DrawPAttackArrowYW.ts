@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium'
 import { DrawPPolygonEx } from './DrawPPolygonEx'
-import { computeAttackArrowYWPositions } from '@ktd-cesium/shared'
+import { computeAttackArrowYWPositions } from '@auto-cesium/shared'
 
 /**
  * Primitive 方式的攻击箭头(燕尾)绘制类

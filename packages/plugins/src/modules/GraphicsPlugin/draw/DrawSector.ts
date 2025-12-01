@@ -1,7 +1,7 @@
 import * as Cesium from 'cesium'
 import { DrawPolygonEx } from './DrawPolygonEx'
 import { EditSector } from '../edit/EditSector'
-import { computeSectorPositions } from '@ktd-cesium/shared'
+import { computeSectorPositions } from '@auto-cesium/shared'
 import type { EditClassConstructor } from '../types'
 
 /**

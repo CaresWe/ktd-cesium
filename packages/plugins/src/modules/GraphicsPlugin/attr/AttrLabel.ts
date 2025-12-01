@@ -1,5 +1,5 @@
 import * as Cesium from 'cesium'
-import { template, cartesians2lonlats } from '@ktd-cesium/shared'
+import { template, cartesians2lonlats } from '@auto-cesium/shared'
 
 // Type definitions
 /**

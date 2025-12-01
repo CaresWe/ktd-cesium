@@ -1,5 +1,5 @@
 import * as Cesium from 'cesium'
-import { cartesian2lonlat, isNumber } from '@ktd-cesium/shared'
+import { cartesian2lonlat, isNumber } from '@auto-cesium/shared'
 import * as globe from './globe'
 import type { GeoJSONFeature } from '../types'
 

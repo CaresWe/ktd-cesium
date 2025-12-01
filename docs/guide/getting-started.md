@@ -7,19 +7,19 @@
 使用 pnpm 安装（推荐）：
 
 ```bash
-pnpm add @ktd-cesium/core @ktd-cesium/shared @ktd-cesium/plugins cesium
+pnpm add @auto-cesium/core @auto-cesium/shared @auto-cesium/plugins cesium
 ```
 
 使用 npm：
 
 ```bash
-npm install @ktd-cesium/core @ktd-cesium/shared @ktd-cesium/plugins cesium
+npm install @auto-cesium/core @auto-cesium/shared @auto-cesium/plugins cesium
 ```
 
 使用 yarn：
 
 ```bash
-yarn add @ktd-cesium/core @ktd-cesium/shared @ktd-cesium/plugins cesium
+yarn add @auto-cesium/core @auto-cesium/shared @auto-cesium/plugins cesium
 ```
 
 ## 基础使用
@@ -27,7 +27,7 @@ yarn add @ktd-cesium/core @ktd-cesium/shared @ktd-cesium/plugins cesium
 ### 创建地图
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
+import { AutoViewer } from '@auto-cesium/core'
 import * as Cesium from 'cesium'
 
 // 先创建 Cesium Viewer
@@ -35,10 +35,10 @@ const cesiumViewer = new Cesium.Viewer('cesiumContainer', {
   terrain: Cesium.Terrain.fromWorldTerrain()
 })
 
-// 创建 KtdViewer 实例（包装 Cesium Viewer）
-const viewer = new KtdViewer(cesiumViewer)
+// 创建 AutoViewer 实例（包装 Cesium Viewer）
+const viewer = new AutoViewer(cesiumViewer)
 
-// KtdViewer 完全兼容 Cesium.Viewer 的所有 API
+// AutoViewer 完全兼容 Cesium.Viewer 的所有 API
 viewer.camera.flyTo({
   destination: Cesium.Cartesian3.fromDegrees(116.4, 39.9, 10000)
 })
@@ -47,7 +47,7 @@ viewer.camera.flyTo({
 ### 使用工具函数
 
 ```typescript
-import { degreesToCartesian, formatDistance } from '@ktd-cesium/shared'
+import { degreesToCartesian, formatDistance } from '@auto-cesium/shared'
 
 // 经纬度转笛卡尔坐标
 const cartesian = degreesToCartesian(116.4, 39.9, 0)
@@ -59,15 +59,15 @@ const distance = formatDistance(1500) // "1.50 km"
 ### 使用插件
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import { BaseLayerPlugin, CameraPlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { BaseLayerPlugin, CameraPlugin } from '@auto-cesium/plugins'
 import * as Cesium from 'cesium'
 
 // 创建 Cesium Viewer
 const cesiumViewer = new Cesium.Viewer('cesiumContainer')
 
-// 创建 KtdViewer
-const viewer = new KtdViewer(cesiumViewer)
+// 创建 AutoViewer
+const viewer = new AutoViewer(cesiumViewer)
 
 // 使用插件（推荐方式）
 const baseLayer = viewer.use(BaseLayerPlugin)
@@ -107,15 +107,15 @@ camera.flyTo({
     <div id="cesiumContainer"></div>
 
     <script type="module">
-      import { KtdViewer } from '@ktd-cesium/core'
-      import { BaseLayerPlugin, CameraPlugin } from '@ktd-cesium/plugins'
+      import { AutoViewer } from '@auto-cesium/core'
+      import { BaseLayerPlugin, CameraPlugin } from '@auto-cesium/plugins'
       import * as Cesium from 'cesium'
 
       // 创建 Cesium Viewer
       const cesiumViewer = new Cesium.Viewer('cesiumContainer')
 
-      // 创建 KtdViewer
-      const viewer = new KtdViewer(cesiumViewer)
+      // 创建 AutoViewer
+      const viewer = new AutoViewer(cesiumViewer)
 
       // 使用插件
       const baseLayer = viewer.use(BaseLayerPlugin)
@@ -148,20 +148,20 @@ camera.flyTo({
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { KtdViewer } from '@ktd-cesium/core'
-import { BaseLayerPlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { BaseLayerPlugin } from '@auto-cesium/plugins'
 import * as Cesium from 'cesium'
 
 const containerRef = ref<HTMLElement>()
-let viewer: KtdViewer | null = null
+let viewer: AutoViewer | null = null
 
 onMounted(() => {
   if (containerRef.value) {
     // 创建 Cesium Viewer
     const cesiumViewer = new Cesium.Viewer(containerRef.value)
 
-    // 创建 KtdViewer
-    viewer = new KtdViewer(cesiumViewer)
+    // 创建 AutoViewer
+    viewer = new AutoViewer(cesiumViewer)
 
     // 使用插件
     viewer.use(BaseLayerPlugin)
@@ -188,8 +188,8 @@ onBeforeUnmount(() => {
 
 ```tsx
 import { useEffect, useRef } from 'react'
-import { KtdViewer } from '@ktd-cesium/core'
-import { BaseLayerPlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { BaseLayerPlugin } from '@auto-cesium/plugins'
 import * as Cesium from 'cesium'
 
 function App() {
@@ -200,8 +200,8 @@ function App() {
       // 创建 Cesium Viewer
       const cesiumViewer = new Cesium.Viewer(containerRef.current)
 
-      // 创建 KtdViewer
-      const viewer = new KtdViewer(cesiumViewer)
+      // 创建 AutoViewer
+      const viewer = new AutoViewer(cesiumViewer)
 
       // 使用插件
       viewer.use(BaseLayerPlugin)
@@ -224,7 +224,7 @@ export default App
 ### 绘制图形
 
 ```typescript
-import { GraphicsPlugin } from '@ktd-cesium/plugins'
+import { GraphicsPlugin } from '@auto-cesium/plugins'
 
 const graphics = viewer.use(GraphicsPlugin)
 
@@ -247,7 +247,7 @@ graphics.startDraw({
 ### 量算分析
 
 ```typescript
-import { AnalysisPlugin } from '@ktd-cesium/plugins'
+import { AnalysisPlugin } from '@auto-cesium/plugins'
 
 const analysis = viewer.use(AnalysisPlugin)
 
@@ -263,7 +263,7 @@ analysis.startMeasure({
 ### 使用工具函数
 
 ```typescript
-import { degreesToCartesian, formatDistance, hexToColor } from '@ktd-cesium/shared'
+import { degreesToCartesian, formatDistance, hexToColor } from '@auto-cesium/shared'
 
 // 坐标转换
 const cartesian = degreesToCartesian(116.4, 39.9, 0)

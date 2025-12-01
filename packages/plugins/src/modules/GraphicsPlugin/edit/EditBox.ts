@@ -3,7 +3,7 @@ import { EditBase } from './EditBase'
 import type { ExtendedEntity } from './EditBase'
 import * as draggerCtl from './Dragger'
 import { defaultMessages } from '../../TooltipPlugin/messages'
-import { setPositionsHeight, getPositionTranslation } from '@ktd-cesium/shared'
+import { setPositionsHeight, getPositionTranslation } from '@auto-cesium/shared'
 import type { BoxEditStyle, BoxEditEntity } from '../types'
 
 /**

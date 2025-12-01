@@ -1,6 +1,6 @@
 import { Cartesian3, SceneTransforms } from 'cesium'
 import { BasePlugin } from '../../BasePlugin'
-import type { KtdViewer } from '@ktd-cesium/core'
+import type { AutoViewer } from '@auto-cesium/core'
 import type {
   PopupOptions,
   PopupInstance,
@@ -34,7 +34,7 @@ export class PopupPlugin extends BasePlugin {
   /** 渲染更新监听器移除函数 */
   private removeRenderListener?: () => void
 
-  protected onInstall(viewer: KtdViewer): void {
+  protected onInstall(viewer: AutoViewer): void {
     try {
       // 创建弹窗容器
       this.containerElement = document.createElement('div')

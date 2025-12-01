@@ -16,7 +16,7 @@ import {
   getMidpoint,
   getPerpendicularPoint,
   getPointToLineDistance
-} from '@ktd-cesium/shared'
+} from '@auto-cesium/shared'
 ```
 
 ## API
@@ -50,7 +50,7 @@ function getHeadingPitchRollByOrientation(
 **示例**
 
 ```typescript
-import { getHeadingPitchRollByOrientation } from '@ktd-cesium/shared'
+import { getHeadingPitchRollByOrientation } from '@auto-cesium/shared'
 
 const position = Cesium.Cartesian3.fromDegrees(116.4, 39.9, 1000)
 const orientation = Cesium.Quaternion.fromAxisAngle(Cesium.Cartesian3.UNIT_Z, Cesium.Math.toRadians(45))
@@ -79,7 +79,7 @@ function getHeadingPitchRollByMatrix(
 **示例**
 
 ```typescript
-import { getHeadingPitchRollByMatrix } from '@ktd-cesium/shared'
+import { getHeadingPitchRollByMatrix } from '@auto-cesium/shared'
 
 const matrix = Cesium.Matrix4.fromRotationTranslation(
   Cesium.Matrix3.fromRotationZ(Cesium.Math.toRadians(45)),
@@ -112,7 +112,7 @@ function getRotateCenterPoint(center: Cesium.Cartesian3, point: Cesium.Cartesian
 **示例**
 
 ```typescript
-import { getRotateCenterPoint } from '@ktd-cesium/shared'
+import { getRotateCenterPoint } from '@auto-cesium/shared'
 
 const center = Cesium.Cartesian3.fromDegrees(116.4, 39.9, 0)
 const point = Cesium.Cartesian3.fromDegrees(116.41, 39.9, 0)
@@ -150,7 +150,7 @@ function getOnLinePointByLen(
 **示例**
 
 ```typescript
-import { getOnLinePointByLen } from '@ktd-cesium/shared'
+import { getOnLinePointByLen } from '@auto-cesium/shared'
 
 const start = Cesium.Cartesian3.fromDegrees(116.4, 39.9, 0)
 const end = Cesium.Cartesian3.fromDegrees(116.5, 39.9, 0)
@@ -190,7 +190,7 @@ function getPositionTranslation(
 **示例**
 
 ```typescript
-import { getPositionTranslation } from '@ktd-cesium/shared'
+import { getPositionTranslation } from '@auto-cesium/shared'
 
 const position = Cesium.Cartesian3.fromDegrees(116.4, 39.9, 0)
 
@@ -231,7 +231,7 @@ function getOffsetLine(positions: Cesium.Cartesian3[], offset: number): Cesium.C
 **示例**
 
 ```typescript
-import { getOffsetLine } from '@ktd-cesium/shared'
+import { getOffsetLine } from '@auto-cesium/shared'
 
 const originalLine = [
   Cesium.Cartesian3.fromDegrees(116.4, 39.9, 0),
@@ -267,7 +267,7 @@ function centerOfMass(positions: Cesium.Cartesian3[]): Cesium.Cartesian3
 **示例**
 
 ```typescript
-import { centerOfMass } from '@ktd-cesium/shared'
+import { centerOfMass } from '@auto-cesium/shared'
 
 const positions = [
   Cesium.Cartesian3.fromDegrees(116.4, 39.9, 0),
@@ -292,7 +292,7 @@ function getMidpoint(p1: Cesium.Cartesian3, p2: Cesium.Cartesian3): Cesium.Carte
 **示例**
 
 ```typescript
-import { getMidpoint } from '@ktd-cesium/shared'
+import { getMidpoint } from '@auto-cesium/shared'
 
 const p1 = Cesium.Cartesian3.fromDegrees(116.4, 39.9, 0)
 const p2 = Cesium.Cartesian3.fromDegrees(116.5, 39.9, 0)
@@ -327,7 +327,7 @@ function getPerpendicularPoint(
 **示例**
 
 ```typescript
-import { getPerpendicularPoint } from '@ktd-cesium/shared'
+import { getPerpendicularPoint } from '@auto-cesium/shared'
 
 const point = Cesium.Cartesian3.fromDegrees(116.45, 39.95, 0)
 const lineStart = Cesium.Cartesian3.fromDegrees(116.4, 39.9, 0)
@@ -357,7 +357,7 @@ function getPointToLineDistance(
 **示例**
 
 ```typescript
-import { getPointToLineDistance } from '@ktd-cesium/shared'
+import { getPointToLineDistance } from '@auto-cesium/shared'
 
 const distance = getPointToLineDistance(point, lineStart, lineEnd)
 console.log(`距离: ${distance} 米`)
@@ -368,7 +368,7 @@ console.log(`距离: ${distance} 米`)
 ### 场景 1：计算模型的方向角
 
 ```typescript
-import { getHeadingPitchRollByOrientation } from '@ktd-cesium/shared'
+import { getHeadingPitchRollByOrientation } from '@auto-cesium/shared'
 
 function getModelOrientation(entity: Cesium.Entity) {
   const position = entity.position?.getValue(Cesium.JulianDate.now())
@@ -389,7 +389,7 @@ function getModelOrientation(entity: Cesium.Entity) {
 ### 场景 2：创建平行道路
 
 ```typescript
-import { getOffsetLine } from '@ktd-cesium/shared'
+import { getOffsetLine } from '@auto-cesium/shared'
 
 function createParallelRoads(centerLine: Cesium.Cartesian3[], width: number) {
   // 左侧道路（偏移 -width/2 千米）
@@ -419,7 +419,7 @@ function createParallelRoads(centerLine: Cesium.Cartesian3[], width: number) {
 ### 场景 3：旋转多边形
 
 ```typescript
-import { getRotateCenterPoint } from '@ktd-cesium/shared'
+import { getRotateCenterPoint } from '@auto-cesium/shared'
 
 function rotatePolygon(positions: Cesium.Cartesian3[], angle: number) {
   // 计算中心点
@@ -433,7 +433,7 @@ function rotatePolygon(positions: Cesium.Cartesian3[], angle: number) {
 ### 场景 4：计算点到路径的距离
 
 ```typescript
-import { getPointToLineDistance } from '@ktd-cesium/shared'
+import { getPointToLineDistance } from '@auto-cesium/shared'
 
 function getDistanceToPath(point: Cesium.Cartesian3, path: Cesium.Cartesian3[]): number {
   let minDistance = Infinity

@@ -5,7 +5,7 @@
 ## 导入
 
 ```typescript
-import { BaseLayerPlugin } from '@ktd-cesium/plugins'
+import { BaseLayerPlugin } from '@auto-cesium/plugins'
 import {
   CoordinateSystem,
   CoordinateOffset,
@@ -15,7 +15,7 @@ import {
   BaiduLayerType,
   GeovisLayerType,
   SuperMapLayerType
-} from '@ktd-cesium/plugins'
+} from '@auto-cesium/plugins'
 ```
 
 ## 核心特性
@@ -31,10 +31,10 @@ import {
 ## 安装
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import { BaseLayerPlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { BaseLayerPlugin } from '@auto-cesium/plugins'
 
-const viewer = new KtdViewer(cesiumViewer)
+const viewer = new AutoViewer(cesiumViewer)
 const baseLayer = viewer.use(BaseLayerPlugin)
 ```
 
@@ -50,7 +50,7 @@ const layer = baseLayer.addXYZ('osm', {
   subdomains: ['a', 'b', 'c'],
   minimumLevel: 0,
   maximumLevel: 19,
-  rectangle: [west, south, east, north],  // 可选：限制显示区域
+  rectangle: [west, south, east, north], // 可选：限制显示区域
   coordinateSystem: CoordinateSystem.EPSG3857,
   alpha: 1.0,
   brightness: 1.0,
@@ -75,6 +75,7 @@ baseLayer.addXYZ('baidu', {
 ```
 
 **参数说明：**
+
 - `id`: 图层唯一标识
 - `url`: 瓦片 URL 模板，支持 `{z}`、`{x}`、`{y}`、`{s}` 占位符
 - `subdomains`: 子域名数组（可选）
@@ -139,7 +140,7 @@ const layer = baseLayer.addWMTS('wmts-layer', {
 const layer = baseLayer.addArcGIS('arcgis-layer', {
   url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',
   enablePickFeatures: false,
-  layers: '0,1,2'  // 可选：指定图层
+  layers: '0,1,2' // 可选：指定图层
 })
 ```
 
@@ -150,13 +151,13 @@ const layer = baseLayer.addArcGIS('arcgis-layer', {
 添加天地图图层。
 
 ```typescript
-import { TiandituLayerType } from '@ktd-cesium/plugins'
+import { TiandituLayerType } from '@auto-cesium/plugins'
 
 // 影像底图
 baseLayer.addTianditu('tdt-img', {
   token: 'your_tianditu_token',
   layerType: TiandituLayerType.IMG,
-  projection: 'EPSG:4326'  // 'EPSG:4326' 或 'EPSG:3857'
+  projection: 'EPSG:4326' // 'EPSG:4326' 或 'EPSG:3857'
 })
 
 // 矢量底图
@@ -185,6 +186,7 @@ baseLayer.addTianditu('tdt-cva', {
 ```
 
 **天地图图层类型：**
+
 - `IMG`: 影像底图
 - `VEC`: 矢量底图
 - `TER`: 地形底图
@@ -197,7 +199,7 @@ baseLayer.addTianditu('tdt-cva', {
 添加高德地图图层。
 
 ```typescript
-import { AmapLayerType } from '@ktd-cesium/plugins'
+import { AmapLayerType } from '@auto-cesium/plugins'
 
 // 矢量地图
 baseLayer.addAmap('amap-vector', {
@@ -216,6 +218,7 @@ baseLayer.addAmap('amap-road', {
 ```
 
 **高德地图图层类型：**
+
 - `VECTOR`: 矢量地图
 - `SATELLITE`: 卫星影像
 - `ROAD`: 路网标注
@@ -225,7 +228,7 @@ baseLayer.addAmap('amap-road', {
 添加腾讯地图图层。
 
 ```typescript
-import { TencentLayerType } from '@ktd-cesium/plugins'
+import { TencentLayerType } from '@auto-cesium/plugins'
 
 // 矢量地图
 baseLayer.addTencent('tencent-vector', {
@@ -248,7 +251,7 @@ baseLayer.addTencent('tencent-terrain', {
 添加百度地图图层。
 
 ```typescript
-import { BaiduLayerType } from '@ktd-cesium/plugins'
+import { BaiduLayerType } from '@auto-cesium/plugins'
 
 // 普通地图
 baseLayer.addBaidu('baidu-normal', {
@@ -267,6 +270,7 @@ baseLayer.addBaidu('baidu-midnight', {
 ```
 
 **百度地图图层类型：**
+
 - `NORMAL`: 普通地图
 - `SATELLITE`: 卫星影像
 - `TRAFFIC`: 实时交通
@@ -277,7 +281,7 @@ baseLayer.addBaidu('baidu-midnight', {
 添加星图地球图层。
 
 ```typescript
-import { GeovisLayerType } from '@ktd-cesium/plugins'
+import { GeovisLayerType } from '@auto-cesium/plugins'
 
 baseLayer.addGeovis('geovis-img', {
   token: 'your_geovis_token',
@@ -290,7 +294,7 @@ baseLayer.addGeovis('geovis-img', {
 添加超图地图图层。
 
 ```typescript
-import { SuperMapLayerType } from '@ktd-cesium/plugins'
+import { SuperMapLayerType } from '@auto-cesium/plugins'
 
 baseLayer.addSuperMap('supermap-layer', {
   url: 'https://your-supermap-server.com/iserver/services',
@@ -322,8 +326,8 @@ const layer = baseLayer.getLayer('layer-id')
 设置图层可见性。
 
 ```typescript
-baseLayer.setLayerVisible('layer-id', false)  // 隐藏
-baseLayer.setLayerVisible('layer-id', true)   // 显示
+baseLayer.setLayerVisible('layer-id', false) // 隐藏
+baseLayer.setLayerVisible('layer-id', true) // 显示
 ```
 
 ### setLayerAlpha(id, alpha)
@@ -331,7 +335,7 @@ baseLayer.setLayerVisible('layer-id', true)   // 显示
 设置图层透明度。
 
 ```typescript
-baseLayer.setLayerAlpha('layer-id', 0.5)  // 50% 透明
+baseLayer.setLayerAlpha('layer-id', 0.5) // 50% 透明
 ```
 
 ### setLayerBrightness(id, brightness)
@@ -339,7 +343,7 @@ baseLayer.setLayerAlpha('layer-id', 0.5)  // 50% 透明
 设置图层亮度。
 
 ```typescript
-baseLayer.setLayerBrightness('layer-id', 1.5)  // 增加亮度
+baseLayer.setLayerBrightness('layer-id', 1.5) // 增加亮度
 ```
 
 ### setLayerContrast(id, contrast)
@@ -347,7 +351,7 @@ baseLayer.setLayerBrightness('layer-id', 1.5)  // 增加亮度
 设置图层对比度。
 
 ```typescript
-baseLayer.setLayerContrast('layer-id', 1.2)  // 增加对比度
+baseLayer.setLayerContrast('layer-id', 1.2) // 增加对比度
 ```
 
 ### moveLayer(id, index)
@@ -355,7 +359,7 @@ baseLayer.setLayerContrast('layer-id', 1.2)  // 增加对比度
 移动图层到指定位置。
 
 ```typescript
-baseLayer.moveLayer('layer-id', 0)  // 移到最底层
+baseLayer.moveLayer('layer-id', 0) // 移到最底层
 ```
 
 ### raiseLayer(id)
@@ -418,21 +422,21 @@ const count = baseLayer.getLayerCount()
 ## 坐标系统
 
 ```typescript
-import { CoordinateSystem } from '@ktd-cesium/plugins'
+import { CoordinateSystem } from '@auto-cesium/plugins'
 
-CoordinateSystem.WGS84      // WGS84 地理坐标系 (EPSG:4326)
-CoordinateSystem.EPSG3857   // Web 墨卡托投影 (Google/OSM)
-CoordinateSystem.CGCS2000   // 中国大地2000坐标系
+CoordinateSystem.WGS84 // WGS84 地理坐标系 (EPSG:4326)
+CoordinateSystem.EPSG3857 // Web 墨卡托投影 (Google/OSM)
+CoordinateSystem.CGCS2000 // 中国大地2000坐标系
 ```
 
 ## 坐标偏移
 
 ```typescript
-import { CoordinateOffset } from '@ktd-cesium/plugins'
+import { CoordinateOffset } from '@auto-cesium/plugins'
 
-CoordinateOffset.NONE   // 无偏移，标准 WGS84/CGCS2000
-CoordinateOffset.GCJ02  // 国测局偏移（高德、腾讯、天地图等）
-CoordinateOffset.BD09   // 百度偏移
+CoordinateOffset.NONE // 无偏移，标准 WGS84/CGCS2000
+CoordinateOffset.GCJ02 // 国测局偏移（高德、腾讯、天地图等）
+CoordinateOffset.BD09 // 百度偏移
 ```
 
 - `coordinateOffset` 由 BaseLayerPlugin 统一处理，内部调用 shared 包的转换工具，无需手动改写 URL。
@@ -473,7 +477,7 @@ baseLayer.addAmap('amap-sat', {
 // 叠加：腾讯路网
 baseLayer.addTencent('tencent-road', {
   layerType: TencentLayerType.ROAD,
-  alpha: 0.7  // 半透明
+  alpha: 0.7 // 半透明
 })
 ```
 
@@ -483,7 +487,7 @@ baseLayer.addTencent('tencent-road', {
 // 只在中国区域显示
 baseLayer.addXYZ('china-layer', {
   url: 'https://example.com/{z}/{x}/{y}.png',
-  rectangle: [73, 18, 135, 53],  // 中国大致范围
+  rectangle: [73, 18, 135, 53], // 中国大致范围
   maximumLevel: 18
 })
 ```
@@ -508,14 +512,7 @@ baseLayer.addXYZ('china-layer', {
       <div class="layer-options" v-if="currentLayerId">
         <label>
           透明度:
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.1"
-            v-model="opacity"
-            @input="updateOpacity"
-          />
+          <input type="range" min="0" max="1" step="0.1" v-model="opacity" @input="updateOpacity" />
           {{ opacity }}
         </label>
         <label>
@@ -529,8 +526,8 @@ baseLayer.addXYZ('china-layer', {
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { KtdViewer } from '@ktd-cesium/core'
-import { BaseLayerPlugin, TiandituLayerType, AmapLayerType } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { BaseLayerPlugin, TiandituLayerType, AmapLayerType } from '@auto-cesium/plugins'
 import * as Cesium from 'cesium'
 
 const containerRef = ref<HTMLElement>()
@@ -539,7 +536,7 @@ const currentLayer = ref('')
 const opacity = ref(1)
 const visible = ref(true)
 
-let viewer: KtdViewer
+let viewer: AutoViewer
 let baseLayer: BaseLayerPlugin
 
 const baseLayers = [
@@ -552,7 +549,7 @@ const baseLayers = [
 onMounted(() => {
   if (containerRef.value) {
     const cesiumViewer = new Cesium.Viewer(containerRef.value)
-    viewer = new KtdViewer(cesiumViewer)
+    viewer = new AutoViewer(cesiumViewer)
     baseLayer = viewer.use(BaseLayerPlugin)
 
     // 默认图层
@@ -673,7 +670,7 @@ class LayerManager {
   private baseLayer: BaseLayerPlugin
   private layers: Map<string, any> = new Map()
 
-  constructor(viewer: KtdViewer) {
+  constructor(viewer: AutoViewer) {
     this.baseLayer = viewer.use(BaseLayerPlugin)
   }
 
@@ -706,7 +703,7 @@ class LayerManager {
 ### 场景 8：国内偏移瓦片对齐
 
 ```typescript
-import { CoordinateOffset } from '@ktd-cesium/plugins'
+import { CoordinateOffset } from '@auto-cesium/plugins'
 
 // 高德底图（GCJ-02）
 baseLayer.addXYZ('amap-base', {

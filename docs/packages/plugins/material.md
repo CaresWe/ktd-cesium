@@ -12,14 +12,14 @@ import {
   CircleWaveMaterial,
   VideoMaterial,
   createVideoMaterial
-} from '@ktd-cesium/plugins'
+} from '@auto-cesium/plugins'
 import type {
   WaterMaterialOptions,
   WaveType,
   LineFlowMaterialOptions,
   CircleWaveMaterialOptions,
   VideoMaterialOptions
-} from '@ktd-cesium/plugins'
+} from '@auto-cesium/plugins'
 ```
 
 ## 核心特性
@@ -34,7 +34,7 @@ import type {
 ### 创建水面材质
 
 ```typescript
-import { WaterMaterial, createWaterMaterial } from '@ktd-cesium/plugins'
+import { WaterMaterial, createWaterMaterial } from '@auto-cesium/plugins'
 
 // 方式 1：使用类
 const waterMaterial = new WaterMaterial({
@@ -88,7 +88,7 @@ type WaveType = 'calm' | 'ripple' | 'wave' | 'turbulent'
 ### 使用示例
 
 ```typescript
-import { createWaterMaterial } from '@ktd-cesium/plugins'
+import { createWaterMaterial } from '@auto-cesium/plugins'
 
 // 创建水面实体
 const waterEntity = viewer.cesiumViewer.entities.add({
@@ -113,7 +113,7 @@ const waterEntity = viewer.cesiumViewer.entities.add({
 ### 创建线状流动材质
 
 ```typescript
-import { LineFlowMaterial } from '@ktd-cesium/plugins'
+import { LineFlowMaterial } from '@auto-cesium/plugins'
 
 const lineFlowMaterial = new LineFlowMaterial({
   color: Cesium.Color.CYAN,
@@ -141,7 +141,7 @@ interface LineFlowMaterialOptions {
 ### 使用示例
 
 ```typescript
-import { LineFlowMaterial } from '@ktd-cesium/plugins'
+import { LineFlowMaterial } from '@auto-cesium/plugins'
 
 // 创建流动线条
 const flowLine = viewer.cesiumViewer.entities.add({
@@ -162,7 +162,7 @@ const flowLine = viewer.cesiumViewer.entities.add({
 ### 创建圆形波纹材质
 
 ```typescript
-import { CircleWaveMaterial } from '@ktd-cesium/plugins'
+import { CircleWaveMaterial } from '@auto-cesium/plugins'
 
 const circleWaveMaterial = new CircleWaveMaterial({
   color: Cesium.Color.CYAN,
@@ -186,7 +186,7 @@ interface CircleWaveMaterialOptions {
 ### 使用示例
 
 ```typescript
-import { CircleWaveMaterial } from '@ktd-cesium/plugins'
+import { CircleWaveMaterial } from '@auto-cesium/plugins'
 
 // 创建圆形波纹点
 const wavePoint = viewer.cesiumViewer.entities.add({
@@ -209,7 +209,7 @@ const wavePoint = viewer.cesiumViewer.entities.add({
 ### 创建视频材质
 
 ```typescript
-import { VideoMaterial, createVideoMaterial } from '@ktd-cesium/plugins'
+import { VideoMaterial, createVideoMaterial } from '@auto-cesium/plugins'
 
 // 方式 1：使用类
 const videoMaterial = new VideoMaterial({
@@ -238,7 +238,7 @@ interface VideoMaterialOptions {
 ### 使用示例
 
 ```typescript
-import { createVideoMaterial } from '@ktd-cesium/plugins'
+import { createVideoMaterial } from '@auto-cesium/plugins'
 
 // 创建视频纹理实体
 const videoEntity = viewer.cesiumViewer.entities.add({
@@ -258,7 +258,7 @@ const videoEntity = viewer.cesiumViewer.entities.add({
 ### 场景 1：创建水面效果
 
 ```typescript
-import { createWaterMaterial } from '@ktd-cesium/plugins'
+import { createWaterMaterial } from '@auto-cesium/plugins'
 
 function createLake(positions: Cesium.Cartesian3[]) {
   viewer.cesiumViewer.entities.add({
@@ -285,7 +285,7 @@ function createLake(positions: Cesium.Cartesian3[]) {
 ### 场景 2：创建流动路径
 
 ```typescript
-import { LineFlowMaterial } from '@ktd-cesium/plugins'
+import { LineFlowMaterial } from '@auto-cesium/plugins'
 
 function createFlowPath(positions: Cesium.Cartesian3[]) {
   viewer.cesiumViewer.entities.add({
@@ -308,7 +308,7 @@ function createFlowPath(positions: Cesium.Cartesian3[]) {
 ### 场景 3：创建雷达扫描效果
 
 ```typescript
-import { CircleWaveMaterial } from '@ktd-cesium/plugins'
+import { CircleWaveMaterial } from '@auto-cesium/plugins'
 
 function createRadarScan(center: Cesium.Cartesian3) {
   viewer.cesiumViewer.entities.add({
@@ -330,7 +330,7 @@ function createRadarScan(center: Cesium.Cartesian3) {
 ### 场景 4：创建视频投影
 
 ```typescript
-import { createVideoMaterial } from '@ktd-cesium/plugins'
+import { createVideoMaterial } from '@auto-cesium/plugins'
 
 function createVideoProjection(rectangle: Cesium.Rectangle) {
   viewer.cesiumViewer.entities.add({
@@ -350,7 +350,7 @@ function createVideoProjection(rectangle: Cesium.Rectangle) {
 ### 场景 5：动态更新材质属性
 
 ```typescript
-import { WaterMaterial } from '@ktd-cesium/plugins'
+import { WaterMaterial } from '@auto-cesium/plugins'
 
 const waterMaterial = new WaterMaterial({
   waveType: 'calm'

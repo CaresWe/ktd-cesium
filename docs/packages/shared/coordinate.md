@@ -11,7 +11,7 @@ import {
   calculateDistance,
   degreesToRadians,
   radiansToDegrees
-} from '@ktd-cesium/shared'
+} from '@auto-cesium/shared'
 ```
 
 ## API
@@ -23,11 +23,7 @@ import {
 **类型签名**
 
 ```typescript
-function degreesToCartesian(
-  longitude: number,
-  latitude: number,
-  height?: number
-): Cesium.Cartesian3
+function degreesToCartesian(longitude: number, latitude: number, height?: number): Cesium.Cartesian3
 ```
 
 **参数**
@@ -43,7 +39,7 @@ function degreesToCartesian(
 **示例**
 
 ```typescript
-import { degreesToCartesian } from '@ktd-cesium/shared'
+import { degreesToCartesian } from '@auto-cesium/shared'
 
 // 转换北京天安门的坐标
 const cartesian = degreesToCartesian(116.4074, 39.9042, 0)
@@ -61,9 +57,7 @@ const cartesianWithHeight = degreesToCartesian(116.4074, 39.9042, 1000)
 **类型签名**
 
 ```typescript
-function cartesianToDegrees(
-  cartesian: Cesium.Cartesian3
-): {
+function cartesianToDegrees(cartesian: Cesium.Cartesian3): {
   longitude: number
   latitude: number
   height: number
@@ -84,7 +78,7 @@ function cartesianToDegrees(
 **示例**
 
 ```typescript
-import { cartesianToDegrees, degreesToCartesian } from '@ktd-cesium/shared'
+import { cartesianToDegrees, degreesToCartesian } from '@auto-cesium/shared'
 
 const cartesian = degreesToCartesian(116.4074, 39.9042, 1000)
 const degrees = cartesianToDegrees(cartesian)
@@ -118,7 +112,7 @@ function calculateDistance(
 **示例**
 
 ```typescript
-import { calculateDistance } from '@ktd-cesium/shared'
+import { calculateDistance } from '@auto-cesium/shared'
 
 // 计算北京到上海的距离
 const beijing = { longitude: 116.4074, latitude: 39.9042 }
@@ -150,7 +144,7 @@ function degreesToRadians(degrees: number): number
 **示例**
 
 ```typescript
-import { degreesToRadians } from '@ktd-cesium/shared'
+import { degreesToRadians } from '@auto-cesium/shared'
 
 const radians = degreesToRadians(180)
 console.log(radians) // 3.141592653589793 (Math.PI)
@@ -177,7 +171,7 @@ function radiansToDegrees(radians: number): number
 **示例**
 
 ```typescript
-import { radiansToDegrees } from '@ktd-cesium/shared'
+import { radiansToDegrees } from '@auto-cesium/shared'
 
 const degrees = radiansToDegrees(Math.PI)
 console.log(degrees) // 180
@@ -188,7 +182,7 @@ console.log(degrees) // 180
 ### 场景 1：标记点位
 
 ```typescript
-import { degreesToCartesian } from '@ktd-cesium/shared'
+import { degreesToCartesian } from '@auto-cesium/shared'
 import * as Cesium from 'cesium'
 
 const viewer = new Cesium.Viewer('cesiumContainer')
@@ -199,7 +193,7 @@ viewer.entities.add({
   position: position,
   point: {
     pixelSize: 10,
-    color: Cesium.Color.RED,
+    color: Cesium.Color.RED
   }
 })
 ```
@@ -207,7 +201,7 @@ viewer.entities.add({
 ### 场景 2：计算并显示两点距离
 
 ```typescript
-import { calculateDistance, formatDistance } from '@ktd-cesium/shared'
+import { calculateDistance, formatDistance } from '@auto-cesium/shared'
 
 function showDistance(point1, point2) {
   const distance = calculateDistance(point1, point2)
@@ -219,23 +213,20 @@ function showDistance(point1, point2) {
 // 使用
 showDistance(
   { longitude: 116.4074, latitude: 39.9042 }, // 北京
-  { longitude: 121.4737, latitude: 31.2304 }  // 上海
+  { longitude: 121.4737, latitude: 31.2304 } // 上海
 )
 ```
 
 ### 场景 3：获取鼠标点击位置的经纬度
 
 ```typescript
-import { cartesianToDegrees } from '@ktd-cesium/shared'
+import { cartesianToDegrees } from '@auto-cesium/shared'
 import * as Cesium from 'cesium'
 
 const viewer = new Cesium.Viewer('cesiumContainer')
 
 viewer.screenSpaceEventHandler.setInputAction((movement) => {
-  const cartesian = viewer.camera.pickEllipsoid(
-    movement.position,
-    viewer.scene.globe.ellipsoid
-  )
+  const cartesian = viewer.camera.pickEllipsoid(movement.position, viewer.scene.globe.ellipsoid)
 
   if (cartesian) {
     const degrees = cartesianToDegrees(cartesian)

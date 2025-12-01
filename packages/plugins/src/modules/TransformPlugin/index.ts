@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium'
 import { BasePlugin } from '../../BasePlugin'
-import type { KtdViewer } from '@ktd-cesium/core'
+import type { AutoViewer } from '@auto-cesium/core'
 import {
   TransformMode,
   TransformSpace,
@@ -95,7 +95,7 @@ export class TransformPlugin extends BasePlugin implements ITransformController 
   /**
    * 插件安装时的回调
    */
-  protected onInstall(_viewer: KtdViewer): void {
+  protected onInstall(_viewer: AutoViewer): void {
     // 创建辅助轴 DataSource
     this.gizmoDataSource = new Cesium.CustomDataSource('transform-gizmo')
     this.cesiumViewer.dataSources.add(this.gizmoDataSource)

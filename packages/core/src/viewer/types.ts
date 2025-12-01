@@ -1,9 +1,9 @@
 import type { Viewer as CesiumViewer } from 'cesium'
 
 /**
- * KtdViewer 的独有属性和方法
+ * AutoViewer 的独有属性和方法
  */
-export interface IKtdViewer {
+export interface IAutoViewer {
   /** 插件集合 */
   readonly plugins: Map<string, ViewerPlugin>
 
@@ -25,9 +25,9 @@ export interface IKtdViewer {
 
 /**
  * 扩展的 Viewer 类型
- * 通过 Proxy 实现，同时包含 KtdViewer 的插件功能和 CesiumViewer 的所有属性和方法
+ * 通过 Proxy 实现，同时包含 AutoViewer 的插件功能和 CesiumViewer 的所有属性和方法
  */
-export type KtdViewer = IKtdViewer & CesiumViewer
+export type AutoViewer = IAutoViewer & CesiumViewer
 
 /**
  * 插件接口
@@ -40,7 +40,7 @@ export interface ViewerPlugin {
   readonly installed: boolean
 
   /** 安装插件 */
-  install(viewer: KtdViewer): void | Promise<void>
+  install(viewer: AutoViewer): void | Promise<void>
 
   /** 销毁插件 */
   destroy?(): void | Promise<void>
@@ -57,7 +57,7 @@ export interface ViewerPluginConstructor<T extends ViewerPlugin = ViewerPlugin> 
 /**
  * Viewer 配置选项
  */
-export interface KtdViewerOptions {
+export interface AutoViewerOptions {
   /** 预装载的插件 */
   plugins?: ViewerPluginConstructor[]
 }

@@ -1,4 +1,4 @@
-# ktd-cesium
+# auto-cesium
 
 Cesium 二次封装库 - 基于 TypeScript 的企业级 3D GIS 开发工具集
 
@@ -14,11 +14,11 @@ Cesium 二次封装库 - 基于 TypeScript 的企业级 3D GIS 开发工具集
 
 ## 包列表
 
-| 包名                                      | 版本                                                        | 描述                |
-| ----------------------------------------- | ----------------------------------------------------------- | ------------------- |
-| [@ktd-cesium/core](./packages/core)       | ![version](https://img.shields.io/badge/version-1.0.0-blue) | Cesium 核心功能封装 |
-| [@ktd-cesium/shared](./packages/shared)   | ![version](https://img.shields.io/badge/version-1.0.0-blue) | 共享工具库          |
-| [@ktd-cesium/plugins](./packages/plugins) | ![version](https://img.shields.io/badge/version-1.0.0-blue) | 插件系统            |
+| 包名                                       | 版本                                                        | 描述                |
+| ------------------------------------------ | ----------------------------------------------------------- | ------------------- |
+| [@auto-cesium/core](./packages/core)       | ![version](https://img.shields.io/badge/version-1.0.0-blue) | Cesium 核心功能封装 |
+| [@auto-cesium/shared](./packages/shared)   | ![version](https://img.shields.io/badge/version-1.0.0-blue) | 共享工具库          |
+| [@auto-cesium/plugins](./packages/plugins) | ![version](https://img.shields.io/badge/version-1.0.0-blue) | 插件系统            |
 
 ## 快速开始
 
@@ -50,7 +50,7 @@ pnpm docs:build
 ### 项目结构
 
 ```
-ktd-cesium/
+auto-cesium/
 ├── packages/
 │   ├── core/          # 核心功能
 │   ├── shared/        # 共享工具

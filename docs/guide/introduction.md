@@ -15,7 +15,7 @@ KTD-Cesium 是一个基于 [Cesium](https://cesium.com/) 的二次封装库，�
 
 KTD-Cesium 采用 Monorepo 架构，包含以下三个核心包：
 
-### [@ktd-cesium/shared](/packages/shared/overview)
+### [@auto-cesium/shared](/packages/shared/overview)
 
 共享基础库，提供通用的工具函数：
 
@@ -30,15 +30,15 @@ KTD-Cesium 采用 Monorepo 架构，包含以下三个核心包：
 - **Cesium 工具**：GeoJSON 处理、样式配置、鼠标位置拾取
 - **军标图形**：攻击箭头、双箭头、扇形、正多边形等军事标绘图形
 
-### [@ktd-cesium/core](/packages/core/overview)
+### [@auto-cesium/core](/packages/core/overview)
 
 核心功能封装，包括：
 
-- **KtdViewer**：对 Cesium.Viewer 的封装，通过 Proxy 代理保留所有 Cesium API
+- **AutoViewer**：对 Cesium.Viewer 的封装，通过 Proxy 代理保留所有 Cesium API
 - **插件系统**：统一的插件管理接口，支持插件安装、获取、卸载
 - **生命周期管理**：自动管理 Viewer 和插件的创建和销毁
 
-### [@ktd-cesium/plugins](/packages/plugins/overview)
+### [@auto-cesium/plugins](/packages/plugins/overview)
 
 插件系统，提供各种功能扩展：
 

@@ -1,11 +1,11 @@
-# @ktd-cesium/shared
+# @auto-cesium/shared
 
 Cesium 共享基础库，提供坐标转换、数学计算、颜色处理、格式化等实用工具。
 
 ## 安装
 
 ```bash
-pnpm add @ktd-cesium/shared cesium
+pnpm add @auto-cesium/shared cesium
 ```
 
 ## 功能模块
@@ -13,11 +13,7 @@ pnpm add @ktd-cesium/shared cesium
 ### 坐标转换 (coordinate)
 
 ```typescript
-import {
-  degreesToCartesian,
-  cartesianToDegrees,
-  calculateDistance
-} from '@ktd-cesium/shared'
+import { degreesToCartesian, cartesianToDegrees, calculateDistance } from '@auto-cesium/shared'
 
 // 经纬度转笛卡尔坐标
 const cartesian = degreesToCartesian(116.4, 39.9, 0)
@@ -26,16 +22,13 @@ const cartesian = degreesToCartesian(116.4, 39.9, 0)
 const { longitude, latitude, height } = cartesianToDegrees(cartesian)
 
 // 计算两点距离
-const distance = calculateDistance(
-  { longitude: 116.4, latitude: 39.9 },
-  { longitude: 117.0, latitude: 40.0 }
-)
+const distance = calculateDistance({ longitude: 116.4, latitude: 39.9 }, { longitude: 117.0, latitude: 40.0 })
 ```
 
 ### 数学计算 (math)
 
 ```typescript
-import { clamp, lerp, mapRange, random } from '@ktd-cesium/shared'
+import { clamp, lerp, mapRange, random } from '@auto-cesium/shared'
 
 // 限制数值范围
 const value = clamp(150, 0, 100) // 100
@@ -54,7 +47,7 @@ const randomInt = randomInt(1, 10)
 ### 颜色处理 (color)
 
 ```typescript
-import { hexToColor, rgbToColor, lerpColor } from '@ktd-cesium/shared'
+import { hexToColor, rgbToColor, lerpColor } from '@auto-cesium/shared'
 
 // 十六进制转颜色
 const color1 = hexToColor('#ff0000', 0.8)
@@ -69,12 +62,7 @@ const interpolatedColor = lerpColor(color1, color2, 0.5)
 ### 格式化 (format)
 
 ```typescript
-import {
-  formatCoordinate,
-  formatDistance,
-  formatArea,
-  formatHeight
-} from '@ktd-cesium/shared'
+import { formatCoordinate, formatDistance, formatArea, formatHeight } from '@auto-cesium/shared'
 
 // 格式化坐标
 const coord = formatCoordinate(116.4074, 39.9042) // "39.9042°N, 116.4074°E"

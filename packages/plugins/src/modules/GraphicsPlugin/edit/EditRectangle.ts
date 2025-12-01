@@ -4,7 +4,7 @@ import type { ExtendedEntity } from './EditBase'
 import type { RectangleEditEntity } from '../types'
 import * as draggerCtl from './Dragger'
 import { defaultMessages } from '../../TooltipPlugin/messages'
-import { setPositionsHeight, centerOfMass } from '@ktd-cesium/shared'
+import { setPositionsHeight, centerOfMass } from '@auto-cesium/shared'
 
 /**
  * 矩形编辑类

@@ -25,7 +25,7 @@ import {
   cancelAnimFrame,
   emptyImageUrl,
   clone
-} from '@ktd-cesium/shared'
+} from '@auto-cesium/shared'
 ```
 
 ## API
@@ -52,7 +52,7 @@ function extend<T extends Record<string, unknown>>(dest: T, ...sources: Partial<
 **示例**
 
 ```typescript
-import { extend } from '@ktd-cesium/shared'
+import { extend } from '@auto-cesium/shared'
 
 const obj1 = { a: 1, b: 2 }
 const obj2 = { b: 3, c: 4 }
@@ -81,7 +81,7 @@ function clone<T>(obj: T): T
 **示例**
 
 ```typescript
-import { clone } from '@ktd-cesium/shared'
+import { clone } from '@auto-cesium/shared'
 
 const original = { a: 1, b: { c: 2 } }
 const copied = clone(original)
@@ -116,7 +116,7 @@ function throttle<T extends (...args: any[]) => any>(
 **示例**
 
 ```typescript
-import { throttle } from '@ktd-cesium/shared'
+import { throttle } from '@auto-cesium/shared'
 
 function handleMouseMove(event: MouseEvent) {
   console.log('鼠标移动:', event.clientX, event.clientY)
@@ -140,7 +140,7 @@ function bind<T extends (...args: any[]) => any>(fn: T, obj: unknown, ...boundAr
 **示例**
 
 ```typescript
-import { bind } from '@ktd-cesium/shared'
+import { bind } from '@auto-cesium/shared'
 
 const obj = {
   value: 10,
@@ -166,7 +166,7 @@ function stamp(obj: Record<string, unknown>): number
 **示例**
 
 ```typescript
-import { stamp } from '@ktd-cesium/shared'
+import { stamp } from '@auto-cesium/shared'
 
 const obj1 = {}
 const obj2 = {}
@@ -191,7 +191,7 @@ function template(
 **示例**
 
 ```typescript
-import { template } from '@ktd-cesium/shared'
+import { template } from '@auto-cesium/shared'
 
 const url = template('https://api.example.com/{x}/{y}/{z}', {
   x: 10,
@@ -219,7 +219,7 @@ function getParamString(obj: Record<string, string | number>, existingUrl?: stri
 **示例**
 
 ```typescript
-import { getParamString } from '@ktd-cesium/shared'
+import { getParamString } from '@auto-cesium/shared'
 
 const params = getParamString({ x: 10, y: 20, z: 5 })
 // '?x=10&y=20&z=5'
@@ -243,7 +243,7 @@ function cancelAnimFrame(id?: number): void
 **示例**
 
 ```typescript
-import { requestAnimFrame, cancelAnimFrame } from '@ktd-cesium/shared'
+import { requestAnimFrame, cancelAnimFrame } from '@auto-cesium/shared'
 
 let animationId: number | undefined
 
@@ -266,7 +266,7 @@ if (animationId) {
 ### 场景 1：对象配置合并
 
 ```typescript
-import { extend } from '@ktd-cesium/shared'
+import { extend } from '@auto-cesium/shared'
 
 interface Config {
   width: number
@@ -289,7 +289,7 @@ function createEntity(config: Partial<Config>) {
 ### 场景 2：节流鼠标事件
 
 ```typescript
-import { throttle } from '@ktd-cesium/shared'
+import { throttle } from '@auto-cesium/shared'
 
 // 限制相机更新频率
 const updateCamera = throttle((position: Cesium.Cartesian3) => {
@@ -309,7 +309,7 @@ viewer.screenSpaceEventHandler.setInputAction((movement) => {
 ### 场景 3：深拷贝配置
 
 ```typescript
-import { clone } from '@ktd-cesium/shared'
+import { clone } from '@auto-cesium/shared'
 
 // 保存配置快照
 function saveConfig(config: EntityConfig) {
@@ -330,7 +330,7 @@ function restoreConfig(): EntityConfig | null {
 ### 场景 4：模板 URL 生成
 
 ```typescript
-import { template } from '@ktd-cesium/shared'
+import { template } from '@auto-cesium/shared'
 
 // 生成瓦片 URL
 function getTileUrl(x: number, y: number, z: number) {
@@ -349,7 +349,7 @@ const url = getTileUrl(10, 20, 5)
 ### 场景 5：对象唯一标识
 
 ```typescript
-import { stamp } from '@ktd-cesium/shared'
+import { stamp } from '@auto-cesium/shared'
 
 // 为实体添加唯一 ID
 function addEntityId(entity: Cesium.Entity) {

@@ -17,21 +17,21 @@ TransformPlugin 提供了强大的 3D 实体变换功能，支持 **平移（Tra
 ### 1. 安装插件
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import { TransformPlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { TransformPlugin } from '@auto-cesium/plugins'
 
-const viewer = new KtdViewer(cesiumViewer)
+const viewer = new AutoViewer(cesiumViewer)
 
 // 安装 TransformPlugin
 const transform = viewer.use(TransformPlugin, {
-  mode: TransformMode.TRANSLATE,    // 默认模式：平移
-  space: TransformSpace.WORLD,      // 默认空间：世界坐标系
-  showGizmo: true,                  // 显示辅助轴
-  gizmoSize: 1.0,                   // 辅助轴大小
-  snap: false,                      // 禁用吸附
-  translateSnap: 0.1,               // 平移吸附值（米）
-  rotateSnap: 5,                    // 旋转吸附值（度）
-  scaleSnap: 0.1                    // 缩放吸附值
+  mode: TransformMode.TRANSLATE, // 默认模式：平移
+  space: TransformSpace.WORLD, // 默认空间：世界坐标系
+  showGizmo: true, // 显示辅助轴
+  gizmoSize: 1.0, // 辅助轴大小
+  snap: false, // 禁用吸附
+  translateSnap: 0.1, // 平移吸附值（米）
+  rotateSnap: 5, // 旋转吸附值（度）
+  scaleSnap: 0.1 // 缩放吸附值
 })
 ```
 
@@ -40,7 +40,7 @@ const transform = viewer.use(TransformPlugin, {
 ```typescript
 // 创建一个模型实体
 const entity = viewer.entities.add({
-  position: Cesium.Cartesian3.fromDegrees(116.39, 39.90, 0),
+  position: Cesium.Cartesian3.fromDegrees(116.39, 39.9, 0),
   model: {
     uri: '/path/to/model.glb',
     scale: 1.0
@@ -89,10 +89,10 @@ transform.detach()
 
 ```typescript
 const transform = viewer.use(TransformPlugin, {
-  snap: true,              // 启用吸附
-  translateSnap: 0.5,      // 平移吸附到 0.5 米
-  rotateSnap: 15,          // 旋转吸附到 15 度
-  scaleSnap: 0.1           // 缩放吸附到 0.1 倍
+  snap: true, // 启用吸附
+  translateSnap: 0.5, // 平移吸附到 0.5 米
+  rotateSnap: 15, // 旋转吸附到 15 度
+  scaleSnap: 0.1 // 缩放吸附到 0.1 倍
 })
 ```
 
@@ -107,11 +107,8 @@ console.log('Scale:', currentTransform.scale)
 
 // 设置变换数据
 transform.setTransform({
-  position: Cesium.Cartesian3.fromDegrees(116.40, 39.91, 100),
-  rotation: Cesium.Quaternion.fromAxisAngle(
-    Cesium.Cartesian3.UNIT_Z,
-    Cesium.Math.toRadians(45)
-  ),
+  position: Cesium.Cartesian3.fromDegrees(116.4, 39.91, 100),
+  rotation: Cesium.Quaternion.fromAxisAngle(Cesium.Cartesian3.UNIT_Z, Cesium.Math.toRadians(45)),
   scale: new Cesium.Cartesian3(2.0, 2.0, 2.0)
 })
 ```
@@ -143,12 +140,12 @@ events.on('transform-end', (data) => {
 ```typescript
 // 创建较大的辅助轴（适合大型模型）
 const transform = viewer.use(TransformPlugin, {
-  gizmoSize: 2.0  // 2倍大小
+  gizmoSize: 2.0 // 2倍大小
 })
 
 // 创建较小的辅助轴（适合小型模型）
 const transform = viewer.use(TransformPlugin, {
-  gizmoSize: 0.5  // 0.5倍大小
+  gizmoSize: 0.5 // 0.5倍大小
 })
 ```
 
@@ -158,7 +155,7 @@ const transform = viewer.use(TransformPlugin, {
 
 ```typescript
 const transform = viewer.use(TransformPlugin, {
-  showGizmo: false  // 不显示辅助轴
+  showGizmo: false // 不显示辅助轴
 })
 
 // 直接通过代码设置变换
@@ -173,23 +170,23 @@ transform.setTransform({
 ### 示例 1：移动模型到指定位置
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import { TransformPlugin, TransformMode, TransformSpace } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { TransformPlugin, TransformMode, TransformSpace } from '@auto-cesium/plugins'
 import * as Cesium from 'cesium'
 
 // 初始化 viewer
-const viewer = new KtdViewer(cesiumViewer)
+const viewer = new AutoViewer(cesiumViewer)
 
 // 安装 TransformPlugin
 const transform = viewer.use(TransformPlugin, {
   mode: TransformMode.TRANSLATE,
   snap: true,
-  translateSnap: 1.0  // 1米网格吸附
+  translateSnap: 1.0 // 1米网格吸附
 })
 
 // 添加模型
 const model = viewer.entities.add({
-  position: Cesium.Cartesian3.fromDegrees(116.39, 39.90, 0),
+  position: Cesium.Cartesian3.fromDegrees(116.39, 39.9, 0),
   model: {
     uri: '/models/building.glb'
   }
@@ -205,17 +202,17 @@ transform.attach(model)
 ### 示例 2：旋转飞机模型
 
 ```typescript
-import { TransformPlugin, TransformMode } from '@ktd-cesium/plugins'
+import { TransformPlugin, TransformMode } from '@auto-cesium/plugins'
 
 const transform = viewer.use(TransformPlugin, {
   mode: TransformMode.ROTATE,
-  space: TransformSpace.LOCAL,  // 使用本地坐标系
+  space: TransformSpace.LOCAL, // 使用本地坐标系
   snap: true,
-  rotateSnap: 15  // 每次旋转 15 度
+  rotateSnap: 15 // 每次旋转 15 度
 })
 
 const airplane = viewer.entities.add({
-  position: Cesium.Cartesian3.fromDegrees(116.39, 39.90, 1000),
+  position: Cesium.Cartesian3.fromDegrees(116.39, 39.9, 1000),
   model: {
     uri: '/models/airplane.glb'
   },
@@ -231,16 +228,16 @@ transform.attach(airplane)
 ### 示例 3：缩放建筑物
 
 ```typescript
-import { TransformPlugin, TransformMode } from '@ktd-cesium/plugins'
+import { TransformPlugin, TransformMode } from '@auto-cesium/plugins'
 
 const transform = viewer.use(TransformPlugin, {
   mode: TransformMode.SCALE,
   snap: true,
-  scaleSnap: 0.1  // 缩放吸附到 0.1 倍
+  scaleSnap: 0.1 // 缩放吸附到 0.1 倍
 })
 
 const building = viewer.entities.add({
-  position: Cesium.Cartesian3.fromDegrees(116.39, 39.90, 0),
+  position: Cesium.Cartesian3.fromDegrees(116.39, 39.9, 0),
   model: {
     uri: '/models/building.glb',
     scale: 1.0
@@ -285,24 +282,27 @@ document.getElementById('local-space-btn').addEventListener('click', () => {
 ```typescript
 // 保存当前变换
 const savedTransform = transform.getTransform()
-localStorage.setItem('entity-transform', JSON.stringify({
-  position: {
-    x: savedTransform.position.x,
-    y: savedTransform.position.y,
-    z: savedTransform.position.z
-  },
-  rotation: {
-    x: savedTransform.rotation.x,
-    y: savedTransform.rotation.y,
-    z: savedTransform.rotation.z,
-    w: savedTransform.rotation.w
-  },
-  scale: {
-    x: savedTransform.scale.x,
-    y: savedTransform.scale.y,
-    z: savedTransform.scale.z
-  }
-}))
+localStorage.setItem(
+  'entity-transform',
+  JSON.stringify({
+    position: {
+      x: savedTransform.position.x,
+      y: savedTransform.position.y,
+      z: savedTransform.position.z
+    },
+    rotation: {
+      x: savedTransform.rotation.x,
+      y: savedTransform.rotation.y,
+      z: savedTransform.rotation.z,
+      w: savedTransform.rotation.w
+    },
+    scale: {
+      x: savedTransform.scale.x,
+      y: savedTransform.scale.y,
+      z: savedTransform.scale.z
+    }
+  })
+)
 
 // 恢复变换
 const stored = JSON.parse(localStorage.getItem('entity-transform'))
@@ -331,9 +331,11 @@ transform.setTransform({
 附加控制器到实体。
 
 **参数：**
+
 - `entity` - 要控制的 Cesium 实体
 
 **示例：**
+
 ```typescript
 transform.attach(myEntity)
 ```
@@ -343,6 +345,7 @@ transform.attach(myEntity)
 分离控制器，停止变换操作。
 
 **示例：**
+
 ```typescript
 transform.detach()
 ```
@@ -352,9 +355,11 @@ transform.detach()
 设置变换模式。
 
 **参数：**
+
 - `mode` - 变换模式（TRANSLATE、ROTATE、SCALE）
 
 **示例：**
+
 ```typescript
 transform.setMode(TransformMode.ROTATE)
 ```
@@ -364,9 +369,11 @@ transform.setMode(TransformMode.ROTATE)
 设置坐标空间。
 
 **参数：**
+
 - `space` - 坐标空间（WORLD、LOCAL）
 
 **示例：**
+
 ```typescript
 transform.setSpace(TransformSpace.LOCAL)
 ```
@@ -376,9 +383,11 @@ transform.setSpace(TransformSpace.LOCAL)
 获取当前变换数据。
 
 **返回值：**
+
 - `TransformData` - 包含 position、rotation、scale 的对象
 
 **示例：**
+
 ```typescript
 const transform = transform.getTransform()
 ```
@@ -388,12 +397,14 @@ const transform = transform.getTransform()
 设置变换数据。
 
 **参数：**
+
 - `transform` - 部分或完整的变换数据
 
 **示例：**
+
 ```typescript
 transform.setTransform({
-  position: Cesium.Cartesian3.fromDegrees(116.39, 39.90, 100)
+  position: Cesium.Cartesian3.fromDegrees(116.39, 39.9, 100)
 })
 ```
 
@@ -405,9 +416,9 @@ transform.setTransform({
 
 ```typescript
 enum TransformMode {
-  TRANSLATE = 'translate',  // 平移
-  ROTATE = 'rotate',        // 旋转
-  SCALE = 'scale'           // 缩放
+  TRANSLATE = 'translate', // 平移
+  ROTATE = 'rotate', // 旋转
+  SCALE = 'scale' // 缩放
 }
 ```
 
@@ -417,8 +428,8 @@ enum TransformMode {
 
 ```typescript
 enum TransformSpace {
-  WORLD = 'world',  // 世界坐标系
-  LOCAL = 'local'   // 本地坐标系
+  WORLD = 'world', // 世界坐标系
+  LOCAL = 'local' // 本地坐标系
 }
 ```
 
@@ -428,13 +439,13 @@ enum TransformSpace {
 
 ```typescript
 enum Axis {
-  X = 'x',      // X 轴
-  Y = 'y',      // Y 轴
-  Z = 'z',      // Z 轴
-  XY = 'xy',    // XY 平面
-  YZ = 'yz',    // YZ 平面
-  XZ = 'xz',    // XZ 平面
-  XYZ = 'xyz'   // 全方向
+  X = 'x', // X 轴
+  Y = 'y', // Y 轴
+  Z = 'z', // Z 轴
+  XY = 'xy', // XY 平面
+  YZ = 'yz', // YZ 平面
+  XZ = 'xz', // XZ 平面
+  XYZ = 'xyz' // 全方向
 }
 ```
 
@@ -444,9 +455,9 @@ enum Axis {
 
 ```typescript
 interface TransformData {
-  position: Cartesian3    // 位置
-  rotation: Quaternion    // 旋转（四元数）
-  scale: Cartesian3       // 缩放
+  position: Cartesian3 // 位置
+  rotation: Quaternion // 旋转（四元数）
+  scale: Cartesian3 // 缩放
 }
 ```
 
@@ -456,14 +467,14 @@ interface TransformData {
 
 ```typescript
 interface TransformPluginOptions {
-  mode?: TransformMode           // 默认变换模式
-  space?: TransformSpace         // 默认坐标空间
-  showGizmo?: boolean            // 是否显示辅助轴
-  gizmoSize?: number             // 辅助轴大小
-  snap?: boolean                 // 是否启用吸附
-  translateSnap?: number         // 平移吸附值（米）
-  rotateSnap?: number            // 旋转吸附值（度）
-  scaleSnap?: number             // 缩放吸附值
+  mode?: TransformMode // 默认变换模式
+  space?: TransformSpace // 默认坐标空间
+  showGizmo?: boolean // 是否显示辅助轴
+  gizmoSize?: number // 辅助轴大小
+  snap?: boolean // 是否启用吸附
+  translateSnap?: number // 平移吸附值（米）
+  rotateSnap?: number // 旋转吸附值（度）
+  scaleSnap?: number // 缩放吸附值
 }
 ```
 
@@ -473,8 +484,8 @@ interface TransformPluginOptions {
 
 ```typescript
 interface TransformEventData {
-  entity: Entity           // 实体
-  mode: TransformMode      // 变换模式
+  entity: Entity // 实体
+  mode: TransformMode // 变换模式
   transform: TransformData // 变换数据
 }
 ```
@@ -483,32 +494,32 @@ interface TransformEventData {
 
 TransformPlugin 会触发以下事件（需要配合 EventPlugin 使用）：
 
-| 事件名 | 触发时机 | 事件数据 |
-|--------|---------|---------|
-| `transform-start` | 附加到实体时 | `TransformEventData` |
+| 事件名             | 触发时机       | 事件数据             |
+| ------------------ | -------------- | -------------------- |
+| `transform-start`  | 附加到实体时   | `TransformEventData` |
 | `transform-change` | 变换数据变化时 | `TransformEventData` |
-| `transform-end` | 分离实体时 | `TransformEventData` |
+| `transform-end`    | 分离实体时     | `TransformEventData` |
 
 ## 支持的实体类型
 
 TransformPlugin 支持所有具有 `position` 属性的 Cesium 实体：
 
-| 实体类型 | 支持说明 |
-|---------|---------|
-| Model | 完整支持平移、旋转、缩放 |
-| Point | 平移改变位置，旋转/缩放影响点属性 |
-| Billboard | 平移改变位置，缩放改变大小 |
-| Label | 平移改变位置，缩放改变大小 |
-| Polyline | 整体平移、旋转、缩放线段 |
-| Polygon | 整体平移、旋转、缩放多边形 |
-| Rectangle | 整体平移、旋转、缩放矩形 |
-| Ellipse/Circle | 整体平移、旋转、缩放椭圆/圆形 |
-| Corridor | 整体平移、旋转、缩放走廊 |
-| Wall | 整体平移、旋转、缩放墙体 |
-| Box | 整体平移、旋转、缩放立方体 |
-| Cylinder | 整体平移、旋转、缩放圆柱 |
-| Ellipsoid | 整体平移、旋转、缩放椭球 |
-| Plane | 整体平移、旋转、缩放平面 |
+| 实体类型       | 支持说明                          |
+| -------------- | --------------------------------- |
+| Model          | 完整支持平移、旋转、缩放          |
+| Point          | 平移改变位置，旋转/缩放影响点属性 |
+| Billboard      | 平移改变位置，缩放改变大小        |
+| Label          | 平移改变位置，缩放改变大小        |
+| Polyline       | 整体平移、旋转、缩放线段          |
+| Polygon        | 整体平移、旋转、缩放多边形        |
+| Rectangle      | 整体平移、旋转、缩放矩形          |
+| Ellipse/Circle | 整体平移、旋转、缩放椭圆/圆形     |
+| Corridor       | 整体平移、旋转、缩放走廊          |
+| Wall           | 整体平移、旋转、缩放墙体          |
+| Box            | 整体平移、旋转、缩放立方体        |
+| Cylinder       | 整体平移、旋转、缩放圆柱          |
+| Ellipsoid      | 整体平移、旋转、缩放椭球          |
+| Plane          | 整体平移、旋转、缩放平面          |
 
 ## 注意事项
 
@@ -558,7 +569,7 @@ let currentIndex = -1
 
 events.on('transform-change', (data) => {
   const transform = data.transform
-  history.splice(currentIndex + 1)  // 清除后续历史
+  history.splice(currentIndex + 1) // 清除后续历史
   history.push(JSON.parse(JSON.stringify(transform)))
   currentIndex++
 })
@@ -597,18 +608,10 @@ transform.attach(centerEntity)
 
 // 监听变换，同步应用到所有选中实体
 events.on('transform-change', (data) => {
-  const offset = Cesium.Cartesian3.subtract(
-    data.transform.position,
-    center,
-    new Cesium.Cartesian3()
-  )
+  const offset = Cesium.Cartesian3.subtract(data.transform.position, center, new Cesium.Cartesian3())
 
-  selectedEntities.forEach(entity => {
-    const newPos = Cesium.Cartesian3.add(
-      entity.position.getValue(now),
-      offset,
-      new Cesium.Cartesian3()
-    )
+  selectedEntities.forEach((entity) => {
+    const newPos = Cesium.Cartesian3.add(entity.position.getValue(now), offset, new Cesium.Cartesian3())
     entity.position = new Cesium.ConstantPositionProperty(newPos)
   })
 })
@@ -629,6 +632,7 @@ events.on('transform-change', (data) => {
 ## 更新日志
 
 ### v1.0.0
+
 - 首次发布
 - 支持平移、旋转、缩放三种模式
 - 支持世界坐标系和本地坐标系

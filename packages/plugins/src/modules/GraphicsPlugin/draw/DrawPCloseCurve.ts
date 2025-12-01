@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium'
 import { DrawPPolygonEx } from './DrawPPolygonEx'
-import { computeCloseCurvePositions } from '@ktd-cesium/shared'
+import { computeCloseCurvePositions } from '@auto-cesium/shared'
 
 /**
  * Primitive 方式的闭合曲面绘制类

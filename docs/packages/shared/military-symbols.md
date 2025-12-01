@@ -25,7 +25,7 @@ import {
   computeFineArrowPositions,
   // 集结地
   computeGatheringPlacePositions
-} from '@ktd-cesium/shared'
+} from '@auto-cesium/shared'
 ```
 
 ## API
@@ -52,7 +52,7 @@ function computeLunePositions(positions: Cesium.Cartesian3[], segments?: number)
 **示例**
 
 ```typescript
-import { computeLunePositions } from '@ktd-cesium/shared'
+import { computeLunePositions } from '@auto-cesium/shared'
 
 const positions = [
   Cesium.Cartesian3.fromDegrees(116.4, 39.9, 0),
@@ -92,7 +92,7 @@ function getLuneArcParams(positions: Cesium.Cartesian3[]): {
 **示例**
 
 ```typescript
-import { getLuneArcParams } from '@ktd-cesium/shared'
+import { getLuneArcParams } from '@auto-cesium/shared'
 
 const params = getLuneArcParams(positions)
 if (params) {
@@ -121,7 +121,7 @@ function computeRegularPositions(positions: Cesium.Cartesian3[], edgeCount?: num
 **示例**
 
 ```typescript
-import { computeRegularPositions } from '@ktd-cesium/shared'
+import { computeRegularPositions } from '@auto-cesium/shared'
 
 // 正六边形
 const positions = [
@@ -157,7 +157,7 @@ function computeSectorPositions(positions: Cesium.Cartesian3[], segments?: numbe
 **示例**
 
 ```typescript
-import { computeSectorPositions } from '@ktd-cesium/shared'
+import { computeSectorPositions } from '@auto-cesium/shared'
 
 const positions = [
   Cesium.Cartesian3.fromDegrees(116.4, 39.9, 0), // 中心
@@ -192,7 +192,7 @@ function computeIsoscelesTrianglePositions(positions: Cesium.Cartesian3[]): Cesi
 **示例**
 
 ```typescript
-import { computeIsoscelesTrianglePositions } from '@ktd-cesium/shared'
+import { computeIsoscelesTrianglePositions } from '@auto-cesium/shared'
 
 const positions = [
   Cesium.Cartesian3.fromDegrees(116.4, 40.0, 0), // 顶点
@@ -220,7 +220,7 @@ function computeAttackArrowPositions(positions: Cesium.Cartesian3[]): Cesium.Car
 **示例**
 
 ```typescript
-import { computeAttackArrowPositions } from '@ktd-cesium/shared'
+import { computeAttackArrowPositions } from '@auto-cesium/shared'
 
 const positions = [
   Cesium.Cartesian3.fromDegrees(116.4, 39.9, 0),
@@ -251,7 +251,7 @@ function computeDoubleArrowPositions(positions: Cesium.Cartesian3[]): Cesium.Car
 **示例**
 
 ```typescript
-import { computeDoubleArrowPositions } from '@ktd-cesium/shared'
+import { computeDoubleArrowPositions } from '@auto-cesium/shared'
 
 const positions = [Cesium.Cartesian3.fromDegrees(116.4, 39.9, 0), Cesium.Cartesian3.fromDegrees(116.5, 39.9, 0)]
 
@@ -271,7 +271,7 @@ function computeFineArrowPositions(positions: Cesium.Cartesian3[]): Cesium.Carte
 **示例**
 
 ```typescript
-import { computeFineArrowPositions } from '@ktd-cesium/shared'
+import { computeFineArrowPositions } from '@auto-cesium/shared'
 
 const positions = [Cesium.Cartesian3.fromDegrees(116.4, 39.9, 0), Cesium.Cartesian3.fromDegrees(116.5, 39.9, 0)]
 
@@ -296,7 +296,7 @@ function computeCloseCurvePositions(positions: Cesium.Cartesian3[], segments?: n
 **示例**
 
 ```typescript
-import { computeCloseCurvePositions } from '@ktd-cesium/shared'
+import { computeCloseCurvePositions } from '@auto-cesium/shared'
 
 const positions = [
   Cesium.Cartesian3.fromDegrees(116.4, 39.9, 0),
@@ -321,7 +321,7 @@ function computeGatheringPlacePositions(positions: Cesium.Cartesian3[]): Cesium.
 **示例**
 
 ```typescript
-import { computeGatheringPlacePositions } from '@ktd-cesium/shared'
+import { computeGatheringPlacePositions } from '@auto-cesium/shared'
 
 const positions = [Cesium.Cartesian3.fromDegrees(116.4, 39.9, 0), Cesium.Cartesian3.fromDegrees(116.5, 39.9, 0)]
 
@@ -333,7 +333,7 @@ const gatheringPositions = computeGatheringPlacePositions(positions)
 ### 场景 1：绘制攻击箭头
 
 ```typescript
-import { computeAttackArrowPositions } from '@ktd-cesium/shared'
+import { computeAttackArrowPositions } from '@auto-cesium/shared'
 
 function drawAttackArrow(waypoints: Cesium.Cartesian3[]) {
   const arrowPositions = computeAttackArrowPositions(waypoints)
@@ -362,7 +362,7 @@ drawAttackArrow(waypoints)
 ### 场景 2：绘制扇形区域
 
 ```typescript
-import { computeSectorPositions } from '@ktd-cesium/shared'
+import { computeSectorPositions } from '@auto-cesium/shared'
 
 function drawSector(center: Cesium.Cartesian3, startDir: Cesium.Cartesian3, endDir: Cesium.Cartesian3) {
   const positions = [center, startDir, endDir]
@@ -383,7 +383,7 @@ function drawSector(center: Cesium.Cartesian3, startDir: Cesium.Cartesian3, endD
 ### 场景 3：绘制正多边形
 
 ```typescript
-import { computeRegularPositions } from '@ktd-cesium/shared'
+import { computeRegularPositions } from '@auto-cesium/shared'
 
 function drawRegularPolygon(center: Cesium.Cartesian3, radius: number, sides: number) {
   // 计算边界点
@@ -409,7 +409,7 @@ function drawRegularPolygon(center: Cesium.Cartesian3, radius: number, sides: nu
 ### 场景 4：绘制弓形面
 
 ```typescript
-import { computeLunePositions, getLuneArcParams } from '@ktd-cesium/shared'
+import { computeLunePositions, getLuneArcParams } from '@auto-cesium/shared'
 
 function drawLune(p1: Cesium.Cartesian3, p2: Cesium.Cartesian3, p3: Cesium.Cartesian3) {
   const positions = [p1, p2, p3]

@@ -11,7 +11,7 @@ hero:
       link: /guide/getting-started
     - theme: alt
       text: 在 GitHub 上查看
-      link: https://github.com/your-repo/ktd-cesium
+      link: https://github.com/your-repo/auto-cesium
 
 features:
   - icon: 📦

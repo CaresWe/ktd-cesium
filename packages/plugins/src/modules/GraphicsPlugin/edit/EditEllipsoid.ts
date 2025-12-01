@@ -3,7 +3,7 @@ import { EditBase } from './EditBase'
 import type { ExtendedEntity } from './EditBase'
 import * as draggerCtl from './Dragger'
 import { defaultMessages } from '../../TooltipPlugin/messages'
-import { setPositionsHeight, addPositionsHeight } from '@ktd-cesium/shared'
+import { setPositionsHeight, addPositionsHeight } from '@auto-cesium/shared'
 import { getEllipseOuterPositions } from '../attr/AttrCircle'
 import type { EllipsoidEditStyle, EllipsoidEditEntity, EllipsoidDragger } from '../types'
 

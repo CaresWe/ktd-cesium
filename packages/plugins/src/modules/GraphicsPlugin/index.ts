@@ -1,5 +1,5 @@
 import { BasePlugin } from '../../BasePlugin'
-import type { KtdViewer } from '@ktd-cesium/core'
+import type { AutoViewer } from '@auto-cesium/core'
 import type { Viewer as CesiumViewer, Entity, CustomDataSource, PrimitiveCollection } from 'cesium'
 import * as Cesium from 'cesium'
 import type {
@@ -173,7 +173,7 @@ export class GraphicsPlugin extends BasePlugin {
   /** 变换控制器是否启用 */
   private transformEnabled = false
 
-  protected onInstall(viewer: KtdViewer, options?: GraphicsPluginOptions): void {
+  protected onInstall(viewer: AutoViewer, options?: GraphicsPluginOptions): void {
     this.options = options || {}
 
     // 获取事件插件

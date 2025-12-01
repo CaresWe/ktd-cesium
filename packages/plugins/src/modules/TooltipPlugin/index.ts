@@ -38,7 +38,7 @@ export function createTooltip(options: TooltipOptions): TooltipCore {
  * tooltip.showAt({ x: 100, y: 200 }, '<div>Hello World</div>')
  *
  * // 2. Vue 组件
- * import { VueRenderer } from '@ktd-cesium/plugins/TooltipPlugin'
+ * import { VueRenderer } from '@auto-cesium/plugins/TooltipPlugin'
  * import { createApp, h } from 'vue'
  * import MyComponent from './MyComponent.vue'
  *
@@ -57,7 +57,7 @@ export function createTooltip(options: TooltipOptions): TooltipCore {
  * })
  *
  * // 3. React 组件
- * import { ReactRenderer } from '@ktd-cesium/plugins/TooltipPlugin'
+ * import { ReactRenderer } from '@auto-cesium/plugins/TooltipPlugin'
  * import React from 'react'
  * import ReactDOM from 'react-dom/client'
  * import MyComponent from './MyComponent'

@@ -19,8 +19,8 @@
     "sourceMap": true,
     "baseUrl": ".",
     "paths": {
-      "@ktd-cesium/shared": ["./packages/shared/src"],
-      "@ktd-cesium/core": ["./packages/core/src"]
+      "@auto-cesium/shared": ["./packages/shared/src"],
+      "@auto-cesium/core": ["./packages/core/src"]
     }
   },
   "exclude": ["node_modules", "dist"]

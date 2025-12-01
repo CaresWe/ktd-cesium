@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium'
 import { DrawPPolygonEx } from './DrawPPolygonEx'
-import { computeSectorPositions } from '@ktd-cesium/shared'
+import { computeSectorPositions } from '@auto-cesium/shared'
 
 /**
  * Primitive 方式的扇形绘制类

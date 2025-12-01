@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium'
 import { EditPolygonEx } from './EditPolygonEx'
-import { computeSectorPositions } from '@ktd-cesium/shared'
+import { computeSectorPositions } from '@auto-cesium/shared'
 import type { ExtendedEntity } from './EditBase'
 import type { SectorEditEntity } from '../types/index'
 

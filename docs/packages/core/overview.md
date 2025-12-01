@@ -1,16 +1,16 @@
 # Core 包概述
 
-`@ktd-cesium/core` 是 KTD-Cesium 的核心功能包，提供了对 Cesium Viewer 的封装，并实现了强大的插件系统。
+`@auto-cesium/core` 是 KTD-Cesium 的核心功能包，提供了对 Cesium Viewer 的封装，并实现了强大的插件系统。
 
 ## 安装
 
 ```bash
-pnpm add @ktd-cesium/core @ktd-cesium/shared cesium
+pnpm add @auto-cesium/core @auto-cesium/shared cesium
 ```
 
 ## 特性
 
-- **KtdViewer**：对 Cesium.Viewer 的增强封装
+- **AutoViewer**：对 Cesium.Viewer 的增强封装
 - **插件系统**：支持动态加载和卸载插件
 - **Proxy 代理**：无缝访问 Cesium.Viewer 的所有属性和方法
 - **TypeScript 支持**：完整的类型定义
@@ -18,19 +18,19 @@ pnpm add @ktd-cesium/core @ktd-cesium/shared cesium
 
 ## 核心概念
 
-### KtdViewer
+### AutoViewer
 
-KtdViewer 是对 `Cesium.Viewer` 的封装，使用 Proxy 模式实现，既保留了 Cesium.Viewer 的所有功能，又增加了插件系统的支持。
+AutoViewer 是对 `Cesium.Viewer` 的封装，使用 Proxy 模式实现，既保留了 Cesium.Viewer 的所有功能，又增加了插件系统的支持。
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
+import { AutoViewer } from '@auto-cesium/core'
 import * as Cesium from 'cesium'
 
 // 创建原始 Cesium Viewer
 const cesiumViewer = new Cesium.Viewer('cesiumContainer')
 
-// 封装为 KtdViewer
-const viewer = new KtdViewer(cesiumViewer)
+// 封装为 AutoViewer
+const viewer = new AutoViewer(cesiumViewer)
 
 // 可以像使用 Cesium.Viewer 一样使用
 viewer.camera.flyTo({
@@ -43,13 +43,13 @@ viewer.use(SomePlugin)
 
 ### 插件系统
 
-插件系统允许你以模块化的方式扩展 KtdViewer 的功能。每个插件都是一个独立的类，实现了 `ViewerPlugin` 接口。
+插件系统允许你以模块化的方式扩展 AutoViewer 的功能。每个插件都是一个独立的类，实现了 `ViewerPlugin` 接口。
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import { BaseLayerPlugin, CameraPlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { BaseLayerPlugin, CameraPlugin } from '@auto-cesium/plugins'
 
-const viewer = new KtdViewer(cesiumViewer)
+const viewer = new AutoViewer(cesiumViewer)
 
 // 安装插件
 const baseLayer = viewer.use(BaseLayerPlugin)
@@ -62,7 +62,7 @@ camera.flyTo({...})
 
 ### Proxy 代理
 
-KtdViewer 使用 Proxy 模式，自动代理所有 Cesium.Viewer 的属性和方法。这意味着你可以：
+AutoViewer 使用 Proxy 模式，自动代理所有 Cesium.Viewer 的属性和方法。这意味着你可以：
 
 1. 直接访问 Cesium.Viewer 的所有属性
 2. 调用 Cesium.Viewer 的所有方法
@@ -74,14 +74,14 @@ viewer.scene.globe.enableLighting = true
 viewer.entities.add({...})
 viewer.camera.setView({...})
 
-// 同时保留 KtdViewer 的功能
+// 同时保留 AutoViewer 的功能
 viewer.use(Plugin)
 viewer.getPlugin('pluginName')
 ```
 
 ## 主要功能
 
-### [KtdViewer](/packages/core/viewer)
+### [AutoViewer](/packages/core/viewer)
 
 - 创建和配置 Viewer
 - 插件管理（安装、获取、卸载）
@@ -93,15 +93,15 @@ viewer.getPlugin('pluginName')
 ### 场景 1：基础使用
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
+import { AutoViewer } from '@auto-cesium/core'
 import * as Cesium from 'cesium'
 
 // 创建 Viewer
 const cesiumViewer = new Cesium.Viewer('cesiumContainer', {
-  terrain: Cesium.Terrain.fromWorldTerrain(),
+  terrain: Cesium.Terrain.fromWorldTerrain()
 })
 
-const viewer = new KtdViewer(cesiumViewer)
+const viewer = new AutoViewer(cesiumViewer)
 
 // 使用
 viewer.camera.flyTo({
@@ -112,13 +112,13 @@ viewer.camera.flyTo({
 ### 场景 2：预装插件
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import { BaseLayerPlugin, CameraPlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { BaseLayerPlugin, CameraPlugin } from '@auto-cesium/plugins'
 import * as Cesium from 'cesium'
 
 const cesiumViewer = new Cesium.Viewer('cesiumContainer')
 
-const viewer = new KtdViewer(cesiumViewer, {
+const viewer = new AutoViewer(cesiumViewer, {
   plugins: [BaseLayerPlugin, CameraPlugin]
 })
 
@@ -159,22 +159,22 @@ if (viewer.destroyed) {
 
 详细的 API 文档请查看：
 
-- [KtdViewer API](/packages/core/viewer)
+- [AutoViewer API](/packages/core/viewer)
 
 ## 与 Cesium.Viewer 的对比
 
-| 特性 | Cesium.Viewer | KtdViewer |
-|------|--------------|-----------|
-| 基础地图功能 | ✅ | ✅ |
-| 所有 Cesium API | ✅ | ✅ |
-| 插件系统 | ❌ | ✅ |
-| 统一生命周期管理 | ❌ | ✅ |
-| TypeScript 类型提示 | ✅ | ✅ |
-| 模块化扩展 | ❌ | ✅ |
+| 特性                | Cesium.Viewer | AutoViewer |
+| ------------------- | ------------- | ---------- |
+| 基础地图功能        | ✅            | ✅         |
+| 所有 Cesium API     | ✅            | ✅         |
+| 插件系统            | ❌            | ✅         |
+| 统一生命周期管理    | ❌            | ✅         |
+| TypeScript 类型提示 | ✅            | ✅         |
+| 模块化扩展          | ❌            | ✅         |
 
 ## 架构设计
 
-KtdViewer 采用以下设计模式：
+AutoViewer 采用以下设计模式：
 
 1. **包装器模式**：封装 Cesium.Viewer，提供额外功能
 2. **Proxy 模式**：透明代理，保持 API 兼容性
@@ -188,7 +188,7 @@ KtdViewer 采用以下设计模式：
 ```typescript
 // 在组件卸载或页面关闭时销毁
 useEffect(() => {
-  const viewer = new KtdViewer(cesiumViewer)
+  const viewer = new AutoViewer(cesiumViewer)
 
   return () => {
     viewer.destroy()
@@ -219,6 +219,6 @@ viewer.scene.globe.enableLighting = true
 
 ## 下一步
 
-- 了解 [KtdViewer 详细 API](/packages/core/viewer)
+- 了解 [AutoViewer 详细 API](/packages/core/viewer)
 - 探索 [Plugins 包](/packages/plugins/overview) 的可用插件
 - 查看 [Shared 包](/packages/shared/overview) 的工具函数

@@ -18,7 +18,7 @@ export default defineConfig({
       fileName: (format) => (format === 'es' ? 'index.js' : 'index.cjs')
     },
     rollupOptions: {
-      external: ['cesium', '@ktd-cesium/shared'],
+      external: ['cesium', '@auto-cesium/shared'],
       output: {
         globals: {
           cesium: 'Cesium'

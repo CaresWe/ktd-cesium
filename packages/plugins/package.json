@@ -1,5 +1,5 @@
 {
-  "name": "@ktd-cesium/plugins",
+  "name": "@auto-cesium/plugins",
   "version": "1.0.0",
   "description": "Cesium插件系统",
   "type": "module",
@@ -31,8 +31,8 @@
     "cesium": "^1.135.0"
   },
   "dependencies": {
-    "@ktd-cesium/core": "workspace:*",
-    "@ktd-cesium/shared": "workspace:*",
+    "@auto-cesium/core": "workspace:*",
+    "@auto-cesium/shared": "workspace:*",
     "@turf/turf": "^7.2.0"
   },
   "devDependencies": {

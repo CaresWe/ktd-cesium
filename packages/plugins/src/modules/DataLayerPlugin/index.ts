@@ -28,7 +28,7 @@ import {
   LabelStyle
 } from 'cesium'
 import { BasePlugin } from '../../BasePlugin'
-import type { KtdViewer } from '@ktd-cesium/core'
+import type { AutoViewer } from '@auto-cesium/core'
 import type { EventPlugin } from '../EventPlugin'
 import type { PopupPlugin } from '../PopupPlugin'
 import { PopupAlignment } from '../PopupPlugin/types'
@@ -71,7 +71,7 @@ export class DataLayerPlugin extends BasePlugin {
   /** Primitive 聚合管理 */
   private primitiveClusterListeners: Map<string, () => void> = new Map()
 
-  protected onInstall(viewer: KtdViewer): void {
+  protected onInstall(viewer: AutoViewer): void {
     try {
       // 获取事件插件和弹窗插件引用
       this.eventPlugin = viewer.getPlugin('event') as EventPlugin | undefined

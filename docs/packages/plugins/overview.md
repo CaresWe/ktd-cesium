@@ -1,11 +1,11 @@
 # Plugins 包概述
 
-`@ktd-cesium/plugins` 是 KTD-Cesium 的插件系统包，提供了一系列功能扩展插件，用于增强 KtdViewer 的能力。
+`@auto-cesium/plugins` 是 KTD-Cesium 的插件系统包，提供了一系列功能扩展插件，用于增强 AutoViewer 的能力。
 
 ## 安装
 
 ```bash
-pnpm add @ktd-cesium/plugins @ktd-cesium/core @ktd-cesium/shared cesium
+pnpm add @auto-cesium/plugins @auto-cesium/core @auto-cesium/shared cesium
 ```
 
 ## 特性
@@ -23,7 +23,7 @@ pnpm add @ktd-cesium/plugins @ktd-cesium/core @ktd-cesium/shared cesium
 所有插件的基类，提供了基础的插件功能。
 
 ```typescript
-import { BasePlugin } from '@ktd-cesium/plugins'
+import { BasePlugin } from '@auto-cesium/plugins'
 ```
 
 ### [BaseLayerPlugin](/packages/plugins/base-layer)
@@ -31,7 +31,7 @@ import { BasePlugin } from '@ktd-cesium/plugins'
 基础图层管理插件，提供常见的底图服务（天地图、高德、Google 等）。
 
 ```typescript
-import { BaseLayerPlugin } from '@ktd-cesium/plugins'
+import { BaseLayerPlugin } from '@auto-cesium/plugins'
 
 const baseLayer = viewer.use(BaseLayerPlugin)
 baseLayer.addLayer({
@@ -45,7 +45,7 @@ baseLayer.addLayer({
 相机控制插件，提供相机操作的便捷方法。
 
 ```typescript
-import { CameraPlugin } from '@ktd-cesium/plugins'
+import { CameraPlugin } from '@auto-cesium/plugins'
 
 const camera = viewer.use(CameraPlugin)
 camera.flyTo({
@@ -59,7 +59,7 @@ camera.flyTo({
 数据图层管理插件，用于管理各种数据图层（GeoJSON、KML 等）。
 
 ```typescript
-import { DataLayerPlugin } from '@ktd-cesium/plugins'
+import { DataLayerPlugin } from '@auto-cesium/plugins'
 
 const dataLayer = viewer.use(DataLayerPlugin)
 dataLayer.addGeoJSON(url, options)
@@ -70,7 +70,7 @@ dataLayer.addGeoJSON(url, options)
 事件处理插件，简化 Cesium 事件监听。
 
 ```typescript
-import { EventPlugin } from '@ktd-cesium/plugins'
+import { EventPlugin } from '@auto-cesium/plugins'
 
 const events = viewer.use(EventPlugin)
 events.on('click', (event) => {
@@ -83,7 +83,7 @@ events.on('click', (event) => {
 弹窗管理插件，用于在地图上显示信息窗口。
 
 ```typescript
-import { PopupPlugin } from '@ktd-cesium/plugins'
+import { PopupPlugin } from '@auto-cesium/plugins'
 
 const popup = viewer.use(PopupPlugin)
 popup.show({
@@ -97,7 +97,7 @@ popup.show({
 标绘插件，提供点、线、面、圆、矩形等图形绘制和编辑功能。
 
 ```typescript
-import { GraphicsPlugin } from '@ktd-cesium/plugins'
+import { GraphicsPlugin } from '@auto-cesium/plugins'
 
 const graphics = viewer.use(GraphicsPlugin)
 
@@ -117,7 +117,7 @@ graphics.draw.polygon({
 3D Tiles 模型插件，支持模型加载、裁剪分析、淹没分析、天气效果等高级功能。
 
 ```typescript
-import { TilesPlugin } from '@ktd-cesium/plugins'
+import { TilesPlugin } from '@auto-cesium/plugins'
 
 const tiles = viewer.use(TilesPlugin)
 
@@ -138,7 +138,7 @@ layer.enableRainDrops({ intensity: 0.7 })
 场景特效插件，提供雨、雪、雾、闪电、高度雾、局部下雨等天气和环境效果。
 
 ```typescript
-import { ScenePlugin } from '@ktd-cesium/plugins'
+import { ScenePlugin } from '@auto-cesium/plugins'
 
 const scene = viewer.use(ScenePlugin)
 
@@ -165,7 +165,7 @@ scene.addLocalRain({
 分析插件，提供量算功能，支持空间距离、水平面积、高度差、坐标测量、贴地距离、贴地面积、三角测量、方位角等多种测量类型。
 
 ```typescript
-import { AnalysisPlugin } from '@ktd-cesium/plugins'
+import { AnalysisPlugin } from '@auto-cesium/plugins'
 
 const analysis = viewer.use(AnalysisPlugin)
 
@@ -183,7 +183,7 @@ analysis.startMeasure({
 材质插件，提供自定义 Cesium 材质，包括水面材质、线状流动材质、圆形波纹材质、视频材质等。
 
 ```typescript
-import { createWaterMaterial, LineFlowMaterial } from '@ktd-cesium/plugins'
+import { createWaterMaterial, LineFlowMaterial } from '@auto-cesium/plugins'
 
 // 创建水面材质
 const waterMaterial = createWaterMaterial({
@@ -211,7 +211,7 @@ interface ViewerPlugin {
   readonly installed: boolean
 
   /** 安装插件 */
-  install(viewer: KtdViewer): void | Promise<void>
+  install(viewer: AutoViewer): void | Promise<void>
 
   /** 销毁插件 */
   destroy?(): void | Promise<void>
@@ -223,11 +223,11 @@ interface ViewerPlugin {
 ### 基础用法
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import { BaseLayerPlugin, CameraPlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { BaseLayerPlugin, CameraPlugin } from '@auto-cesium/plugins'
 
 // 创建 Viewer
-const viewer = new KtdViewer(cesiumViewer)
+const viewer = new AutoViewer(cesiumViewer)
 
 // 安装插件
 const baseLayer = viewer.use(BaseLayerPlugin)
@@ -241,11 +241,11 @@ camera.flyTo({...})
 ### 预装插件
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import { BaseLayerPlugin, CameraPlugin, EventPlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { BaseLayerPlugin, CameraPlugin, EventPlugin } from '@auto-cesium/plugins'
 
 // 在创建时预装插件
-const viewer = new KtdViewer(cesiumViewer, {
+const viewer = new AutoViewer(cesiumViewer, {
   plugins: [BaseLayerPlugin, CameraPlugin, EventPlugin]
 })
 
@@ -273,13 +273,13 @@ if (needsPopup) {
 你可以通过继承 `BasePlugin` 来创建自己的插件：
 
 ```typescript
-import { BasePlugin } from '@ktd-cesium/plugins'
-import type { KtdViewer } from '@ktd-cesium/core'
+import { BasePlugin } from '@auto-cesium/plugins'
+import type { AutoViewer } from '@auto-cesium/core'
 
 export class MyCustomPlugin extends BasePlugin {
   static readonly pluginName = 'MyCustomPlugin'
 
-  install(viewer: KtdViewer): void {
+  install(viewer: AutoViewer): void {
     super.install(viewer)
 
     // 初始化插件功能
@@ -313,7 +313,7 @@ myPlugin.doSomething()
 多个插件可以协同工作：
 
 ```typescript
-import { BaseLayerPlugin, CameraPlugin, EventPlugin, PopupPlugin } from '@ktd-cesium/plugins'
+import { BaseLayerPlugin, CameraPlugin, EventPlugin, PopupPlugin } from '@auto-cesium/plugins'
 
 // 安装多个插件
 const baseLayer = viewer.use(BaseLayerPlugin)
@@ -347,12 +347,12 @@ events.on('click', (event) => {
 
 ```typescript
 // 好的做法
-const viewer = new KtdViewer(cesiumViewer, {
+const viewer = new AutoViewer(cesiumViewer, {
   plugins: [BaseLayerPlugin] // 只加载需要的插件
 })
 
 // 避免
-const viewer = new KtdViewer(cesiumViewer, {
+const viewer = new AutoViewer(cesiumViewer, {
   plugins: [
     /* 加载所有插件 */
   ] // 可能造成浪费
@@ -365,7 +365,7 @@ const viewer = new KtdViewer(cesiumViewer, {
 class PluginManager {
   private plugins = new Map()
 
-  install(viewer: KtdViewer, plugins: ViewerPluginConstructor[]) {
+  install(viewer: AutoViewer, plugins: ViewerPluginConstructor[]) {
     plugins.forEach((Plugin) => {
       const instance = viewer.use(Plugin)
       this.plugins.set(Plugin.pluginName, instance)

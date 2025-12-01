@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { KtdViewer } from '../../src/viewer/KtdViewer'
+import { AutoViewer } from '../../src/viewer/AutoViewer'
 import type { Viewer as CesiumViewer } from 'cesium'
-import type { ViewerPlugin, ViewerPluginConstructor, KtdViewer as KtdViewerType } from '../../src/viewer/types'
+import type { ViewerPlugin, ViewerPluginConstructor, AutoViewer as AutoViewerType } from '../../src/viewer/types'
 
 // Mock Cesium Viewer
 const createMockViewer = (): CesiumViewer => {
@@ -38,7 +38,7 @@ class MockPlugin implements ViewerPlugin {
   name = 'mockPlugin'
   installed = false
 
-  install = vi.fn((_viewer: KtdViewerType) => {
+  install = vi.fn((_viewer: AutoViewerType) => {
     this.installed = true
     return undefined
   })
@@ -49,13 +49,13 @@ class MockPlugin implements ViewerPlugin {
   })
 }
 
-describe('KtdViewer', () => {
+describe('AutoViewer', () => {
   let mockCesiumViewer: CesiumViewer
-  let ktdViewer: KtdViewerType
+  let ktdViewer: AutoViewerType
 
   beforeEach(() => {
     mockCesiumViewer = createMockViewer()
-    ktdViewer = new KtdViewer(mockCesiumViewer) as unknown as KtdViewerType
+    ktdViewer = new AutoViewer(mockCesiumViewer) as unknown as AutoViewerType
   })
 
   afterEach(() => {
@@ -63,7 +63,7 @@ describe('KtdViewer', () => {
   })
 
   describe('构造函数', () => {
-    it('应该正确创建 KtdViewer 实例', () => {
+    it('应该正确创建 AutoViewer 实例', () => {
       expect(ktdViewer).toBeDefined()
       expect(ktdViewer.plugins).toBeInstanceOf(Map)
       expect(ktdViewer.plugins.size).toBe(0)
@@ -71,14 +71,14 @@ describe('KtdViewer', () => {
 
     it('应该代理 Cesium Viewer 的属性', () => {
       // 通过 Proxy,可以访问原始 viewer 的属性
-      const viewer = ktdViewer as KtdViewerType & CesiumViewer
+      const viewer = ktdViewer as AutoViewerType & CesiumViewer
       expect(viewer.scene).toBeDefined()
       expect(viewer.camera).toBeDefined()
       expect(viewer.canvas).toBeDefined()
     })
 
     it('应该能设置 Cesium Viewer 的属性', () => {
-      const viewer = ktdViewer as KtdViewerType & CesiumViewer
+      const viewer = ktdViewer as AutoViewerType & CesiumViewer
       const customValue = 'test-value'
 
       // 设置一个自定义属性到 viewer
@@ -89,7 +89,7 @@ describe('KtdViewer', () => {
     })
 
     it('应该安装预设插件', () => {
-      const viewer = new KtdViewer(createMockViewer(), {
+      const viewer = new AutoViewer(createMockViewer(), {
         plugins: [MockPlugin as ViewerPluginConstructor]
       })
 
@@ -98,7 +98,7 @@ describe('KtdViewer', () => {
     })
 
     it('应该处理空的预设插件数组', () => {
-      const viewer = new KtdViewer(createMockViewer(), {
+      const viewer = new AutoViewer(createMockViewer(), {
         plugins: []
       })
 
@@ -106,7 +106,7 @@ describe('KtdViewer', () => {
     })
 
     it('应该处理没有预设插件的选项', () => {
-      const viewer = new KtdViewer(createMockViewer(), {})
+      const viewer = new AutoViewer(createMockViewer(), {})
 
       expect(viewer.plugins.size).toBe(0)
     })
@@ -142,7 +142,7 @@ describe('KtdViewer', () => {
         name = 'syncPlugin'
         installed = false
 
-        install = vi.fn((_viewer: KtdViewerType) => {
+        install = vi.fn((_viewer: AutoViewerType) => {
           this.installed = true
           // 返回 undefined (同步)
         })
@@ -161,7 +161,7 @@ describe('KtdViewer', () => {
         name = 'asyncPlugin'
         installed = false
 
-        install = vi.fn((_viewer: KtdViewerType) => {
+        install = vi.fn((_viewer: AutoViewerType) => {
           return Promise.resolve().then(() => {
             this.installed = true
           })
@@ -380,7 +380,7 @@ describe('KtdViewer', () => {
       const mockIsDestroyed = alreadyDestroyedViewer.isDestroyed as ReturnType<typeof vi.fn>
       mockIsDestroyed.mockReturnValue(true)
 
-      const viewer = new KtdViewer(alreadyDestroyedViewer)
+      const viewer = new AutoViewer(alreadyDestroyedViewer)
       const mockDestroy = alreadyDestroyedViewer.destroy as ReturnType<typeof vi.fn>
 
       viewer.destroy()
@@ -397,7 +397,7 @@ describe('KtdViewer', () => {
     })
 
     it('原始 Cesium Viewer 应该与代理的属性一致', () => {
-      const viewer = ktdViewer as KtdViewerType & CesiumViewer
+      const viewer = ktdViewer as AutoViewerType & CesiumViewer
       expect(ktdViewer.cesiumViewer.scene).toBe(viewer.scene)
       expect(ktdViewer.cesiumViewer.camera).toBe(viewer.camera)
     })
@@ -405,7 +405,7 @@ describe('KtdViewer', () => {
 
   describe('Proxy 行为', () => {
     it('应该能调用 Cesium Viewer 的方法', () => {
-      const viewer = ktdViewer as KtdViewerType & CesiumViewer
+      const viewer = ktdViewer as AutoViewerType & CesiumViewer
       const mockMethod = vi.fn()
       mockCesiumViewer.isDestroyed = mockMethod
 
@@ -415,7 +415,7 @@ describe('KtdViewer', () => {
     })
 
     it('应该正确绑定 this 到原始 viewer', () => {
-      const viewer = ktdViewer as KtdViewerType & CesiumViewer
+      const viewer = ktdViewer as AutoViewerType & CesiumViewer
       const mockIsDestroyed = mockCesiumViewer.isDestroyed as ReturnType<typeof vi.fn>
 
       viewer.isDestroyed()
@@ -424,16 +424,16 @@ describe('KtdViewer', () => {
       expect(mockIsDestroyed).toHaveBeenCalled()
     })
 
-    it('应该能获取 KtdViewer 自己的属性优先', () => {
+    it('应该能获取 AutoViewer 自己的属性优先', () => {
       expect(ktdViewer.plugins).toBeDefined()
       expect(ktdViewer.plugins).toBeInstanceOf(Map)
     })
 
     it('应该能通过 Proxy 设置 Cesium Viewer 的属性', () => {
-      const viewer = ktdViewer as KtdViewerType & CesiumViewer
+      const viewer = ktdViewer as AutoViewerType & CesiumViewer
       const customProperty = { custom: 'value' }
 
-      // 设置一个不存在于 KtdViewer 的属性，应该被代理到 cesiumViewer
+      // 设置一个不存在于 AutoViewer 的属性，应该被代理到 cesiumViewer
       ;(viewer as unknown as Record<string, unknown>).customProp = customProperty
 
       expect((viewer as unknown as Record<string, unknown>).customProp).toBe(customProperty)

@@ -21,12 +21,12 @@ export default defineConfig({
       fileName: (format) => (format === 'es' ? 'index.js' : 'index.cjs')
     },
     rollupOptions: {
-      external: ['cesium', '@ktd-cesium/core', '@ktd-cesium/shared', 'vue', 'react', 'react-dom', 'react-dom/client'],
+      external: ['cesium', '@auto-cesium/core', '@auto-cesium/shared', 'vue', 'react', 'react-dom', 'react-dom/client'],
       output: {
         globals: {
           cesium: 'Cesium',
-          '@ktd-cesium/core': 'KtdCesiumCore',
-          '@ktd-cesium/shared': 'KtdCesiumShared',
+          '@auto-cesium/core': 'KtdCesiumCore',
+          '@auto-cesium/shared': 'KtdCesiumShared',
           vue: 'Vue',
           react: 'React',
           'react-dom': 'ReactDOM'

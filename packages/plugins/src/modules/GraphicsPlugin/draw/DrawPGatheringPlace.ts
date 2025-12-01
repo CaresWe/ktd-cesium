@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium'
 import { DrawPPolygonEx } from './DrawPPolygonEx'
-import { computeGatheringPlacePositions } from '@ktd-cesium/shared'
+import { computeGatheringPlacePositions } from '@auto-cesium/shared'
 
 /**
  * Primitive 方式的集结地绘制类

@@ -5,13 +5,7 @@
 ## 导入
 
 ```typescript
-import {
-  hexToColor,
-  rgbToColor,
-  rgbaToColor,
-  lerpColor,
-  colorToRgb
-} from '@ktd-cesium/shared'
+import { hexToColor, rgbToColor, rgbaToColor, lerpColor, colorToRgb } from '@auto-cesium/shared'
 ```
 
 ## API
@@ -38,11 +32,11 @@ function hexToColor(hex: string, alpha?: number): Cesium.Color
 **示例**
 
 ```typescript
-import { hexToColor } from '@ktd-cesium/shared'
+import { hexToColor } from '@auto-cesium/shared'
 
 // 完全不透明的红色
 const red = hexToColor('#ff0000')
-const red2 = hexToColor('#f00')  // 简写形式
+const red2 = hexToColor('#f00') // 简写形式
 
 // 半透明的蓝色
 const blue = hexToColor('#0000ff', 0.5)
@@ -80,7 +74,7 @@ function rgbToColor(r: number, g: number, b: number): Cesium.Color
 **示例**
 
 ```typescript
-import { rgbToColor } from '@ktd-cesium/shared'
+import { rgbToColor } from '@auto-cesium/shared'
 
 const red = rgbToColor(255, 0, 0)
 const green = rgbToColor(0, 255, 0)
@@ -94,12 +88,7 @@ const purple = rgbToColor(128, 0, 128)
 **类型签名**
 
 ```typescript
-function rgbaToColor(
-  r: number,
-  g: number,
-  b: number,
-  a: number
-): Cesium.Color
+function rgbaToColor(r: number, g: number, b: number, a: number): Cesium.Color
 ```
 
 **参数**
@@ -116,7 +105,7 @@ function rgbaToColor(
 **示例**
 
 ```typescript
-import { rgbaToColor } from '@ktd-cesium/shared'
+import { rgbaToColor } from '@auto-cesium/shared'
 
 const semiTransparentRed = rgbaToColor(255, 0, 0, 0.5)
 const transparentGreen = rgbaToColor(0, 255, 0, 0.3)
@@ -129,11 +118,7 @@ const transparentGreen = rgbaToColor(0, 255, 0, 0.3)
 **类型签名**
 
 ```typescript
-function lerpColor(
-  startColor: Cesium.Color,
-  endColor: Cesium.Color,
-  t: number
-): Cesium.Color
+function lerpColor(startColor: Cesium.Color, endColor: Cesium.Color, t: number): Cesium.Color
 ```
 
 **参数**
@@ -149,7 +134,7 @@ function lerpColor(
 **示例**
 
 ```typescript
-import { hexToColor, lerpColor } from '@ktd-cesium/shared'
+import { hexToColor, lerpColor } from '@auto-cesium/shared'
 
 const red = hexToColor('#ff0000')
 const blue = hexToColor('#0000ff')
@@ -194,7 +179,7 @@ function colorToRgb(color: Cesium.Color): {
 **示例**
 
 ```typescript
-import { hexToColor, colorToRgb } from '@ktd-cesium/shared'
+import { hexToColor, colorToRgb } from '@auto-cesium/shared'
 
 const color = hexToColor('#ff6b6b', 0.8)
 const rgb = colorToRgb(color)
@@ -208,15 +193,15 @@ console.log(rgb)
 ### 场景 1：热力图颜色映射
 
 ```typescript
-import { hexToColor, lerpColor, mapRange } from '@ktd-cesium/shared'
+import { hexToColor, lerpColor, mapRange } from '@auto-cesium/shared'
 
 function getHeatColor(value, min, max) {
   // 定义颜色范围：蓝色（低）-> 绿色 -> 黄色 -> 红色（高）
   const colors = [
-    hexToColor('#0000ff'),  // 蓝色
-    hexToColor('#00ff00'),  // 绿色
-    hexToColor('#ffff00'),  // 黄色
-    hexToColor('#ff0000'),  // 红色
+    hexToColor('#0000ff'), // 蓝色
+    hexToColor('#00ff00'), // 绿色
+    hexToColor('#ffff00'), // 黄色
+    hexToColor('#ff0000') // 红色
   ]
 
   // 将值映射到 0-1 范围
@@ -240,7 +225,7 @@ const color = getHeatColor(75, 0, 100)
 ### 场景 2：动态改变实体颜色
 
 ```typescript
-import { hexToColor, lerpColor } from '@ktd-cesium/shared'
+import { hexToColor, lerpColor } from '@auto-cesium/shared'
 
 class BlinkingEntity {
   constructor(viewer, position) {
@@ -261,11 +246,7 @@ class BlinkingEntity {
     this.progress += deltaTime * 0.001
     const t = (Math.sin(this.progress) + 1) / 2
 
-    this.entity.point.color = lerpColor(
-      this.startColor,
-      this.endColor,
-      t
-    )
+    this.entity.point.color = lerpColor(this.startColor, this.endColor, t)
   }
 }
 ```
@@ -273,7 +254,7 @@ class BlinkingEntity {
 ### 场景 3：根据高度设置颜色
 
 ```typescript
-import { hexToColor, lerpColor, mapRange } from '@ktd-cesium/shared'
+import { hexToColor, lerpColor, mapRange } from '@auto-cesium/shared'
 
 function addHeightColoredEntity(viewer, longitude, latitude, height) {
   // 高度范围：0-10000 米
@@ -284,11 +265,7 @@ function addHeightColoredEntity(viewer, longitude, latitude, height) {
   const color = lerpColor(lowColor, highColor, t)
 
   viewer.entities.add({
-    position: Cesium.Cartesian3.fromDegrees(
-      longitude,
-      latitude,
-      height
-    ),
+    position: Cesium.Cartesian3.fromDegrees(longitude, latitude, height),
     point: {
       pixelSize: 8,
       color: color
@@ -300,7 +277,7 @@ function addHeightColoredEntity(viewer, longitude, latitude, height) {
 ### 场景 4：颜色主题切换
 
 ```typescript
-import { hexToColor } from '@ktd-cesium/shared'
+import { hexToColor } from '@auto-cesium/shared'
 
 const themes = {
   light: {
@@ -308,14 +285,14 @@ const themes = {
     primary: hexToColor('#007bff'),
     secondary: hexToColor('#6c757d'),
     success: hexToColor('#28a745'),
-    danger: hexToColor('#dc3545'),
+    danger: hexToColor('#dc3545')
   },
   dark: {
     background: hexToColor('#212529'),
     primary: hexToColor('#0d6efd'),
     secondary: hexToColor('#6c757d'),
     success: hexToColor('#198754'),
-    danger: hexToColor('#dc3545'),
+    danger: hexToColor('#dc3545')
   }
 }
 
@@ -332,7 +309,7 @@ function applyTheme(viewer, themeName) {
 ### 场景 5：渐变线段
 
 ```typescript
-import { hexToColor, lerpColor } from '@ktd-cesium/shared'
+import { hexToColor, lerpColor } from '@auto-cesium/shared'
 
 function createGradientPolyline(viewer, positions) {
   const startColor = hexToColor('#ff0000')

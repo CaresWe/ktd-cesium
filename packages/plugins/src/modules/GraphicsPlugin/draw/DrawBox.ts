@@ -3,7 +3,7 @@ import { DrawPoint } from './DrawPoint'
 import type { AttrClass, EditClassConstructor, BoxDrawAttribute, BoxExtendedEntity } from '../types'
 import * as attr from '../attr/AttrBox'
 import { EditBox } from '../edit/EditBox'
-import { getCurrentMousePosition } from '@ktd-cesium/shared'
+import { getCurrentMousePosition } from '@auto-cesium/shared'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import { GraphicsEventType } from '../../EventPlugin'
 

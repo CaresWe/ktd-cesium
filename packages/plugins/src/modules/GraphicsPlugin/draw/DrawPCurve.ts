@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium'
 import { DrawPPolyline } from './DrawPPolyline'
-import { line2curve } from '@ktd-cesium/shared'
+import { line2curve } from '@auto-cesium/shared'
 import type { CurvePrimitiveAttribute } from '../types'
 
 /**

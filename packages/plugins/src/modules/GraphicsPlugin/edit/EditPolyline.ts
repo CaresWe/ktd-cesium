@@ -2,8 +2,8 @@ import * as Cesium from 'cesium'
 import { EditBase, type ExtendedEntity } from './EditBase'
 import * as draggerCtl from './Dragger'
 import { defaultMessages } from '../../TooltipPlugin/messages'
-import { setPositionsHeight, getMaxHeight } from '@ktd-cesium/shared'
-import { formatNum } from '@ktd-cesium/shared'
+import { setPositionsHeight, getMaxHeight } from '@auto-cesium/shared'
+import { formatNum } from '@auto-cesium/shared'
 
 /**
  * 计算质心（中心点）

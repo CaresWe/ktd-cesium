@@ -9,7 +9,7 @@ import {
   Entity
 } from 'cesium'
 import type { FlattenConfig, EntityFlattenConfig } from './types'
-import type { KtdViewer } from '@ktd-cesium/core'
+import type { AutoViewer } from '@auto-cesium/core'
 import type { GraphicsPlugin } from '../GraphicsPlugin'
 
 /**
@@ -18,13 +18,13 @@ import type { GraphicsPlugin } from '../GraphicsPlugin'
  */
 export class FlattenManager {
   private tileset: Cesium3DTileset
-  private _viewer?: KtdViewer
+  private _viewer?: AutoViewer
   private graphicsPlugin?: GraphicsPlugin
   private config: FlattenConfig | null = null
   private _entityConfig: EntityFlattenConfig | null = null
   private clippingPlanes: ClippingPlaneCollection | null = null
 
-  constructor(tileset: Cesium3DTileset, viewer?: KtdViewer) {
+  constructor(tileset: Cesium3DTileset, viewer?: AutoViewer) {
     this.tileset = tileset
     this._viewer = viewer
     if (viewer) {

@@ -1,10 +1,10 @@
 import * as Cesium from 'cesium'
-import { isNumber } from '@ktd-cesium/shared'
+import { isNumber } from '@auto-cesium/shared'
 import { DrawPolyline } from './DrawPolyline'
 import type { AttrClass, EditClassConstructor, CorridorDrawAttribute, CorridorExtendedEntity } from '../types'
 import * as attr from '../attr/AttrCorridor'
 import { EditCorridor } from '../edit/EditCorridor'
-import { getMaxHeight } from '@ktd-cesium/shared'
+import { getMaxHeight } from '@auto-cesium/shared'
 import type { EditBase } from '../edit/EditBase'
 
 /**

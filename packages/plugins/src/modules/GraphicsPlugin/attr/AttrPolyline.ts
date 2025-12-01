@@ -1,5 +1,5 @@
 import * as Cesium from 'cesium'
-import { cartesians2lonlats, cartesian2lonlat, lonlats2cartesians } from '@ktd-cesium/shared'
+import { cartesians2lonlats, cartesian2lonlat, lonlats2cartesians } from '@auto-cesium/shared'
 import { bezierSpline } from '@turf/turf'
 
 // Type definitions

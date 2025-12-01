@@ -16,7 +16,7 @@ import {
   formatPosition,
   getCurrentMousePosition,
   defConfigStyle
-} from '@ktd-cesium/shared'
+} from '@auto-cesium/shared'
 ```
 
 ## API
@@ -42,7 +42,7 @@ function removeGeoJsonDefVal(geojson: GeoJSONFeature): GeoJSONFeature
 **示例**
 
 ```typescript
-import { removeGeoJsonDefVal } from '@ktd-cesium/shared'
+import { removeGeoJsonDefVal } from '@auto-cesium/shared'
 
 const geojson = {
   type: 'Feature',
@@ -85,7 +85,7 @@ function addGeoJsonDefVal(properties: GeoJSONFeature['properties']): GeoJSONFeat
 **示例**
 
 ```typescript
-import { addGeoJsonDefVal } from '@ktd-cesium/shared'
+import { addGeoJsonDefVal } from '@auto-cesium/shared'
 
 const properties = {
   type: 'point',
@@ -122,7 +122,7 @@ function getDefStyle(type: string, style?: StyleConfig): StyleConfig
 **示例**
 
 ```typescript
-import { getDefStyle } from '@ktd-cesium/shared'
+import { getDefStyle } from '@auto-cesium/shared'
 
 // 获取点的默认样式
 const defaultPointStyle = getDefStyle('point')
@@ -159,7 +159,7 @@ function getPositionByGeoJSON(
 **示例**
 
 ```typescript
-import { getPositionByGeoJSON } from '@ktd-cesium/shared'
+import { getPositionByGeoJSON } from '@auto-cesium/shared'
 
 // Point
 const pointGeoJSON = {
@@ -215,7 +215,7 @@ function formatPosition(position: Cesium.Cartesian3): { x: number; y: number; z:
 **示例**
 
 ```typescript
-import { formatPosition } from '@ktd-cesium/shared'
+import { formatPosition } from '@auto-cesium/shared'
 
 const position = Cesium.Cartesian3.fromDegrees(116.4074, 39.9042, 100)
 const formatted = formatPosition(position)
@@ -249,7 +249,7 @@ function getCurrentMousePosition(
 **示例**
 
 ```typescript
-import { getCurrentMousePosition } from '@ktd-cesium/shared'
+import { getCurrentMousePosition } from '@auto-cesium/shared'
 
 viewer.screenSpaceEventHandler.setInputAction((movement) => {
   const cartesian = getCurrentMousePosition(viewer.scene, movement.endPosition)
@@ -302,7 +302,7 @@ const defConfigStyle: {
 **示例**
 
 ```typescript
-import { defConfigStyle } from '@ktd-cesium/shared'
+import { defConfigStyle } from '@auto-cesium/shared'
 
 // 获取点的默认样式
 const pointStyle = defConfigStyle.point
@@ -317,7 +317,7 @@ const polylineStyle = defConfigStyle.polyline
 ### 场景 1：加载 GeoJSON 并创建实体
 
 ```typescript
-import { getPositionByGeoJSON, getDefStyle } from '@ktd-cesium/shared'
+import { getPositionByGeoJSON, getDefStyle } from '@auto-cesium/shared'
 
 function loadGeoJSON(geojson: GeoJSONFeature) {
   const positions = getPositionByGeoJSON(geojson.geometry)
@@ -350,7 +350,7 @@ function loadGeoJSON(geojson: GeoJSONFeature) {
 ### 场景 2：导出 GeoJSON 并清理默认值
 
 ```typescript
-import { removeGeoJsonDefVal } from '@ktd-cesium/shared'
+import { removeGeoJsonDefVal } from '@auto-cesium/shared'
 
 function exportEntityAsGeoJSON(entity: Cesium.Entity): GeoJSONFeature {
   const geojson = {
@@ -376,7 +376,7 @@ function exportEntityAsGeoJSON(entity: Cesium.Entity): GeoJSONFeature {
 ### 场景 3：鼠标拾取位置
 
 ```typescript
-import { getCurrentMousePosition, formatPosition } from '@ktd-cesium/shared'
+import { getCurrentMousePosition, formatPosition } from '@auto-cesium/shared'
 
 viewer.screenSpaceEventHandler.setInputAction((click) => {
   const cartesian = getCurrentMousePosition(viewer.scene, click.position)
@@ -395,7 +395,7 @@ viewer.screenSpaceEventHandler.setInputAction((click) => {
 ### 场景 4：批量处理 GeoJSON
 
 ```typescript
-import { addGeoJsonDefVal, getPositionByGeoJSON } from '@ktd-cesium/shared'
+import { addGeoJsonDefVal, getPositionByGeoJSON } from '@auto-cesium/shared'
 
 function processGeoJSONCollection(features: GeoJSONFeature[]) {
   return features.map((feature) => {
@@ -418,7 +418,7 @@ function processGeoJSONCollection(features: GeoJSONFeature[]) {
 ### 场景 5：自定义样式合并
 
 ```typescript
-import { getDefStyle } from '@ktd-cesium/shared'
+import { getDefStyle } from '@auto-cesium/shared'
 
 function createStyledEntity(type: string, customStyle: StyleConfig) {
   // 获取合并后的样式（自定义样式覆盖默认值）

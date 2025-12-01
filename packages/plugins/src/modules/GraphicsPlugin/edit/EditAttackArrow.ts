@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium'
 import { EditPolygonEx } from './EditPolygonEx'
-import { computeAttackArrowPositions } from '@ktd-cesium/shared'
+import { computeAttackArrowPositions } from '@auto-cesium/shared'
 import type { ExtendedEntity } from './EditBase'
 import type { AttackArrowEditEntity } from '../types/index'
 

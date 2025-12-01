@@ -1,7 +1,7 @@
 import * as Cesium from 'cesium'
 import { DrawBase } from './DrawBase'
 import type { AttrClass, PolylineDrawAttribute, PolylineExtendedEntity } from '../types'
-import { getCurrentMousePosition, addPositionsHeight } from '@ktd-cesium/shared'
+import { getCurrentMousePosition, addPositionsHeight } from '@auto-cesium/shared'
 import { GraphicsEventType } from '../../EventPlugin'
 import { defaultMessages } from '../../TooltipPlugin/messages'
 import * as attr from '../attr/AttrPolyline'

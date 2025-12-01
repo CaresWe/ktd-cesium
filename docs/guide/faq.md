@@ -9,10 +9,10 @@
 A: 使用 pnpm（推荐）或 npm/yarn 安装：
 
 ```bash
-pnpm add @ktd-cesium/core @ktd-cesium/shared @ktd-cesium/plugins cesium
+pnpm add @auto-cesium/core @auto-cesium/shared @auto-cesium/plugins cesium
 ```
 
-确保所有 `@ktd-cesium/*` 包使用相同的版本。
+确保所有 `@auto-cesium/*` 包使用相同的版本。
 
 ### Q: Cesium 静态资源加载失败怎么办？
 
@@ -52,9 +52,9 @@ pnpm add -D @types/cesium
 
 ## Viewer 使用
 
-### Q: KtdViewer 和 Cesium.Viewer 有什么区别？
+### Q: AutoViewer 和 Cesium.Viewer 有什么区别？
 
-A: `KtdViewer` 是对 `Cesium.Viewer` 的包装，通过 Proxy 代理保留了所有 Cesium API，同时添加了插件系统。你可以像使用 `Cesium.Viewer` 一样使用 `KtdViewer`。
+A: `AutoViewer` 是对 `Cesium.Viewer` 的包装，通过 Proxy 代理保留了所有 Cesium API，同时添加了插件系统。你可以像使用 `Cesium.Viewer` 一样使用 `AutoViewer`。
 
 ```typescript
 // 这些都可以正常工作
@@ -250,7 +250,7 @@ A: 是的，TransformPlugin 同时支持 Entity 和 Primitive 模式。
 A: 使用 `coordinateTransform` 模块：
 
 ```typescript
-import { wgs84ToGcj02, gcj02ToBd09 } from '@ktd-cesium/shared'
+import { wgs84ToGcj02, gcj02ToBd09 } from '@auto-cesium/shared'
 
 // WGS84 转 GCJ-02
 const [gcjLng, gcjLat] = wgs84ToGcj02(116.3974, 39.9093)
@@ -346,7 +346,7 @@ A: 使用全局状态管理或 Context：
 provide('viewer', viewer)
 
 // React - Context
-const ViewerContext = createContext<KtdViewer | null>(null)
+const ViewerContext = createContext<AutoViewer | null>(null)
 ```
 
 ## 其他问题

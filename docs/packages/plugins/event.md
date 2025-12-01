@@ -12,10 +12,10 @@
 ## 导入与安装
 
 ```typescript
-import { KtdViewer } from '@ktd-cesium/core'
-import { EventPlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { EventPlugin } from '@auto-cesium/plugins'
 
-const viewer = new KtdViewer(cesiumViewer)
+const viewer = new AutoViewer(cesiumViewer)
 const events = viewer.use(EventPlugin)
 ```
 
@@ -25,9 +25,9 @@ const events = viewer.use(EventPlugin)
 
 ```typescript
 events.setConfig({
-  enablePicking: true,      // 是否启用拾取（默认 true）
-  enableCartesian: true,    // 是否获取世界坐标（默认 true）
-  enableCoordinates: true  // 是否获取经纬度（默认 true）
+  enablePicking: true, // 是否启用拾取（默认 true）
+  enableCartesian: true, // 是否获取世界坐标（默认 true）
+  enableCoordinates: true // 是否获取经纬度（默认 true）
 })
 ```
 
@@ -137,12 +137,12 @@ const keyDownId = events.onKeyDown((info) => {
   console.log('Ctrl:', info.ctrlKey)
   console.log('Shift:', info.shiftKey)
   console.log('Alt:', info.altKey)
-  
+
   // 快捷键示例
   if (info.key === 'Escape') {
     closeAllPopups()
   }
-  
+
   if (info.ctrlKey && info.key === 'z') {
     undo()
   }
@@ -275,7 +275,7 @@ const clickId = events.onLeftClick((info) => {
 events.off(clickId)
 
 // 按类型移除所有监听
-events.offType('leftClick')  // 移除所有左键点击监听
+events.offType('leftClick') // 移除所有左键点击监听
 
 // 移除所有事件监听
 events.offAll()
@@ -309,9 +309,9 @@ interface PickInfo {
   cartesian?: Cartesian3
   /** 经纬度高度 */
   coordinates?: {
-    longitude: number  // 经度（度）
-    latitude: number   // 纬度（度）
-    height: number     // 高度（米）
+    longitude: number // 经度（度）
+    latitude: number // 纬度（度）
+    height: number // 高度（米）
   }
   /** 射线（用于射线检测） */
   ray?: Ray
@@ -323,14 +323,14 @@ interface PickInfo {
 ### 场景 1：点击获取坐标并显示弹窗
 
 ```typescript
-import { PopupPlugin } from '@ktd-cesium/plugins'
+import { PopupPlugin } from '@auto-cesium/plugins'
 
 const popup = viewer.use(PopupPlugin)
 
 events.onLeftClick((info) => {
   if (info.coordinates) {
     const { longitude, latitude } = info.coordinates
-    
+
     popup.createHTML(
       `<div>
         <h3>点击位置</h3>
@@ -350,16 +350,16 @@ events.onLeftClick((info) => {
 events.onLeftClick((info) => {
   if (info.pickedObject && info.pickedObject.id) {
     const entity = info.pickedObject.id
-    
+
     // 显示实体信息
     showEntityInfo(entity)
-    
+
     // 或者使用弹窗插件
     if (entity.properties) {
       const content = Object.entries(entity.properties)
         .map(([key, value]) => `<p><strong>${key}:</strong> ${value}</p>`)
         .join('')
-      
+
       popup.createHTML(content, info.cartesian!)
     }
   }
@@ -374,13 +374,13 @@ events.onKeyDown((info) => {
   if (info.key === ' ') {
     viewer.clock.shouldAnimate = !viewer.clock.shouldAnimate
   }
-  
+
   // Ctrl + S：保存当前视图
   if (info.ctrlKey && info.key === 's') {
     const position = camera.getCurrentPosition()
     saveViewState(position)
   }
-  
+
   // 方向键：移动相机
   if (info.key === 'ArrowUp') {
     camera.flyTo(currentLon, currentLat + 0.1, currentHeight)
@@ -429,23 +429,23 @@ events.onCameraMoveEnd(() => {
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { KtdViewer } from '@ktd-cesium/core'
-import { EventPlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { EventPlugin } from '@auto-cesium/plugins'
 import * as Cesium from 'cesium'
 
 const containerRef = ref<HTMLElement>()
 const clickInfo = ref<any>(null)
 
-let viewer: KtdViewer
+let viewer: AutoViewer
 let events: EventPlugin
 let clickListenerId: string
 
 onMounted(() => {
   if (containerRef.value) {
     const cesiumViewer = new Cesium.Viewer(containerRef.value)
-    viewer = new KtdViewer(cesiumViewer)
+    viewer = new AutoViewer(cesiumViewer)
     events = viewer.use(EventPlugin)
-    
+
     clickListenerId = events.onLeftClick((info) => {
       clickInfo.value = {
         position: `(${info.position.x}, ${info.position.y})`,
@@ -470,34 +470,34 @@ onBeforeUnmount(() => {
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { KtdViewer } from '@ktd-cesium/core'
-import { EventPlugin } from '@ktd-cesium/plugins'
+import { AutoViewer } from '@auto-cesium/core'
+import { EventPlugin } from '@auto-cesium/plugins'
 import * as Cesium from 'cesium'
 
 export function MapWithEvents() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [clickPosition, setClickPosition] = useState<string>('')
-  
+
   useEffect(() => {
     if (!containerRef.current) return
-    
+
     const cesiumViewer = new Cesium.Viewer(containerRef.current)
-    const viewer = new KtdViewer(cesiumViewer)
+    const viewer = new AutoViewer(cesiumViewer)
     const events = viewer.use(EventPlugin)
-    
+
     const clickId = events.onLeftClick((info) => {
       if (info.coordinates) {
         const { longitude, latitude } = info.coordinates
         setClickPosition(`${longitude.toFixed(6)}, ${latitude.toFixed(6)}`)
       }
     })
-    
+
     return () => {
       events.off(clickId)
       viewer.destroy()
     }
   }, [])
-  
+
   return (
     <div>
       <div ref={containerRef} className="map-container" />
