@@ -332,7 +332,7 @@ layer.disableFlatten()
 
 #### 方法
 
-**createLayer(options: TilesLayerOptions): Promise<string>**
+**createLayer(options: TilesLayerOptions): Promise\<string>**
 
 创建 3D Tiles 图层。
 
@@ -351,7 +351,7 @@ layer.disableFlatten()
 
 移除图层。
 
-**getAllLayers(): TilesLayerInstance[]**
+**getAllLayers(): TilesLayerInstance\[]**
 
 获取所有图层。
 

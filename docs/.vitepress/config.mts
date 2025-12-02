@@ -5,6 +5,7 @@ export default defineConfig({
   description: 'Cesium 二次封装库',
   base: '/ktd-cesium/',
   lang: 'zh-CN',
+  ignoreDeadLinks: true,
 
   themeConfig: {
     langMenuLabel: '选择语言',
