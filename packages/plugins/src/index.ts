@@ -71,3 +71,6 @@ export {
 } from './modules/ScenePlugin'
 export { GraphicsPlugin } from './modules/GraphicsPlugin'
 export * from './modules/GraphicsPlugin/types'
+export { TerrainPlugin, FloodAnalysis } from './modules/TerrainPlugin'
+export * from './modules/TerrainPlugin/types'
+export * from './modules/TerrainPlugin/presets'
