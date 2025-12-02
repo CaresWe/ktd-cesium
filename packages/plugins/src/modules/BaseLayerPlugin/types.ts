@@ -1,4 +1,4 @@
-import { CoordinateOffset } from '@auto-cesium/shared'
+import { CoordinateOffset, type RGBColor } from '@auto-cesium/shared'
 
 /**
  * 支持的坐标系类型
@@ -25,6 +25,22 @@ export interface BaseLayerOptions {
   brightness?: number
   /** 对比度 */
   contrast?: number
+  /** 色调（色相偏移）单位：弧度，范围 0-2π */
+  hue?: number
+  /** 饱和度，0 表示灰度，1 表示正常，>1 表示增强饱和度 */
+  saturation?: number
+  /** Gamma 校正值，默认 1.0（无校正），<1 变亮，>1 变暗 */
+  gamma?: number
+  /**
+   * 颜色转透明：将指定的 RGB 颜色转为透明
+   * 支持格式：
+   * - 数组形式：[255, 255, 255] 或 [255, 255, 255, 0.1]
+   * - 十六进制字符串：'#FFFFFF' 或 '#FFFFFF1A'
+   * 最后一个参数为容差值（0-1），默认为 0.004
+   */
+  colorToAlpha?: RGBColor
+  /** colorToAlpha 的容差值（0-1），默认为 0.004 */
+  colorToAlphaThreshold?: number
   /** 是否显示 */
   show?: boolean
   /** 图层索引位置 */

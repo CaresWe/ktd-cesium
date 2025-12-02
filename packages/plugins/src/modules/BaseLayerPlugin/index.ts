@@ -13,10 +13,12 @@ import {
   SingleTileImageryProvider,
   Rectangle as CesiumRectangle,
   WebMercatorTilingScheme,
-  GeographicTilingScheme
+  GeographicTilingScheme,
+  Color
 } from 'cesium'
 import { BasePlugin } from '../../BasePlugin'
 import type { AutoViewer } from '@auto-cesium/core'
+import { parseRGBColor, type RGBColor } from '@auto-cesium/shared'
 import type {
   BaseLayerOptions,
   XYZLayerOptions,
@@ -595,6 +597,12 @@ export class BaseLayerPlugin extends BasePlugin {
     if (options.alpha !== undefined) layer.alpha = options.alpha
     if (options.brightness !== undefined) layer.brightness = options.brightness
     if (options.contrast !== undefined) layer.contrast = options.contrast
+    if (options.hue !== undefined) layer.hue = options.hue
+    if (options.saturation !== undefined) layer.saturation = options.saturation
+    if (options.gamma !== undefined) layer.gamma = options.gamma
+    if (options.colorToAlpha !== undefined) {
+      layer.colorToAlpha = parseRGBColor(options.colorToAlpha, options.colorToAlphaThreshold)
+    }
     if (options.show !== undefined) layer.show = options.show
 
     this.layers.set(id, layer)
@@ -681,6 +689,192 @@ export class BaseLayerPlugin extends BasePlugin {
     if (layer) {
       layer.contrast = contrast
     }
+  }
+
+  /**
+   * 设置图层色调（色相偏移）
+   * @param id 图层 ID
+   * @param hue 色调值（弧度），范围 0-2π
+   * @example
+   * ```ts
+   * // 设置色调为 π/2（90度）
+   * layer.setLayerHue('my-layer', Math.PI / 2)
+   *
+   * // 设置色调为 180度
+   * layer.setLayerHue('my-layer', Math.PI)
+   * ```
+   */
+  setLayerHue(id: string, hue: number): void {
+    const layer = this.layers.get(id)
+    if (layer) {
+      layer.hue = hue
+    }
+  }
+
+  /**
+   * 设置图层饱和度
+   * @param id 图层 ID
+   * @param saturation 饱和度（0 表示灰度，1 表示正常，>1 表示增强）
+   * @example
+   * ```ts
+   * // 设置为灰度
+   * layer.setLayerSaturation('my-layer', 0)
+   *
+   * // 设置为正常
+   * layer.setLayerSaturation('my-layer', 1)
+   *
+   * // 增强饱和度
+   * layer.setLayerSaturation('my-layer', 1.5)
+   * ```
+   */
+  setLayerSaturation(id: string, saturation: number): void {
+    const layer = this.layers.get(id)
+    if (layer) {
+      layer.saturation = Math.max(0, saturation)
+    }
+  }
+
+  /**
+   * 设置图层 Gamma 校正
+   * @param id 图层 ID
+   * @param gamma Gamma 值（默认 1.0，<1 变亮，>1 变暗）
+   * @example
+   * ```ts
+   * // 增强亮度
+   * layer.setLayerGamma('my-layer', 0.7)
+   *
+   * // 正常
+   * layer.setLayerGamma('my-layer', 1.0)
+   *
+   * // 变暗
+   * layer.setLayerGamma('my-layer', 1.5)
+   * ```
+   */
+  setLayerGamma(id: string, gamma: number): void {
+    const layer = this.layers.get(id)
+    if (layer) {
+      layer.gamma = Math.max(0.1, gamma)
+    }
+  }
+
+  /**
+   * 设置图层颜色转透明
+   * @param id 图层 ID
+   * @param color RGB 颜色值，支持数组 [r, g, b] 或十六进制字符串 '#RRGGBB'
+   * @param threshold 容差值（0-1），默认为 0.004
+   * @example
+   * ```ts
+   * // 将白色转为透明（去除白色背景）
+   * layer.setLayerColorToAlpha('my-layer', [255, 255, 255])
+   *
+   * // 使用十六进制格式
+   * layer.setLayerColorToAlpha('my-layer', '#FFFFFF')
+   *
+   * // 设置自定义容差值
+   * layer.setLayerColorToAlpha('my-layer', [255, 255, 255], 0.01)
+   *
+   * // 将黑色转为透明
+   * layer.setLayerColorToAlpha('my-layer', '#000000')
+   *
+   * // 移除颜色转透明效果
+   * layer.setLayerColorToAlpha('my-layer', [0, 0, 0], 0)
+   * ```
+   */
+  setLayerColorToAlpha(id: string, color: RGBColor, threshold?: number): void {
+    const layer = this.layers.get(id)
+    if (layer) {
+      layer.colorToAlpha = parseRGBColor(color, threshold)
+    }
+  }
+
+  /**
+   * 批量设置图层颜色滤镜
+   * @param id 图层 ID
+   * @param filters 滤镜配置对象
+   * @example
+   * ```ts
+   * // 批量设置多个滤镜效果
+   * layer.setLayerColorFilter('my-layer', {
+   *   hue: Math.PI / 2,        // 色调偏移 90度
+   *   saturation: 1.2,         // 增强饱和度
+   *   gamma: 0.9,              // 稍微提亮
+   *   brightness: 1.1,         // 增加亮度
+   *   contrast: 1.2,           // 增加对比度
+   *   alpha: 0.8               // 设置透明度
+   * })
+   *
+   * // 创建灰度效果
+   * layer.setLayerColorFilter('my-layer', {
+   *   saturation: 0
+   * })
+   *
+   * // 创建暖色调效果
+   * layer.setLayerColorFilter('my-layer', {
+   *   hue: 0.1,
+   *   saturation: 1.1,
+   *   brightness: 1.05
+   * })
+   *
+   * // 去除白色背景
+   * layer.setLayerColorFilter('my-layer', {
+   *   colorToAlpha: [255, 255, 255],
+   *   colorToAlphaThreshold: 0.004
+   * })
+   * ```
+   */
+  setLayerColorFilter(
+    id: string,
+    filters: {
+      hue?: number
+      saturation?: number
+      gamma?: number
+      brightness?: number
+      contrast?: number
+      alpha?: number
+      colorToAlpha?: RGBColor
+      colorToAlphaThreshold?: number
+    }
+  ): void {
+    const layer = this.layers.get(id)
+    if (!layer) {
+      console.warn(`Layer "${id}" not found`)
+      return
+    }
+
+    if (filters.hue !== undefined) layer.hue = filters.hue
+    if (filters.saturation !== undefined) layer.saturation = Math.max(0, filters.saturation)
+    if (filters.gamma !== undefined) layer.gamma = Math.max(0.1, filters.gamma)
+    if (filters.brightness !== undefined) layer.brightness = filters.brightness
+    if (filters.contrast !== undefined) layer.contrast = filters.contrast
+    if (filters.alpha !== undefined) layer.alpha = Math.max(0, Math.min(1, filters.alpha))
+    if (filters.colorToAlpha !== undefined) {
+      layer.colorToAlpha = parseRGBColor(filters.colorToAlpha, filters.colorToAlphaThreshold)
+    }
+  }
+
+  /**
+   * 重置图层颜色滤镜到默认值
+   * @param id 图层 ID
+   * @example
+   * ```ts
+   * // 重置所有滤镜效果
+   * layer.resetLayerColorFilter('my-layer')
+   * ```
+   */
+  resetLayerColorFilter(id: string): void {
+    const layer = this.layers.get(id)
+    if (!layer) {
+      console.warn(`Layer "${id}" not found`)
+      return
+    }
+
+    layer.hue = 0
+    layer.saturation = 1
+    layer.gamma = 1
+    layer.brightness = 1
+    layer.contrast = 1
+    layer.alpha = 1
+    layer.colorToAlpha = new Color(0, 0, 0, 0.004)
   }
 
   /**
@@ -962,6 +1156,9 @@ export type {
 
 // 导出枚举
 export { CoordinateSystem, CoordinateOffset } from './types'
+
+// 从 shared 包重新导出 RGBColor
+export type { RGBColor } from '@auto-cesium/shared'
 
 // 导出预设配置相关
 export {
