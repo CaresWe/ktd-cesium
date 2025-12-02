@@ -4423,9 +4423,288 @@ setInterval(() => sync.syncFromServer(), 10000)
 
 ### 聚合
 
+GraphicsPlugin 提供了强大的聚合功能，支持 Entity 和 Primitive 两种模式，可以有效优化大量数据的显示性能。
+
+#### API 方法
+
 - `setClusterOptions(options)`：配置聚合开关、像素范围、最小数量、样式、回调。
-- `enableClustering()` / `disableClustering()`：快捷开启或关闭。
+- `enableClustering()` / `disableClustering()`：快捷开启或关闭聚合。
 - 内部 `_applyEntityClustering` 使用 Cesium 原生 `DataSource.clustering`，`_applyPrimitiveClustering` 自行维护 `clusterDataSource` 以显示聚合点并隐藏被聚合 Primitive。
+
+#### 聚合配置选项
+
+```typescript
+interface ClusterOptions {
+  enabled: boolean // 是否启用聚合
+  pixelRange?: number // 聚合像素范围（默认 80）
+  minimumClusterSize?: number // 最小聚合数量（默认 2）
+  showLabels?: boolean // 是否显示聚合标签（默认 true）
+  clusterStyle?: {
+    color?: string // 聚合点颜色
+    pixelSize?: number // 聚合点大小
+    outlineColor?: string // 轮廓颜色
+    outlineWidth?: number // 轮廓宽度
+    font?: string // 标签字体
+    labelColor?: string // 标签颜色
+    labelOutlineColor?: string // 标签轮廓颜色
+    labelOutlineWidth?: number // 标签轮廓宽度
+  }
+  clusterEvent?: (clusteredEntities: Entity[], cluster: ClusterObject) => void // 自定义聚合回调
+}
+```
+
+#### 支持的几何类型
+
+GraphicsPlugin 的聚合功能支持所有 20+ 种几何类型，分为两类：
+
+✅ **直接支持聚合**（点类型）：
+
+- `point` - 点
+- `billboard` - 图标标注
+- `label` - 文字标注
+
+⚠️ **通过中心点参与聚合**（非点类型）：
+
+- **线类型**：`polyline`、`curve`、`polylineVolume`、`corridor`
+- **面类型**：`polygon`、`polygonEx`、`rectangle`、`circle`、`ellipse`、`sector`、`lune`、`regular`、`isoscelesTriangle`、`closeCurve`
+- **三维类型**：`box`、`cylinder`、`ellipsoid`、`wall`、`plane`
+- **军标类型**：`attackArrow`、`attackArrowPW`、`attackArrowYW`、`doubleArrow`、`fineArrow`、`fineArrowYW`、`gatheringPlace`
+- **模型类型**：`model`、`model-p`
+- **水面类型**：`water`、`flood`、`river`（Primitive）
+- **特效类型**：`video-fusion`、`particle`（Primitive）
+
+**原理**：对于非点类型的几何体，插件会自动计算其中心点位置，并使用该中心点参与聚合显示。当聚合时，原始几何体会被隐藏；当缩放接近时，聚合解散，显示原始几何体。
+
+#### 基础聚合示例
+
+```typescript
+// 初始化时启用聚合
+const graphics = viewer.use(GraphicsPlugin, {
+  clustering: {
+    enabled: true,
+    pixelRange: 80,
+    minimumClusterSize: 3,
+    showLabels: true,
+    clusterStyle: {
+      color: '#ff6b6b',
+      pixelSize: 40,
+      outlineColor: '#ffffff',
+      outlineWidth: 2,
+      font: 'bold 16px sans-serif',
+      labelColor: '#ffffff',
+      labelOutlineColor: '#000000',
+      labelOutlineWidth: 2
+    }
+  }
+})
+
+// 运行时控制聚合
+graphics.enableClustering()
+graphics.disableClustering()
+
+// 更新聚合配置
+graphics.setClusterOptions({
+  enabled: true,
+  pixelRange: 100,
+  minimumClusterSize: 5
+})
+```
+
+#### 自定义聚合样式
+
+```typescript
+graphics.setClusterOptions({
+  enabled: true,
+  pixelRange: 80,
+  minimumClusterSize: 3,
+  clusterEvent: (clusteredEntities, cluster) => {
+    const count = clusteredEntities.length
+
+    // 根据数量自定义样式
+    if (count > 100) {
+      cluster.billboard.image = '/icons/cluster-xl.png'
+      cluster.billboard.scale = 2.0
+      cluster.label.fillColor = Cesium.Color.RED
+    } else if (count > 50) {
+      cluster.billboard.image = '/icons/cluster-large.png'
+      cluster.billboard.scale = 1.5
+      cluster.label.fillColor = Cesium.Color.ORANGE
+    } else {
+      cluster.billboard.image = '/icons/cluster.png'
+      cluster.billboard.scale = 1.0
+      cluster.label.fillColor = Cesium.Color.YELLOW
+    }
+
+    cluster.label.text = `${count} 个对象`
+    cluster.label.font = 'bold 18px sans-serif'
+  }
+})
+```
+
+#### 使用 Canvas 动态生成聚合图标
+
+```typescript
+graphics.setClusterOptions({
+  clusterEvent: (entities, cluster) => {
+    // 使用 Canvas 动态生成聚合图标
+    const canvas = document.createElement('canvas')
+    canvas.width = 64
+    canvas.height = 64
+    const ctx = canvas.getContext('2d')!
+
+    // 绘制渐变圆形
+    const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32)
+    gradient.addColorStop(0, '#ff6b6b')
+    gradient.addColorStop(1, '#cc0000')
+    ctx.fillStyle = gradient
+    ctx.beginPath()
+    ctx.arc(32, 32, 30, 0, Math.PI * 2)
+    ctx.fill()
+
+    // 绘制数量
+    ctx.fillStyle = '#ffffff'
+    ctx.font = 'bold 20px Arial'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(entities.length.toString(), 32, 32)
+
+    cluster.billboard.image = canvas
+  }
+})
+```
+
+#### 动态聚合策略
+
+根据缩放级别自动调整聚合：
+
+```typescript
+viewer.camera.changed.addEventListener(() => {
+  const height = viewer.camera.positionCartographic.height
+
+  if (height > 100000) {
+    // 高空视角：启用聚合
+    graphics.enableClustering()
+    graphics.setClusterOptions({
+      pixelRange: 100,
+      minimumClusterSize: 3
+    })
+  } else if (height > 10000) {
+    // 中等高度：温和聚合
+    graphics.setClusterOptions({
+      pixelRange: 60,
+      minimumClusterSize: 5
+    })
+  } else {
+    // 近距离：禁用聚合，显示所有细节
+    graphics.disableClustering()
+  }
+})
+```
+
+根据数据量自动调整：
+
+```typescript
+function updateClusteringBasedOnData() {
+  const entityCount = graphics.getEntitys().length
+
+  if (entityCount < 50) {
+    // 少量数据：不聚合
+    graphics.disableClustering()
+  } else if (entityCount < 500) {
+    // 中等数据：温和聚合
+    graphics.setClusterOptions({
+      enabled: true,
+      pixelRange: 60,
+      minimumClusterSize: 5
+    })
+  } else {
+    // 大量数据：激进聚合
+    graphics.setClusterOptions({
+      enabled: true,
+      pixelRange: 120,
+      minimumClusterSize: 3
+    })
+  }
+}
+```
+
+#### 混合几何类型聚合示例
+
+```typescript
+// 绘制不同类型的几何体
+graphics.startDraw({ type: 'point' }) // 点
+graphics.startDraw({ type: 'billboard' }) // 图标
+graphics.startDraw({ type: 'polygon' }) // 面
+graphics.startDraw({ type: 'box' }) // 立方体
+graphics.startDraw({ type: 'model' }) // 模型
+graphics.startDraw({ type: 'attackArrow' }) // 军标
+
+// 所有类型会统一参与聚合（通过中心点）
+graphics.enableClustering()
+```
+
+#### 加载 GeoJSON 时启用聚合
+
+```typescript
+// 加载大量 GeoJSON 数据
+const entities = graphics.loadJson(geojsonData, {
+  flyTo: true,
+  onEachFeature: (feature, type, index) => {
+    // 可以在这里自定义每个要素的样式
+    feature.properties.style = {
+      color: getColorByType(type)
+    }
+  }
+})
+
+// 如果数据量大，启用聚合
+if (entities.length > 100) {
+  graphics.enableClustering()
+}
+```
+
+#### 性能优化建议
+
+**数据量级与聚合配置**：
+
+| 数据量     | 是否聚合 | pixelRange | minimumClusterSize |
+| ---------- | -------- | ---------- | ------------------ |
+| < 100      | 否       | -          | -                  |
+| 100-1000   | 是       | 60-80      | 3-5                |
+| 1000-10000 | 是       | 80-120     | 5-10               |
+| > 10000    | 是       | 50-150     | 10+                |
+
+**优化技巧**：
+
+1. **使用合适的聚合范围**：大数据量使用更大的 pixelRange
+2. **设置合理的最小聚合数**：避免过度聚合导致丢失细节
+3. **按需启用聚合**：根据视野范围和数据量动态控制
+4. **禁用编辑模式**：聚合时禁用编辑提高性能 `graphics.hasEdit(false)`
+5. **Primitive 模式优化**：Primitive 聚合在相机移动时更新，可通过防抖优化
+
+#### 注意事项
+
+**Entity 模式**：
+
+1. 使用 Cesium 原生聚合引擎，性能较好
+2. 仅 Billboard 和 Point 直接支持聚合
+3. 其他几何体通过中心点间接参与聚合
+4. 被聚合的原始几何体会自动隐藏
+
+**Primitive 模式**：
+
+1. 使用自定义聚合算法，在 postRender 时执行
+2. 相机移动时会频繁重新计算聚合
+3. 支持 BillboardCollection、PointPrimitiveCollection、LabelCollection、model-p、particle 等
+4. 大量 Primitive（> 10000）可能影响帧率
+
+**通用建议**：
+
+1. 聚合最适合 100+ 对象的场景
+2. 点类型聚合效果最好，其他类型作为辅助
+3. 聚合后的对象不支持单独编辑，需要先解散聚合
+4. 聚合样式会覆盖原始样式
+5. 混合 Entity 和 Primitive 时，两种模式的聚合是独立的
 
 ### 事件
 

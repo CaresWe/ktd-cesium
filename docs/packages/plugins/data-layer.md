@@ -15,16 +15,32 @@ import type {
   PopupConfig,
   DataMappingConfig
 } from '@auto-cesium/plugins'
+
+// 数据加载器
+import {
+  loadGeoJSONLayer,
+  loadGeoJSONNative,
+  loadCSVLayer,
+  loadExcelLayer,
+  loadShapefileLayer,
+  loadWKTLayer,
+  loadWFSLayer,
+  loadKMLLayer,
+  applyLayerGradient,
+  GRADIENT_PRESETS
+} from '@auto-cesium/plugins'
 ```
 
 ## 核心特性
 
 - **双渲染模式**：Entity 模式（功能完整）和 Primitive 模式（高性能）
 - **多种几何类型**：点、线、面、模型、圆、椭圆、矩形、走廊、墙、圆柱、盒子
+- **多格式支持**：GeoJSON、CSV、Excel、Shapefile、WKT、WFS、KML/KMZ
 - **聚合功能**：Entity 模式使用 Cesium 原生聚合，Primitive 模式自定义聚合算法
 - **点击交互**：支持点击事件回调、弹窗展示（HTML/Vue/React）
 - **数据映射**：从数组数据自动映射创建图层，支持字段转换和过滤
 - **图层管理**：创建、删除、显示/隐藏、飞行等完整管理功能
+- **渐变色渲染**：支持根据数据值自动应用渐变色
 
 ## 安装
 
@@ -561,7 +577,11 @@ layer.addItem({
 
 ## 聚合功能
 
+DataLayerPlugin 支持强大的聚合功能，可以优化大量数据的显示性能。
+
 ### Entity 模式聚合
+
+Entity 模式使用 Cesium 原生聚合引擎，性能优秀。
 
 ```typescript
 const layerId = dataLayer.createLayer({
@@ -586,6 +606,8 @@ const layerId = dataLayer.createLayer({
 
 ### Primitive 模式聚合
 
+Primitive 模式使用自定义聚合算法，在相机移动时自动更新。
+
 ```typescript
 const layerId = dataLayer.createLayer({
   name: 'Primitive聚合图层',
@@ -599,7 +621,435 @@ const layerId = dataLayer.createLayer({
 })
 ```
 
-**注意：** Primitive 模式的聚合会在相机移动时自动更新，使用自定义聚合算法。
+### 聚合配置参数
+
+| 参数                 | 类型       | 默认值  | 说明                                 |
+| -------------------- | ---------- | ------- | ------------------------------------ |
+| `enabled`            | `boolean`  | `false` | 是否启用聚合                         |
+| `pixelRange`         | `number`   | `80`    | 屏幕像素范围，此范围内的对象会被聚合 |
+| `minimumClusterSize` | `number`   | `2`     | 最小聚合数量，少于此数量不聚合       |
+| `showLabels`         | `boolean`  | `true`  | 是否显示聚合点数量标签               |
+| `clusterStyle`       | `function` | -       | 自定义聚合样式回调函数               |
+
+### 聚合支持的几何类型
+
+✅ **直接支持聚合**：
+
+- `point` - 点
+- `billboard` - 图标标注
+- `label` - 文字标注
+
+⚠️ **通过中心点参与聚合**（非点类型）：
+
+- `polyline` - 线
+- `polygon` - 面
+- `circle` / `ellipse` - 圆/椭圆
+- `rectangle` - 矩形
+- `corridor` - 走廊
+- `wall` - 墙体
+- `box` - 立方体
+- `cylinder` - 圆柱体
+- `model` - 3D模型
+
+**原理**：对于非点类型的几何体，插件会计算其中心点位置，并使用该中心点参与聚合显示。当聚合时，原始几何体会被隐藏；当缩放接近时，聚合解散，显示原始几何体。
+
+### 动态聚合示例
+
+```typescript
+// 根据缩放级别自动调整聚合
+viewer.camera.changed.addEventListener(() => {
+  const height = viewer.camera.positionCartographic.height
+
+  if (height > 100000) {
+    // 高空视角：启用聚合
+    layer.updateConfig({
+      clustering: {
+        enabled: true,
+        pixelRange: 100,
+        minimumClusterSize: 3
+      }
+    })
+  } else if (height > 10000) {
+    // 中等高度：温和聚合
+    layer.updateConfig({
+      clustering: {
+        pixelRange: 60,
+        minimumClusterSize: 5
+      }
+    })
+  } else {
+    // 近距离：禁用聚合
+    layer.updateConfig({
+      clustering: {
+        enabled: false
+      }
+    })
+  }
+})
+```
+
+### 性能建议
+
+- **少量数据（< 100）**：不需要聚合
+- **中等数据（100-1000）**：推荐 `pixelRange: 60-80`，`minimumClusterSize: 3-5`
+- **大量数据（1000-10000）**：推荐 `pixelRange: 80-120`，`minimumClusterSize: 5-10`
+- **海量数据（> 10000）**：推荐使用 Primitive 模式 + 激进聚合配置
+
+## 数据格式加载器
+
+DataLayerPlugin 提供了丰富的数据格式加载器，支持从多种常见地理数据格式导入数据。
+
+### GeoJSON 加载
+
+GeoJSON 是最常用的地理数据交换格式。
+
+```typescript
+import { loadGeoJSONLayer } from '@auto-cesium/plugins'
+
+// 从 URL 加载
+const layerId = await loadGeoJSONLayer(
+  dataLayer,
+  {
+    name: 'GeoJSON图层',
+    type: 'entity'
+  },
+  {
+    url: '/data/regions.geojson',
+    fill: Cesium.Color.BLUE.withAlpha(0.5),
+    stroke: Cesium.Color.BLACK,
+    strokeWidth: 2,
+    markerColor: Cesium.Color.RED,
+    markerSize: 10,
+    clampToGround: true
+  }
+)
+
+// 从数据加载
+const geojsonData = {
+  type: 'FeatureCollection',
+  features: [
+    {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [116.4074, 39.9042]
+      },
+      properties: {
+        name: '北京'
+      }
+    }
+  ]
+}
+
+const layerId2 = await loadGeoJSONLayer(
+  dataLayer,
+  { name: 'GeoJSON数据', type: 'entity' },
+  { data: JSON.stringify(geojsonData) }
+)
+```
+
+**支持的 GeoJSON 几何类型**：
+
+- Point
+- LineString
+- Polygon
+- MultiPoint（取第一个点）
+- MultiLineString（取第一条线）
+- MultiPolygon（取第一个面）
+
+### CSV 加载
+
+从 CSV 文件加载点位数据。
+
+```typescript
+import { loadCSVLayer } from '@auto-cesium/plugins'
+
+const layerId = await loadCSVLayer(
+  dataLayer,
+  {
+    name: 'CSV图层',
+    type: 'entity'
+  },
+  {
+    url: '/data/points.csv',
+    delimiter: ',',
+    hasHeader: true,
+    longitudeField: 'lon', // 经度字段名
+    latitudeField: 'lat', // 纬度字段名
+    heightField: 'height', // 高度字段名（可选）
+    idField: 'id' // ID字段名（可选）
+  }
+)
+```
+
+**CSV 文件示例**：
+
+```csv
+id,lon,lat,height,name,value
+1,116.4074,39.9042,0,北京,100
+2,121.4737,31.2304,0,上海,200
+3,113.2644,23.1291,0,广州,150
+```
+
+### Excel 加载
+
+支持加载 Excel 文件（.xlsx）中的点位数据。
+
+**依赖安装**：
+
+```bash
+npm install xlsx
+# 或
+pnpm install xlsx
+```
+
+```typescript
+import { loadExcelLayer } from '@auto-cesium/plugins'
+
+const layerId = await loadExcelLayer(
+  dataLayer,
+  {
+    name: 'Excel图层',
+    type: 'entity'
+  },
+  {
+    url: '/data/points.xlsx',
+    sheet: 0, // 工作表索引，或使用工作表名称 'Sheet1'
+    startRow: 1, // 数据起始行（跳过表头）
+    longitudeField: 'longitude', // 可以是字段名或列索引
+    latitudeField: 'latitude',
+    heightField: 'height',
+    idField: 'id'
+  }
+)
+
+// 从本地文件加载
+const fileInput = document.querySelector('input[type="file"]')
+fileInput.addEventListener('change', async (e) => {
+  const file = e.target.files[0]
+  const layerId = await loadExcelLayer(
+    dataLayer,
+    { name: 'Excel本地文件', type: 'entity' },
+    {
+      data: file, // 直接传入 File 对象
+      sheet: 0,
+      longitudeField: 0, // 也可以使用列索引
+      latitudeField: 1
+    }
+  )
+})
+```
+
+**降级方案**：如果未安装 xlsx 库，会尝试将 Excel 作为 CSV 格式处理（仅支持简单格式）。
+
+### Shapefile 加载
+
+支持加载 Shapefile 格式（.shp + .dbf + .prj）。
+
+**依赖安装**：
+
+```bash
+npm install shpjs
+# 或
+pnpm install shpjs
+```
+
+```typescript
+import { loadShapefileLayer } from '@auto-cesium/plugins'
+
+const layerId = await loadShapefileLayer(
+  dataLayer,
+  {
+    name: 'Shapefile图层',
+    type: 'entity'
+  },
+  {
+    shpUrl: '/data/regions.shp',
+    dbfUrl: '/data/regions.dbf',
+    prjUrl: '/data/regions.prj' // 投影信息（可选）
+  }
+)
+
+// 如果没有 .prj 文件，可以指定源坐标系
+const layerId2 = await loadShapefileLayer(
+  dataLayer,
+  { name: 'Shapefile图层2', type: 'entity' },
+  {
+    shpUrl: '/data/regions.shp',
+    dbfUrl: '/data/regions.dbf',
+    sourceEPSG: 4326 // WGS84
+  }
+)
+
+// 从压缩文件加载
+const layerId3 = await loadShapefileLayer(
+  dataLayer,
+  { name: 'Shapefile压缩包', type: 'entity' },
+  {
+    url: '/data/regions.zip' // 包含 .shp、.dbf、.prj 的 zip 文件
+  }
+)
+```
+
+### WKT 加载
+
+WKT (Well-Known Text) 是一种用文本表示几何对象的格式。
+
+```typescript
+import { loadWKTLayer } from '@auto-cesium/plugins'
+
+const layerId = loadWKTLayer(
+  dataLayer,
+  {
+    name: 'WKT图层',
+    type: 'entity'
+  },
+  {
+    wkt: 'POINT(116.4074 39.9042)',
+    properties: { name: '北京' }
+  }
+)
+
+// 批量加载
+const layerId2 = loadWKTLayer(
+  dataLayer,
+  { name: 'WKT批量', type: 'entity' },
+  {
+    wkt: [
+      'POINT(116.4074 39.9042)',
+      'LINESTRING(116.4074 39.9042, 116.4084 39.9052, 116.4094 39.9062)',
+      'POLYGON((116.4074 39.9042, 116.4084 39.9042, 116.4084 39.9052, 116.4074 39.9052, 116.4074 39.9042))'
+    ],
+    properties: [
+      { name: '点', type: 'point' },
+      { name: '线', type: 'line' },
+      { name: '面', type: 'polygon' }
+    ]
+  }
+)
+```
+
+**支持的 WKT 类型**：
+
+- POINT - 点
+- LINESTRING - 线
+- POLYGON - 面
+- MULTIPOINT - 多点（取第一个）
+- MULTILINESTRING - 多线（取第一条）
+- MULTIPOLYGON - 多面（取第一个）
+
+**WKT 格式示例**：
+
+```
+POINT(116.4074 39.9042)
+POINT(116.4074 39.9042 100) // 带高度
+LINESTRING(116.4074 39.9042, 116.4084 39.9052, 116.4094 39.9062)
+POLYGON((116.4074 39.9042, 116.4084 39.9042, 116.4084 39.9052, 116.4074 39.9042))
+```
+
+### WFS 加载
+
+从 WFS (Web Feature Service) 服务加载数据。
+
+```typescript
+import { loadWFSLayer } from '@auto-cesium/plugins'
+
+const layerId = await loadWFSLayer(
+  dataLayer,
+  {
+    name: 'WFS图层',
+    type: 'entity'
+  },
+  {
+    url: 'https://example.com/geoserver/wfs',
+    typeName: 'workspace:layer_name',
+    version: '2.0.0',
+    maxFeatures: 1000,
+    cqlFilter: 'population > 100000', // CQL 过滤器
+    bbox: [116.0, 39.0, 117.0, 40.0], // 边界框过滤
+    outputFormat: 'application/json',
+    srsName: 'EPSG:4326'
+  }
+)
+```
+
+**WFS 配置参数**：
+
+- `url`: WFS 服务地址
+- `typeName`: 图层名称（必需）
+- `version`: WFS 版本（1.0.0、1.1.0、2.0.0）
+- `maxFeatures`: 最大要素数量
+- `cqlFilter`: CQL 过滤表达式
+- `bbox`: 边界框 [minx, miny, maxx, maxy]
+- `outputFormat`: 输出格式
+- `srsName`: 坐标系
+
+### KML/KMZ 加载
+
+加载 KML 或 KMZ 文件（使用 Cesium 原生 DataSource）。
+
+```typescript
+import { loadKMLLayer } from '@auto-cesium/plugins'
+
+// KML 文件
+await loadKMLLayer(dataLayer, 'KML图层', '/data/regions.kml')
+
+// KMZ 文件
+await loadKMLLayer(dataLayer, 'KMZ图层', '/data/regions.kmz')
+```
+
+**注意**：KML/KMZ 使用 Cesium 原生 KmlDataSource，不通过 DataLayerPlugin 的图层系统，而是直接添加到 `viewer.dataSources`。
+
+### 渐变色应用
+
+为图层数据应用渐变色，根据数据值自动着色。
+
+```typescript
+import { applyLayerGradient, GRADIENT_PRESETS } from '@auto-cesium/plugins'
+
+// 使用预设渐变色
+applyLayerGradient(dataLayer, layerId, {
+  field: 'population', // 数据字段名
+  colors: GRADIENT_PRESETS.rainbow, // 预设渐变色
+  autoRange: true // 自动计算数值范围
+})
+
+// 自定义渐变色
+applyLayerGradient(dataLayer, layerId, {
+  field: 'temperature',
+  colors: [
+    Cesium.Color.BLUE, // 低值
+    Cesium.Color.GREEN,
+    Cesium.Color.YELLOW,
+    Cesium.Color.RED // 高值
+  ],
+  range: [0, 100] // 手动指定范围
+})
+```
+
+**预设渐变色**：
+
+```typescript
+GRADIENT_PRESETS = {
+  rainbow: [...], // 彩虹色
+  heatmap: [...], // 热力图
+  blueToRed: [...], // 蓝到红
+  greenToRed: [...], // 绿到红
+  grayscale: [...] // 灰度
+}
+```
+
+### 数据加载器使用建议
+
+| 格式      | 适用场景      | 性能       | 依赖  |
+| --------- | ------------- | ---------- | ----- |
+| GeoJSON   | 通用、Web友好 | ⭐⭐⭐⭐   | 无    |
+| CSV       | 简单点位数据  | ⭐⭐⭐⭐⭐ | 无    |
+| Excel     | Excel数据导出 | ⭐⭐⭐     | xlsx  |
+| Shapefile | GIS标准格式   | ⭐⭐⭐     | shpjs |
+| WKT       | 数据库导出    | ⭐⭐⭐⭐⭐ | 无    |
+| WFS       | 实时GIS服务   | ⭐⭐⭐     | 无    |
+| KML/KMZ   | Google Earth  | ⭐⭐⭐⭐   | 无    |
 
 ## 弹窗功能
 
@@ -1092,4 +1542,210 @@ manager.showGroup('基础图层')
    - 位置坐标使用 WGS84 坐标系（经纬度）
    - 高度单位为米
 
-DataLayerPlugin 提供了完整的数据图层管理能力，适用于各种数据可视化场景，从简单的点位展示到复杂的海量数据渲染都能很好地支持。
+## 综合示例：数据加载 + 聚合 + 弹窗
+
+结合数据加载器、聚合和弹窗功能的完整示例。
+
+```typescript
+import { AutoViewer } from '@auto-cesium/core'
+import {
+  DataLayerPlugin,
+  loadGeoJSONLayer,
+  loadCSVLayer,
+  loadExcelLayer,
+  applyLayerGradient,
+  GRADIENT_PRESETS
+} from '@auto-cesium/plugins'
+
+const viewer = new AutoViewer(cesiumViewer)
+const dataLayer = viewer.use(DataLayerPlugin)
+
+// 示例 1：从 GeoJSON 加载带聚合的区域数据
+async function loadRegions() {
+  const layerId = await loadGeoJSONLayer(
+    dataLayer,
+    {
+      name: '行政区域',
+      type: 'entity',
+      clustering: {
+        enabled: true,
+        pixelRange: 80,
+        minimumClusterSize: 3,
+        showLabels: true
+      },
+      popup: {
+        enabled: true,
+        title: '区域信息',
+        fields: [
+          { field: 'name', label: '名称' },
+          {
+            field: 'population',
+            label: '人口',
+            formatter: (v) => `${v.toLocaleString()} 人`
+          },
+          {
+            field: 'area',
+            label: '面积',
+            formatter: (v) => `${v.toFixed(2)} km²`
+          }
+        ]
+      }
+    },
+    {
+      url: '/data/regions.geojson',
+      fill: Cesium.Color.BLUE.withAlpha(0.5),
+      stroke: Cesium.Color.BLACK,
+      strokeWidth: 2
+    }
+  )
+
+  // 应用渐变色
+  applyLayerGradient(dataLayer, layerId, {
+    field: 'population',
+    colors: GRADIENT_PRESETS.heatmap,
+    autoRange: true
+  })
+
+  // 飞行到图层
+  const layer = dataLayer.getLayer(layerId)
+  await layer.flyTo()
+}
+
+// 示例 2：从 CSV 加载带聚合的点位数据
+async function loadPOIs() {
+  const layerId = await loadCSVLayer(
+    dataLayer,
+    {
+      name: 'POI点位',
+      type: 'entity',
+      clustering: {
+        enabled: true,
+        pixelRange: 60,
+        minimumClusterSize: 2
+      },
+      popup: {
+        enabled: true,
+        content: (item) => `
+          <div style="padding: 15px; min-width: 200px;">
+            <h3 style="margin: 0 0 10px 0;">${item.data.name}</h3>
+            <p><strong>类型:</strong> ${item.data.category}</p>
+            <p><strong>评分:</strong> ${item.data.rating} ⭐</p>
+            <p><strong>地址:</strong> ${item.data.address}</p>
+          </div>
+        `
+      },
+      onClick: (item) => {
+        console.log('点击了POI:', item.data.name)
+      }
+    },
+    {
+      url: '/data/pois.csv',
+      hasHeader: true,
+      longitudeField: 'lon',
+      latitudeField: 'lat',
+      idField: 'id'
+    }
+  )
+
+  // 根据类别设置不同的图标
+  const layer = dataLayer.getLayer(layerId)
+  const items = Array.from(layer.dataMap.values())
+
+  items.forEach((item) => {
+    layer.updateItem(item.id, {
+      style: {
+        icon: {
+          image: `/icons/${item.data.category}.png`,
+          scale: 1.0
+        }
+      }
+    })
+  })
+}
+
+// 示例 3：从 Excel 加载大量数据并启用聚合
+async function loadMassiveData() {
+  const layerId = await loadExcelLayer(
+    dataLayer,
+    {
+      name: '海量数据',
+      type: 'primitive', // 使用 Primitive 模式提高性能
+      clustering: {
+        enabled: true,
+        pixelRange: 50,
+        minimumClusterSize: 10
+      }
+    },
+    {
+      url: '/data/massive.xlsx',
+      sheet: 0,
+      startRow: 1,
+      longitudeField: 'longitude',
+      latitudeField: 'latitude',
+      heightField: 'height'
+    }
+  )
+
+  console.log(`加载了 ${dataLayer.getLayer(layerId).dataMap.size} 条数据`)
+}
+
+// 示例 4：多图层管理
+async function multiLayerDemo() {
+  // 加载多个图层
+  const layer1 = await loadGeoJSONLayer(dataLayer, { name: '省界', type: 'entity' }, { url: '/data/provinces.geojson' })
+
+  const layer2 = await loadCSVLayer(
+    dataLayer,
+    { name: '城市', type: 'entity', clustering: { enabled: true } },
+    { url: '/data/cities.csv', longitudeField: 'lon', latitudeField: 'lat' }
+  )
+
+  // 图层控制
+  setTimeout(() => {
+    dataLayer.getLayer(layer1)?.setShow(false) // 隐藏省界
+  }, 5000)
+
+  setTimeout(() => {
+    dataLayer.getLayer(layer1)?.setShow(true) // 显示省界
+  }, 10000)
+
+  // 移除图层
+  setTimeout(() => {
+    dataLayer.removeLayer(layer2) // 移除城市图层
+  }, 15000)
+}
+
+// 运行示例
+loadRegions()
+loadPOIs()
+loadMassiveData()
+```
+
+## 最佳实践总结
+
+### 数据量级与模式选择
+
+| 数据量     | 推荐模式         | 是否聚合 | 配置建议                                |
+| ---------- | ---------------- | -------- | --------------------------------------- |
+| < 100      | Entity           | 否       | 完整交互功能                            |
+| 100-1000   | Entity           | 是       | pixelRange: 60-80                       |
+| 1000-10000 | Entity/Primitive | 是       | pixelRange: 80-100                      |
+| > 10000    | Primitive        | 是       | pixelRange: 50, minimumClusterSize: 10+ |
+
+### 性能优化技巧
+
+1. **使用合适的渲染模式**：大数据量使用 Primitive 模式
+2. **启用聚合**：减少同时渲染的对象数量
+3. **及时清理**：不需要的图层及时 `removeLayer()`
+4. **分批加载**：大数据集分批次加载和添加
+5. **按需加载**：根据视野范围动态加载数据
+
+### 格式选择建议
+
+- **前端可视化**：优先使用 GeoJSON
+- **数据库导出**：使用 WKT 或 CSV
+- **Excel 数据**：直接使用 Excel 加载器
+- **GIS 标准**：使用 Shapefile 或 WFS
+- **Google Earth**：使用 KML/KMZ
+
+DataLayerPlugin 提供了完整的数据图层管理能力，支持多种数据格式、强大的聚合功能和丰富的交互特性，适用于各种数据可视化场景，从简单的点位展示到复杂的海量数据渲染都能很好地支持。
