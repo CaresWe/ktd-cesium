@@ -33,7 +33,9 @@
   "dependencies": {
     "@auto-cesium/core": "workspace:*",
     "@auto-cesium/shared": "workspace:*",
-    "@turf/turf": "^7.2.0"
+    "@turf/turf": "^7.2.0",
+    "shpjs": "^6.2.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "cesium": "^1.135.0",

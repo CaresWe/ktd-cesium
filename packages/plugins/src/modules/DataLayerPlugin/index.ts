@@ -25,7 +25,13 @@ import {
   LabelCollection,
   HorizontalOrigin,
   VerticalOrigin,
-  LabelStyle
+  LabelStyle,
+  Entity,
+  Billboard,
+  Label,
+  ConstantPositionProperty,
+  ConstantProperty,
+  PropertyBag
 } from 'cesium'
 import { BasePlugin } from '../../BasePlugin'
 import type { AutoViewer } from '@auto-cesium/core'
@@ -109,8 +115,8 @@ export class DataLayerPlugin extends BasePlugin {
 
         // Entity 模式
         if (layer.type === 'entity' && layer.dataSource) {
-          const entity = info.pickedObject.id
-          if (entity && layer.dataMap.has(entity.id)) {
+          const entity = (info.pickedObject as { id?: { id?: string } }).id
+          if (entity && entity.id && layer.dataMap.has(entity.id)) {
             const dataItem = layer.dataMap.get(entity.id)!
             this.handleItemClick(layer, dataItem, info)
             return
@@ -119,7 +125,7 @@ export class DataLayerPlugin extends BasePlugin {
 
         // Primitive 模式
         if (layer.type === 'primitive') {
-          const primitive = info.pickedObject.primitive
+          const primitive = (info.pickedObject as { primitive?: { id?: string | number } }).primitive
           if (primitive && primitive.id && layer.dataMap.has(primitive.id)) {
             const dataItem = layer.dataMap.get(primitive.id)!
             this.handleItemClick(layer, dataItem, info)
@@ -678,8 +684,8 @@ export class DataLayerPlugin extends BasePlugin {
           if (config.showLabels !== false) {
             const labelText = config.clusterStyle
               ? config.clusterStyle(
-                  cluster.points.map((p) => p.primitive as unknown as Cesium.Entity),
-                  clusterPoint as unknown as Cesium.Billboard
+                  cluster.points.map((p) => p.primitive as unknown as Entity),
+                  { billboard: clusterPoint, label: undefined, point: undefined }
                 )?.label || `${cluster.points.length}`
               : `${cluster.points.length}`
 
@@ -722,10 +728,7 @@ export class DataLayerPlugin extends BasePlugin {
       // 自定义聚合样式
       if (config.clusterStyle) {
         dataSource.clustering.clusterEvent.addEventListener(
-          (
-            clusteredEntities: Cesium.Entity[],
-            cluster: { billboard: Cesium.Billboard; label: Cesium.Label; point: Cesium.PointGraphics }
-          ) => {
+          (clusteredEntities: Entity[], cluster: { billboard: Billboard; label: Label; point: PointPrimitive }) => {
             try {
               const style = config.clusterStyle!(clusteredEntities, cluster)
 
@@ -755,10 +758,7 @@ export class DataLayerPlugin extends BasePlugin {
       } else {
         // 默认聚合样式
         dataSource.clustering.clusterEvent.addEventListener(
-          (
-            _clusteredEntities: Cesium.Entity[],
-            cluster: { billboard: Cesium.Billboard; label: Cesium.Label; point: Cesium.PointGraphics }
-          ) => {
+          (_clusteredEntities: Entity[], cluster: { billboard: Billboard; label: Label; point: PointPrimitive }) => {
             try {
               cluster.label.show = config.showLabels !== false
               cluster.label.text = `${_clusteredEntities.length}`
@@ -788,10 +788,11 @@ export class DataLayerPlugin extends BasePlugin {
   private addEntityItem(layer: DataLayerInstance, item: DataItem): void {
     try {
       const style = { ...layer.config.defaultStyle, ...item.style }
-      const entityConfig: Cesium.Entity.ConstructorOptions = {
+      const entityConfig: Entity.ConstructorOptions = {
         id: String(item.id),
         show: item.show !== false,
-        properties: item.data
+        properties:
+          item.data && typeof item.data === 'object' ? new PropertyBag(item.data as Record<string, unknown>) : undefined
       }
 
       // 根据几何类型创建不同的几何体
@@ -1018,7 +1019,7 @@ export class DataLayerPlugin extends BasePlugin {
 
       // 更新位置
       if (updates.position) {
-        entity.position = new Cesium.ConstantPositionProperty(this.normalizePosition(updates.position))
+        entity.position = new ConstantPositionProperty(this.normalizePosition(updates.position))
       }
 
       // 更新显示状态
@@ -1031,28 +1032,28 @@ export class DataLayerPlugin extends BasePlugin {
         const style = { ...layer.config.defaultStyle, ...item.style }
 
         if (style.icon && entity.billboard) {
-          entity.billboard.image = new Cesium.ConstantProperty(style.icon.image)
-          entity.billboard.scale = new Cesium.ConstantProperty(style.icon.scale)
-          entity.billboard.color = new Cesium.ConstantProperty(style.icon.color)
+          entity.billboard.image = new ConstantProperty(style.icon.image)
+          entity.billboard.scale = new ConstantProperty(style.icon.scale)
+          entity.billboard.color = new ConstantProperty(style.icon.color)
         }
 
         if (style.point && entity.point) {
-          entity.point.pixelSize = new Cesium.ConstantProperty(style.point.pixelSize)
-          entity.point.color = new Cesium.ConstantProperty(style.point.color)
-          entity.point.outlineColor = new Cesium.ConstantProperty(style.point.outlineColor)
-          entity.point.outlineWidth = new Cesium.ConstantProperty(style.point.outlineWidth)
+          entity.point.pixelSize = new ConstantProperty(style.point.pixelSize)
+          entity.point.color = new ConstantProperty(style.point.color)
+          entity.point.outlineColor = new ConstantProperty(style.point.outlineColor)
+          entity.point.outlineWidth = new ConstantProperty(style.point.outlineWidth)
         }
 
         if (style.label && entity.label) {
-          entity.label.text = new Cesium.ConstantProperty(style.label.text)
-          entity.label.fillColor = new Cesium.ConstantProperty(style.label.fillColor)
-          entity.label.show = new Cesium.ConstantProperty(style.label.show)
+          entity.label.text = new ConstantProperty(style.label.text)
+          entity.label.fillColor = new ConstantProperty(style.label.fillColor)
+          entity.label.show = new ConstantProperty(style.label.show)
         }
       }
 
       // 更新数据
-      if (updates.data) {
-        entity.properties = updates.data
+      if (updates.data && typeof updates.data === 'object') {
+        entity.properties = new PropertyBag(updates.data as Record<string, unknown>)
       }
     } catch (error) {
       console.error('Failed to update entity item:', error)
@@ -1266,10 +1267,11 @@ export class DataLayerPlugin extends BasePlugin {
           const item = mapping.transform ? mapping.transform(rawItem) : rawItem
 
           // 获取ID
-          const id = this.getFieldValue(item, mapping.idField)
-          if (id === undefined) {
+          const idValue = this.getFieldValue(item, mapping.idField)
+          if (idValue === undefined || idValue === null) {
             throw new Error(`ID field '${mapping.idField}' not found in data`)
           }
+          const id = String(idValue)
 
           // 获取几何类型
           const geometryType =
@@ -1380,3 +1382,30 @@ export class DataLayerPlugin extends BasePlugin {
 
 // 导出类型
 export * from './types'
+
+// 导出加载器类型
+export * from './loaders/types'
+
+// 导出扩展方法
+export {
+  loadGeoJSONLayer,
+  loadGeoJSONNative,
+  loadCSVLayer,
+  loadWKTLayer,
+  loadWFSLayer,
+  loadKMLLayer,
+  loadExcelLayer,
+  loadShapefileLayer,
+  applyLayerGradient,
+  GRADIENT_PRESETS
+} from './extensions'
+
+// 导出加载器
+export { loadGeoJSON, loadGeoJSONDataSource } from './loaders/geojson'
+export { loadCSV } from './loaders/csv'
+export { parseWKT } from './loaders/wkt'
+export { loadWFS } from './loaders/wfs'
+export { loadKML } from './loaders/kml'
+export { loadExcel, hasXLSXLibrary } from './loaders/excel'
+export { loadShapefile, hasShpjsLibrary } from './loaders/shapefile'
+export { applyGradient, GRADIENT_PRESETS as GradientPresets } from './loaders/gradient'
