@@ -3,7 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'Auto-Cesium',
   description: 'Cesium 二次封装库',
-  base: '/',
+  base: '/ktd-cesium/',
   lang: 'zh-CN',
 
   themeConfig: {
