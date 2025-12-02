@@ -205,14 +205,18 @@ export class AnalysisPlugin extends BasePlugin {
 
     // 绑定事件
     if (options.onComplete) {
-      this.currentMeasure.on('measure:complete', (result: MeasureResult) => {
+      this.currentMeasure.on('measure:complete', (...args: unknown[]) => {
+        const result = args[0] as MeasureResult
         this.results.set(result.entity?.id || '', result)
         options.onComplete?.(result)
       })
     }
 
     if (options.onUpdate) {
-      this.currentMeasure.on('measure:update', options.onUpdate)
+      this.currentMeasure.on('measure:update', (...args: unknown[]) => {
+        const result = args[0] as MeasureResult
+        options.onUpdate?.(result)
+      })
     }
 
     // 转发所有事件
@@ -227,7 +231,8 @@ export class AnalysisPlugin extends BasePlugin {
     ]
 
     eventTypes.forEach((eventType) => {
-      this.currentMeasure?.on(eventType, (data: Record<string, unknown>) => {
+      this.currentMeasure?.on(eventType, (...args: unknown[]) => {
+        const data = (args[0] as Record<string, unknown>) || {}
         this.fireEvent(eventType, data)
       })
     })
