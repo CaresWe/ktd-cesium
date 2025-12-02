@@ -3,7 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'Auto-Cesium',
   description: 'Cesium 二次封装库',
-  base: '/',
+  base: '/ktd-cesium/',
   lang: 'zh-CN',
   ignoreDeadLinks: true,
 
@@ -102,7 +102,6 @@ export default defineConfig({
             { text: '材质插件', link: '/packages/plugins/material' },
             { text: '场景插件', link: '/packages/plugins/scene' },
             { text: '3D Tiles插件', link: '/packages/plugins/3dtiles' },
-            { text: '地形插件', link: '/packages/plugins/terrain' },
           ]
         }
       ],
