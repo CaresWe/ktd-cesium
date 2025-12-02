@@ -132,3 +132,39 @@ export interface ArcGISLayerOptions extends BaseLayerOptions {
   /** 区域范围 [west, south, east, north] (度) */
   rectangle?: [number, number, number, number]
 }
+
+/**
+ * 单图片底图配置
+ */
+export interface SingleImageLayerOptions extends BaseLayerOptions {
+  /** 图片 URL */
+  url: string
+  /** 区域范围 [west, south, east, north] (度) - 必填 */
+  rectangle: [number, number, number, number]
+}
+
+/**
+ * 时序图配置
+ */
+export interface TimeSeriesLayerOptions extends BaseLayerOptions {
+  /** 瓦片 URL 模板，支持 {x} {y} {z} {s} {time} 占位符 */
+  url: string
+  /** 时间列表，可以是 Date 对象数组或 ISO 字符串数组 */
+  times: Date[] | string[]
+  /** 子域名数组，用于负载均衡 */
+  subdomains?: string[]
+  /** 最小层级 */
+  minimumLevel?: number
+  /** 最大层级 */
+  maximumLevel?: number
+  /** 瓦片宽度 */
+  tileWidth?: number
+  /** 瓦片高度 */
+  tileHeight?: number
+  /** 区域范围 [west, south, east, north] (度) */
+  rectangle?: [number, number, number, number]
+  /** 当前时间索引，默认为 0 */
+  currentTimeIndex?: number
+  /** 时间格式化函数，用于将 Date 转换为 URL 中的时间字符串 */
+  timeFormatter?: (date: Date) => string
+}

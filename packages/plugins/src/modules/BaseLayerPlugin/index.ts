@@ -10,6 +10,7 @@ import {
   WebMapServiceImageryProvider,
   WebMapTileServiceImageryProvider,
   ArcGisMapServerImageryProvider,
+  SingleTileImageryProvider,
   Rectangle as CesiumRectangle,
   WebMercatorTilingScheme,
   GeographicTilingScheme
@@ -22,7 +23,9 @@ import type {
   TMSLayerOptions,
   WMSLayerOptions,
   WMTSLayerOptions,
-  ArcGISLayerOptions
+  ArcGISLayerOptions,
+  SingleImageLayerOptions,
+  TimeSeriesLayerOptions
 } from './types'
 import { CoordinateSystem } from './types'
 import {
@@ -51,6 +54,18 @@ export class BaseLayerPlugin extends BasePlugin {
 
   /** 图层集合 */
   private layers: Map<string, ImageryLayer> = new Map()
+
+  /** 时序图层配置集合 */
+  private timeSeriesConfigs: Map<
+    string,
+    {
+      provider: UrlTemplateImageryProvider
+      times: Date[]
+      currentIndex: number
+      timeFormatter: (date: Date) => string
+      urlTemplate: string
+    }
+  > = new Map()
 
   protected onInstall(_viewer: AutoViewer): void {
     // Layer plugin installed
@@ -375,6 +390,193 @@ export class BaseLayerPlugin extends BasePlugin {
   }
 
   /**
+   * 添加单图片底图
+   * @param id 图层 ID
+   * @param options 配置选项
+   * @returns ImageryLayer 图层实例
+   * @example
+   * ```ts
+   * // 添加区域影像图片
+   * layer.addSingleImage('region-image', {
+   *   url: 'https://example.com/image.jpg',
+   *   rectangle: [110, 30, 120, 40] // [west, south, east, north]
+   * })
+   *
+   * // 添加带透明度的图片
+   * layer.addSingleImage('overlay-image', {
+   *   url: 'https://example.com/overlay.png',
+   *   rectangle: [110, 30, 120, 40],
+   *   alpha: 0.7
+   * })
+   * ```
+   */
+  addSingleImage(id: string, options: SingleImageLayerOptions): ImageryLayer {
+    this.ensureInstalled()
+
+    if (this.layers.has(id)) {
+      console.warn(`Layer "${id}" already exists`)
+      return this.layers.get(id)!
+    }
+
+    const provider = new SingleTileImageryProvider({
+      url: options.url,
+      rectangle: CesiumRectangle.fromDegrees(
+        options.rectangle[0],
+        options.rectangle[1],
+        options.rectangle[2],
+        options.rectangle[3]
+      )
+    })
+
+    return this.addLayerFromProvider(id, provider, options)
+  }
+
+  /**
+   * 添加时序图层
+   * @param id 图层 ID
+   * @param options 配置选项
+   * @returns ImageryLayer 图层实例
+   * @example
+   * ```ts
+   * // 添加时序气象数据
+   * layer.addTimeSeries('weather-series', {
+   *   url: 'https://example.com/tiles/{z}/{x}/{y}?time={time}',
+   *   times: [
+   *     new Date('2024-01-01T00:00:00Z'),
+   *     new Date('2024-01-01T06:00:00Z'),
+   *     new Date('2024-01-01T12:00:00Z')
+   *   ],
+   *   timeFormatter: (date) => date.toISOString()
+   * })
+   *
+   * // 使用自定义时间格式
+   * layer.addTimeSeries('custom-time', {
+   *   url: 'https://example.com/tiles/{z}/{x}/{y}/{time}.png',
+   *   times: ['2024-01-01', '2024-01-02', '2024-01-03'],
+   *   currentTimeIndex: 0,
+   *   timeFormatter: (date) => {
+   *     const year = date.getFullYear()
+   *     const month = String(date.getMonth() + 1).padStart(2, '0')
+   *     const day = String(date.getDate()).padStart(2, '0')
+   *     return `${year}${month}${day}`
+   *   }
+   * })
+   * ```
+   */
+  addTimeSeries(id: string, options: TimeSeriesLayerOptions): ImageryLayer {
+    this.ensureInstalled()
+
+    if (this.layers.has(id)) {
+      console.warn(`Layer "${id}" already exists`)
+      return this.layers.get(id)!
+    }
+
+    // 转换时间列表为 Date 数组
+    const times = options.times.map((time) => (time instanceof Date ? time : new Date(time)))
+
+    // 默认时间格式化函数
+    const timeFormatter =
+      options.timeFormatter ||
+      ((date: Date) => {
+        return date.toISOString()
+      })
+
+    const currentIndex = options.currentTimeIndex || 0
+    const currentTime = times[currentIndex]
+
+    // 创建初始 URL（替换 {time} 占位符）
+    const initialUrl = options.url.replace('{time}', timeFormatter(currentTime))
+
+    const providerOptions: CesiumUrlTemplateImageryProvider.ConstructorOptions = {
+      url: initialUrl,
+      subdomains: options.subdomains,
+      minimumLevel: options.minimumLevel,
+      maximumLevel: options.maximumLevel,
+      tileWidth: options.tileWidth,
+      tileHeight: options.tileHeight,
+      tilingScheme: this.createTilingScheme(options.coordinateSystem)
+    }
+
+    // 设置区域范围
+    if (options.rectangle) {
+      providerOptions.rectangle = CesiumRectangle.fromDegrees(
+        options.rectangle[0],
+        options.rectangle[1],
+        options.rectangle[2],
+        options.rectangle[3]
+      )
+    }
+
+    const provider = new UrlTemplateImageryProvider(providerOptions)
+    const layer = this.addLayerFromProvider(id, provider, options)
+
+    // 保存时序配置
+    this.timeSeriesConfigs.set(id, {
+      provider,
+      times,
+      currentIndex,
+      timeFormatter,
+      urlTemplate: options.url
+    })
+
+    return layer
+  }
+
+  /**
+   * 设置时序图层的时间
+   * @param id 图层 ID
+   * @param timeIndex 时间索引
+   * @returns 是否设置成功
+   */
+  setTimeSeriesTime(id: string, timeIndex: number): boolean {
+    const config = this.timeSeriesConfigs.get(id)
+    if (!config) {
+      console.warn(`Time series layer "${id}" not found`)
+      return false
+    }
+
+    if (timeIndex < 0 || timeIndex >= config.times.length) {
+      console.warn(`Invalid time index: ${timeIndex}`)
+      return false
+    }
+
+    const newTime = config.times[timeIndex]
+    const newUrl = config.urlTemplate.replace('{time}', config.timeFormatter(newTime))
+
+    // 更新 provider 的 URL
+    // @ts-expect-error - Cesium 的 UrlTemplateImageryProvider 支持动态修改 URL
+    config.provider._resource._url = newUrl
+    config.currentIndex = timeIndex
+
+    // 刷新图层
+    const layer = this.layers.get(id)
+    if (layer) {
+      // @ts-expect-error - 触发图层重新加载
+      layer._imageryProvider._reload()
+    }
+
+    return true
+  }
+
+  /**
+   * 获取时序图层的当前时间索引
+   * @param id 图层 ID
+   * @returns 当前时间索引，如果图层不存在则返回 undefined
+   */
+  getTimeSeriesCurrentIndex(id: string): number | undefined {
+    return this.timeSeriesConfigs.get(id)?.currentIndex
+  }
+
+  /**
+   * 获取时序图层的时间列表
+   * @param id 图层 ID
+   * @returns 时间列表，如果图层不存在则返回 undefined
+   */
+  getTimeSeriesTimes(id: string): Date[] | undefined {
+    return this.timeSeriesConfigs.get(id)?.times
+  }
+
+  /**
    * 从 Provider 添加图层（内部方法）
    */
   private addLayerFromProvider(
@@ -383,7 +585,8 @@ export class BaseLayerPlugin extends BasePlugin {
       | UrlTemplateImageryProvider
       | WebMapServiceImageryProvider
       | WebMapTileServiceImageryProvider
-      | ArcGisMapServerImageryProvider,
+      | ArcGisMapServerImageryProvider
+      | SingleTileImageryProvider,
     options: BaseLayerOptions
   ): ImageryLayer {
     const layer = this.cesiumViewer.imageryLayers.addImageryProvider(provider, options.index)
@@ -414,6 +617,12 @@ export class BaseLayerPlugin extends BasePlugin {
 
     this.cesiumViewer.imageryLayers.remove(layer)
     this.layers.delete(id)
+
+    // 如果是时序图层，也删除其配置
+    if (this.timeSeriesConfigs.has(id)) {
+      this.timeSeriesConfigs.delete(id)
+    }
+
     return true
   }
 
@@ -558,6 +767,7 @@ export class BaseLayerPlugin extends BasePlugin {
       this.cesiumViewer.imageryLayers.remove(layer)
     })
     this.layers.clear()
+    this.timeSeriesConfigs.clear()
   }
 
   /**
@@ -745,7 +955,9 @@ export type {
   TMSLayerOptions,
   WMSLayerOptions,
   WMTSLayerOptions,
-  ArcGISLayerOptions
+  ArcGISLayerOptions,
+  SingleImageLayerOptions,
+  TimeSeriesLayerOptions
 } from './types'
 
 // 导出枚举
