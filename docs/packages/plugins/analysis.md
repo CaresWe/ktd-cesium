@@ -1,124 +1,131 @@
-# AnalysisPlugin
+# AnalysisPlugin - 空间分析插件
 
-分析插件提供量算功能，支持空间距离、水平面积、高度差、坐标测量、贴地距离、贴地面积、三角测量、方位角等多种测量类型。
+AnalysisPlugin 提供强大的空间测量和分析功能，支持多种量算类型和高级空间分析。
 
-## 导入
+## 特性
 
-```typescript
-import { AnalysisPlugin, MeasureType } from '@auto-cesium/plugins'
-import type {
-  AnalysisPluginOptions,
-  MeasureOptions,
-  MeasureResult,
-  MeasureStyle,
-  SnapConfig
-} from '@auto-cesium/plugins'
-```
+### 基础测量
 
-## 核心特性
+- **空间距离** - 测量两点间的三维直线距离
+- **贴地距离** - 测量贴合地形的实际距离
+- **水平面积** - 测量多边形的水平投影面积
+- **贴地面积** - 测量贴合地形的表面积
+- **高度差** - 测量两点间的高程差
+- **坐标测量** - 获取点的经纬度和高程
+- **三角测量** - 三点构成的三角形面积和周长
+- **方位角** - 测量两点间的方位角
 
-- **多种测量类型**：空间距离、贴地距离、水平面积、贴地面积、高度差、坐标、三角测量、方位角
-- **空间分析**：剖面分析、方量分析、通视分析、环视分析、最短路径、缓冲区、可视域、日照、叠面分析
-- **顶点吸附**：支持吸附到已有实体的顶点
-- **实时更新**：测量过程中实时显示测量值
-- **GeoJSON 支持**：支持导入导出测量结果
-- **样式自定义**：支持自定义测量线、点、标签样式
-- **事件系统**：完整的测量事件回调
-- **基于 Turf.js**：叠面分析使用 Turf.js 实现高性能空间计算
+### 高级分析
 
-## 安装
+- **剖面分析** - 生成地形剖面图
+- **方量分析** - 计算挖填方量
+- **通视分析** - 分析两点间的可视性
+- **环视分析** - 天际线和全景可视性分析
+- **最短路径** - 基于地形坡度的最优路径
+- **缓冲区分析** - 生成几何缓冲区
+- **可视域分析** - 指定视角的可视范围分析
+- **日照分析** - 建筑日照时长分析
+- **叠面分析** - 多边形的交并差分析
+
+### 增强功能
+
+- **顶点吸附** - 自动吸附到已有图形顶点
+- **实时更新** - 绘制过程中实时显示测量结果
+- **GeoJSON 导入导出** - 支持标准 GeoJSON 格式
+- **样式自定义** - 完全自定义测量样式
+- **移动端支持** - 支持触摸操作和长按结束
+
+## 使用场景
+
+### 城市规划
+
+- **土地测量** - 使用面积测量工具计算地块面积
+- **建筑布局** - 通过距离和角度测量优化建筑间距
+- **日照分析** - 评估建筑物对周边的日照影响
+- **方量计算** - 计算土方工程的挖填方量
+
+### 地理信息系统
+
+- **地形分析** - 使用剖面分析查看地形起伏
+- **通视分析** - 评估观测点之间的可视性
+- **缓冲区分析** - 生成兴趣点周边的影响范围
+- **叠面分析** - 分析不同区域的交集和差集
+
+### 工程建设
+
+- **路径规划** - 基于地形坡度计算最优施工路径
+- **场地平整** - 通过方量分析优化场地平整方案
+- **可视域分析** - 评估建筑物的视野范围
+- **高程测量** - 测量关键点位的高程信息
+
+### 环境监测
+
+- **区域测量** - 测量监测区域的面积和边界
+- **坐标定位** - 记录监测点的精确坐标
+- **环视分析** - 分析监测点的360°可视范围
+- **数据导出** - 将测量结果导出为GeoJSON格式
+
+### 应急救援
+
+- **距离测算** - 快速测量救援距离
+- **区域划分** - 使用缓冲区划定警戒范围
+- **路径分析** - 计算最短救援路径
+- **可视性评估** - 评估指挥位置的视野覆盖
+
+## 快速开始
 
 ```typescript
 import { AutoViewer } from '@auto-cesium/core'
 import { AnalysisPlugin } from '@auto-cesium/plugins'
 
 const viewer = new AutoViewer(cesiumViewer)
-
 const analysis = viewer.use(AnalysisPlugin, {
+  showMidpoint: true,
+  liveUpdate: true,
   style: {
     lineColor: '#ffff00',
-    lineWidth: 2,
     pointColor: '#ff0000',
-    pointSize: 8
-  },
-  snap: {
-    enabled: true,
-    radius: 10
-  },
-  showMidpoint: true,
-  liveUpdate: true
-} satisfies AnalysisPluginOptions)
-```
-
-## 配置选项
-
-| 选项           | 类型                    | 默认值 | 说明               |
-| -------------- | ----------------------- | ------ | ------------------ |
-| `style`        | `Partial<MeasureStyle>` | -      | 默认样式配置       |
-| `snap`         | `Partial<SnapConfig>`   | -      | 顶点吸附配置       |
-| `showMidpoint` | `boolean`               | `true` | 是否显示中间点     |
-| `liveUpdate`   | `boolean`               | `true` | 是否实时更新测量值 |
-
-## 测量类型
-
-### MeasureType 枚举
-
-```typescript
-enum MeasureType {
-  // 基础量算
-  DISTANCE = 'distance', // 空间距离测量
-  SURFACE_DISTANCE = 'surfaceDistance', // 贴地距离测量
-  AREA = 'area', // 水平面积测量
-  SURFACE_AREA = 'surfaceArea', // 贴地面积测量
-  HEIGHT = 'height', // 高度差测量
-  COORDINATE = 'coordinate', // 坐标测量
-  TRIANGLE = 'triangle', // 三角测量
-  ANGLE = 'angle', // 方位角测量
-
-  // 高级分析
-  PROFILE = 'profile', // 剖面分析
-  VOLUME = 'volume', // 方量分析
-  VIEWSHED = 'viewshed', // 通视分析
-  SKYLINE = 'skyline', // 环视分析（天际线）
-  SHORTEST_PATH = 'shortestPath', // 最短路径分析
-  BUFFER = 'buffer', // 缓冲区分析
-  VIEWSHED_ANALYSIS = 'viewshedAnalysis', // 可视域分析
-  SUNLIGHT = 'sunlight', // 日照分析
-  OVERLAY = 'overlay' // 叠面分析
-}
-```
-
-## API
-
-### startMeasure(options)
-
-开始量算。
-
-**类型签名**
-
-```typescript
-startMeasure(options: MeasureOptions): this
-```
-
-**参数**
-
-- `options.type`: 量算类型
-- `options.style`: 样式覆盖（可选）
-- `options.onComplete`: 完成回调（可选）
-- `options.onUpdate`: 更新回调（可选）
-
-**示例**
-
-```typescript
-// 空间距离测量
-analysis.startMeasure({
-  type: 'distance',
-  onComplete: (result) => {
-    console.log('测量完成:', result.value, '米')
+    fillColor: '#00ff00'
   }
 })
 
-// 水平面积测量
+// 开始距离测量
+analysis.startMeasure({
+  type: 'distance',
+  onComplete: (result) => {
+    console.log('测量完成:', result.text)
+  }
+})
+```
+
+## 使用示例
+
+### 基础测量
+
+#### 距离测量
+
+```typescript
+// 空间距离
+analysis.startMeasure({
+  type: 'distance',
+  onComplete: (result) => {
+    console.log('距离:', result.value, '米')
+  }
+})
+
+// 贴地距离
+analysis.startMeasure({
+  type: 'surfaceDistance',
+  onComplete: (result) => {
+    console.log('贴地距离:', result.value, '米')
+  }
+})
+```
+
+#### 面积测量
+
+```typescript
+// 水平面积
 analysis.startMeasure({
   type: 'area',
   style: {
@@ -129,820 +136,723 @@ analysis.startMeasure({
     console.log('面积:', result.value, '平方米')
   }
 })
-```
 
-### stopMeasure()
-
-停止当前量算。
-
-```typescript
-analysis.stopMeasure()
-```
-
-### clearMeasure(id?)
-
-清除量算结果。
-
-```typescript
-// 清除所有
-analysis.clearMeasure()
-
-// 清除指定 ID
-analysis.clearMeasure('measure-id-1')
-```
-
-### getResult(id)
-
-获取量算结果。
-
-```typescript
-const result = analysis.getResult('measure-id-1')
-if (result) {
-  console.log('测量值:', result.value)
-  console.log('位置:', result.positions)
-}
-```
-
-### getAllResults()
-
-获取所有量算结果。
-
-```typescript
-const results = analysis.getAllResults()
-results.forEach((result, id) => {
-  console.log(`${id}: ${result.value}`)
-})
-```
-
-### on(event, callback)
-
-监听测量事件。
-
-```typescript
-analysis.on('measure:start', (result) => {
-  console.log('开始测量')
-})
-
-analysis.on('measure:complete', (result) => {
-  console.log('测量完成:', result)
-})
-
-analysis.on('measure:update', (result) => {
-  console.log('测量更新:', result.value)
-})
-```
-
-### off(event, callback)
-
-移除事件监听。
-
-```typescript
-const handler = (result) => console.log(result)
-analysis.on('measure:complete', handler)
-analysis.off('measure:complete', handler)
-```
-
-## 使用场景
-
-### 场景 1：空间距离测量
-
-```typescript
-analysis.startMeasure({
-  type: 'distance',
-  onComplete: (result) => {
-    const distance = result.value as number
-    console.log(`距离: ${distance.toFixed(2)} 米`)
-
-    // 显示结果
-    alert(`测量距离: ${(distance / 1000).toFixed(2)} 公里`)
-  }
-})
-
-// 用户在地图上点击两个点
-// 测量完成后会触发 onComplete 回调
-```
-
-### 场景 2：贴地距离测量
-
-```typescript
-analysis.startMeasure({
-  type: 'surfaceDistance',
-  style: {
-    lineColor: '#00ff00',
-    lineWidth: 3
-  },
-  onUpdate: (result) => {
-    // 实时更新显示
-    document.getElementById('distance-display')!.textContent = `${((result.value as number) / 1000).toFixed(2)} 公里`
-  }
-})
-```
-
-### 场景 3：水平面积测量
-
-```typescript
-analysis.startMeasure({
-  type: 'area',
-  style: {
-    fillColor: '#3388ff',
-    fillOpacity: 0.4,
-    lineColor: '#ffffff',
-    lineWidth: 2
-  },
-  onComplete: (result) => {
-    const area = result.value as number
-    console.log(`面积: ${(area / 1000000).toFixed(2)} 平方公里`)
-  }
-})
-
-// 用户在地图上点击多个点形成多边形
-// 双击完成测量
-```
-
-### 场景 4：贴地面积测量
-
-```typescript
+// 贴地面积
 analysis.startMeasure({
   type: 'surfaceArea',
   onComplete: (result) => {
-    const area = result.value as number
-    // 考虑地形起伏的实际面积
-    console.log(`贴地面积: ${area.toFixed(2)} 平方米`)
+    console.log('贴地面积:', result.value, '平方米')
   }
 })
 ```
 
-### 场景 5：高度差测量
+#### 高度和坐标
 
 ```typescript
+// 高度差
 analysis.startMeasure({
   type: 'height',
   onComplete: (result) => {
-    const heightDiff = result.value as number
-    console.log(`高度差: ${heightDiff.toFixed(2)} 米`)
+    console.log('高度差:', result.value, '米')
   }
 })
 
-// 用户点击两个点，测量它们之间的高度差
-```
-
-### 场景 6：坐标测量
-
-```typescript
+// 坐标测量
 analysis.startMeasure({
   type: 'coordinate',
   onComplete: (result) => {
-    const coord = result.value as { longitude: number; latitude: number; height: number }
-    console.log(`经度: ${coord.longitude}`)
-    console.log(`纬度: ${coord.latitude}`)
-    console.log(`高度: ${coord.height} 米`)
+    const coord = result.value as { lng: number; lat: number; height: number }
+    console.log(\`经度: \${coord.lng}°, 纬度: \${coord.lat}°, 高程: \${coord.height}m\`)
   }
 })
-
-// 用户点击一个点，获取该点的坐标
 ```
 
-### 场景 7：三角测量
+### 高级分析
+
+#### 剖面分析
 
 ```typescript
 analysis.startMeasure({
-  type: 'triangle',
+  type: 'profile',
+  profileOptions: {
+    sampleCount: 100,
+    clampToGround: true
+  },
   onComplete: (result) => {
-    const triangle = result.value as {
-      area: number
-      perimeter: number
-      angles: number[]
-      sides: number[]
+    const data = result.value as ProfileDataPoint[]
+    // 使用图表库绘制剖面图
+    drawChart(data)
+  }
+})
+```
+
+#### 方量分析
+
+```typescript
+analysis.startMeasure({
+  type: 'volume',
+  volumeOptions: {
+    baseElevation: 100,
+    gridSize: 10
+  },
+  onComplete: (result) => {
+    const volume = result.value as {
+      cutVolume: number
+      fillVolume: number
     }
-    console.log('面积:', triangle.area)
-    console.log('周长:', triangle.perimeter)
-    console.log('角度:', triangle.angles)
-    console.log('边长:', triangle.sides)
+    console.log('挖方:', volume.cutVolume, '立方米')
+    console.log('填方:', volume.fillVolume, '立方米')
   }
 })
-
-// 用户点击三个点形成三角形
 ```
 
-### 场景 8：方位角测量
+#### 通视分析
 
 ```typescript
 analysis.startMeasure({
-  type: 'angle',
+  type: 'viewshed',
+  viewshedOptions: {
+    observerHeight: 1.6,
+    visibleColor: '#00ff00',
+    invisibleColor: '#ff0000'
+  },
   onComplete: (result) => {
-    const angle = result.value as number
-    console.log(`方位角: ${angle.toFixed(2)}°`)
+    const data = result.value as { visible: boolean }
+    console.log('是否可见:', data.visible)
   }
 })
-
-// 用户点击两个点，测量从第一点到第二点的方位角
 ```
 
-### 场景 9：顶点吸附
+### 样式自定义
 
 ```typescript
+// 全局样式
 const analysis = viewer.use(AnalysisPlugin, {
-  snap: {
-    enabled: true,
-    radius: 15, // 吸附半径（像素）
-    entities: [entity1, entity2], // 指定要吸附的实体
-    dataSources: [graphics.getDataSource()] // 或指定数据源
+  style: {
+    lineColor: '#ffff00',
+    lineWidth: 2,
+    pointColor: '#ff0000',
+    pointSize: 8
   }
 })
 
-// 测量时会自动吸附到附近实体的顶点
-```
-
-### 场景 10：事件监听
-
-```typescript
-// 监听所有测量事件
-analysis.on('measure:start', (result) => {
-  console.log('开始测量:', result.type)
-})
-
-analysis.on('measure:pointAdd', (result) => {
-  console.log('添加点:', result.positions.length)
-})
-
-analysis.on('measure:update', (result) => {
-  console.log('测量值更新:', result.value)
-})
-
-analysis.on('measure:complete', (result) => {
-  console.log('测量完成:', result)
-  // 保存结果
-  saveMeasureResult(result)
-})
-
-analysis.on('measure:snap', (result) => {
-  console.log('吸附到顶点')
-})
-```
-
-### 场景 11：批量测量管理
-
-```typescript
-// 开始多个测量
-const measure1 = analysis.startMeasure({ type: 'distance' })
-const measure2 = analysis.startMeasure({ type: 'area' })
-
-// 获取所有结果
-const allResults = analysis.getAllResults()
-console.log(`共 ${allResults.size} 个测量结果`)
-
-// 清除所有
-analysis.clearMeasure()
-
-// 清除指定测量
-analysis.clearMeasure('measure-id-1')
-```
-
-### 场景 12：自定义样式
-
-```typescript
+// 单次测量样式覆盖
 analysis.startMeasure({
   type: 'distance',
   style: {
-    lineColor: '#ff0000',
-    lineWidth: 3,
-    pointColor: '#00ff00',
-    pointSize: 10,
-    labelFont: '16px Arial',
-    labelColor: '#ffffff',
-    labelBackgroundColor: '#000000',
-    labelBackgroundOpacity: 0.8,
-    labelPixelOffset: { x: 0, y: -30 }
+    lineColor: '#00ffff',
+    lineWidth: 3
   }
 })
 ```
 
-## 样式配置
-
-### MeasureStyle
+### 顶点吸附
 
 ```typescript
-interface MeasureStyle {
-  lineColor?: string // 线颜色（默认 '#ffff00'）
-  lineWidth?: number // 线宽（默认 2）
-  pointColor?: string // 点颜色（默认 '#ff0000'）
-  pointSize?: number // 点大小（默认 8）
-  fillColor?: string // 填充颜色（默认 '#00ff00'）
-  fillOpacity?: number // 填充透明度（默认 0.3）
-  labelFont?: string // 标签字体（默认 '14px sans-serif'）
-  labelColor?: string // 标签颜色（默认 '#ffffff'）
-  labelBackgroundColor?: string // 标签背景色（默认 '#000000'）
-  labelBackgroundOpacity?: number // 标签背景透明度（默认 0.7）
-  labelPixelOffset?: { x: number; y: number } // 标签偏移（默认 { x: 0, y: -20 }）
-  auxiliaryLineColor?: string // 辅助线颜色（默认 '#ffffff'）
-  auxiliaryLineWidth?: number // 辅助线宽度（默认 1）
-  auxiliaryLineDashLength?: number // 辅助线虚线长度（默认 10）
+// 启用吸附
+analysis.setSnapConfig({
+  enabled: true,
+  radius: 15
+})
+
+// 监听吸附事件
+analysis.on('measure:snap', (data) => {
+  console.log('吸附到顶点:', data.position)
+})
+```
+
+### GeoJSON 导入导出
+
+```typescript
+// 导出
+const features = analysis.exportGeoJSON()
+const geojson = {
+  type: 'FeatureCollection',
+  features
 }
+console.log(JSON.stringify(geojson))
+
+// 导入
+analysis.importGeoJSON(features)
 ```
 
-## 测量结果
-
-### MeasureResult
+### 完整应用示例
 
 ```typescript
-interface MeasureResult {
-  type: MeasureTypeString // 测量类型
-  value: number | string | Record<string, unknown> // 测量值
-  positions: Cesium.Cartesian3[] // 位置数组
-  entity?: Cesium.Entity // 关联的实体
-  text?: string // 格式化的文本
-}
-```
-
-**测量值类型**：
-
-- `distance` / `surfaceDistance`: `number`（米）
-- `area` / `surfaceArea`: `number`（平方米）
-- `height`: `number`（米）
-- `coordinate`: `{ longitude: number; latitude: number; height: number }`
-- `triangle`: `{ area: number; perimeter: number; angles: number[]; sides: number[] }`
-- `angle`: `number`（度）
-
-## 注意事项
-
-1. **依赖 GraphicsPlugin**：
-   - AnalysisPlugin 需要 GraphicsPlugin 支持
-   - 如果 GraphicsPlugin 存在，会共享数据源
-
-2. **测量操作**：
-   - 空间距离：点击两个点
-   - 面积测量：点击多个点，双击完成
-   - 坐标测量：点击一个点
-   - 三角测量：点击三个点
-   - 方位角：点击两个点
-
-3. **顶点吸附**：
-   - 需要在配置中启用 `snap.enabled: true`
-   - 可以指定要吸附的实体或数据源
-   - 吸附半径单位为像素
-
-4. **实时更新**：
-   - `liveUpdate: true` 时，测量过程中会实时更新显示
-   - 可能会影响性能，大量测量时建议关闭
-
-5. **事件清理**：
-   - 使用 `off` 方法移除事件监听，避免内存泄漏
-   - 插件销毁时会自动清理所有监听器
-
-6. **结果管理**：
-   - 测量结果会保存在插件内部
-   - 使用 `getResult` 或 `getAllResults` 获取结果
-   - 使用 `clearMeasure` 清除结果
-
-## 叠面分析 (Overlay Analysis)
-
-叠面分析基于 Turf.js 实现，提供强大的多边形空间分析功能。
-
-### 支持的分析类型
-
-```typescript
-enum OverlayType {
-  INTERSECT = 'intersect', // 相交（求交集）
-  UNION = 'union', // 合并（求并集）
-  DIFFERENCE = 'difference', // 差集（A - B）
-  XOR = 'xor', // 对称差（互斥部分）
-  CONTAINS = 'contains', // 包含判断
-  WITHIN = 'within', // 被包含判断
-  OVERLAPS = 'overlaps', // 重叠判断
-  TOUCHES = 'touches' // 相邻判断
-}
-```
-
-### 基本用法
-
-```typescript
-import { AnalysisPlugin, OverlayType } from '@auto-cesium/plugins'
-
-// 1. 相交分析（求两个多边形的交集）
-analysis.startMeasure({
-  type: 'overlay',
-  overlayOptions: {
-    overlayType: OverlayType.INTERSECT,
-    resultFillColor: '#ff0000',
-    resultFillOpacity: 0.5,
-    showAreaLabel: true,
-    showOverlapRatio: true
-  },
-  onComplete: (result) => {
-    const overlayResult = result.value as OverlayResult
-    console.log('交集面积:', overlayResult.resultArea)
-    console.log('重叠率:', overlayResult.overlapRatio)
-  }
+// 初始化
+const analysis = viewer.use(AnalysisPlugin, {
+  showMidpoint: true,
+  liveUpdate: true
 })
 
-// 用户绘制第一个多边形（至少3个点，右键完成）
-// 然后绘制第二个多边形
-// 分析结果会自动显示
-```
+// 工具切换函数
+function startMeasure(type: string) {
+  analysis.stopMeasure()
 
-### 使用已有多边形进行分析
-
-```typescript
-// 方式1：使用坐标数组
-const polygon1 = [
-  Cesium.Cartesian3.fromDegrees(116.4, 39.9, 0),
-  Cesium.Cartesian3.fromDegrees(116.5, 39.9, 0),
-  Cesium.Cartesian3.fromDegrees(116.5, 40.0, 0),
-  Cesium.Cartesian3.fromDegrees(116.4, 40.0, 0)
-]
-
-analysis.startMeasure({
-  type: 'overlay',
-  overlayOptions: {
-    overlayType: 'union',
-    secondPolygon: polygon1
-  }
-})
-// 只需绘制第一个多边形，第二个多边形已提供
-
-// 方式2：使用已有实体
-const existingEntity = viewer.entities.getById('polygon-entity-id')
-analysis.startMeasure({
-  type: 'overlay',
-  overlayOptions: {
-    overlayType: 'difference',
-    secondPolygonEntity: existingEntity
-  }
-})
-```
-
-### 分析类型详解
-
-#### 1. 相交分析 (Intersect)
-
-求两个多边形的交集区域。
-
-```typescript
-analysis.startMeasure({
-  type: 'overlay',
-  overlayOptions: {
-    overlayType: OverlayType.INTERSECT,
-    showOverlapRatio: true
-  },
-  onComplete: (result) => {
-    const { resultArea, overlapRatio } = result.value as OverlayResult
-    console.log(`交集面积: ${resultArea.toFixed(2)} m²`)
-    console.log(`重叠率: ${(overlapRatio! * 100).toFixed(2)}%`)
-  }
-})
-```
-
-**应用场景**：
-
-- 计算两个地块的重叠区域
-- 分析建筑物与规划区域的交集
-- 确定影响范围的重叠部分
-
-#### 2. 合并分析 (Union)
-
-求两个多边形的并集区域。
-
-```typescript
-analysis.startMeasure({
-  type: 'overlay',
-  overlayOptions: {
-    overlayType: OverlayType.UNION,
-    resultFillColor: '#00ff00',
-    showOriginalPolygons: false
-  },
-  onComplete: (result) => {
-    const { resultArea } = result.value as OverlayResult
-    console.log(`合并后总面积: ${resultArea.toFixed(2)} m²`)
-  }
-})
-```
-
-**应用场景**：
-
-- 合并多个相邻地块
-- 计算覆盖范围的总面积
-- 规划区域整合
-
-#### 3. 差集分析 (Difference)
-
-从第一个多边形中减去第二个多边形。
-
-```typescript
-analysis.startMeasure({
-  type: 'overlay',
-  overlayOptions: {
-    overlayType: OverlayType.DIFFERENCE,
-    resultFillColor: '#0000ff'
-  },
-  onComplete: (result) => {
-    const { firstArea, secondArea, resultArea } = result.value as OverlayResult
-    console.log(`原面积: ${firstArea.toFixed(2)} m²`)
-    console.log(`减去面积: ${secondArea.toFixed(2)} m²`)
-    console.log(`剩余面积: ${resultArea.toFixed(2)} m²`)
-  }
-})
-```
-
-**应用场景**：
-
-- 计算去除某区域后的剩余面积
-- 土地扣除计算
-- 规划区域调整
-
-#### 4. 对称差分析 (XOR)
-
-求两个多边形互相排斥的部分（不包括交集）。
-
-```typescript
-analysis.startMeasure({
-  type: 'overlay',
-  overlayOptions: {
-    overlayType: OverlayType.XOR,
-    resultFillColor: '#ff00ff'
-  },
-  onComplete: (result) => {
-    const { resultArea } = result.value as OverlayResult
-    console.log(`独占区域面积: ${resultArea.toFixed(2)} m²`)
-  }
-})
-```
-
-**应用场景**：
-
-- 找出两个区域的差异部分
-- 对比分析
-- 冲突区域检测
-
-#### 5. 包含判断 (Contains)
-
-判断第一个多边形是否完全包含第二个多边形。
-
-```typescript
-analysis.startMeasure({
-  type: 'overlay',
-  overlayOptions: {
-    overlayType: OverlayType.CONTAINS
-  },
-  onComplete: (result) => {
-    const { booleanResult } = result.value as OverlayResult
-    console.log(`是否包含: ${booleanResult ? '是' : '否'}`)
-  }
-})
-```
-
-**应用场景**：
-
-- 检查建筑物是否在地块内
-- 验证规划范围
-- 空间包含关系检测
-
-#### 6. 被包含判断 (Within)
-
-判断第一个多边形是否被第二个多边形完全包含。
-
-```typescript
-analysis.startMeasure({
-  type: 'overlay',
-  overlayOptions: {
-    overlayType: OverlayType.WITHIN
-  },
-  onComplete: (result) => {
-    const { booleanResult } = result.value as OverlayResult
-    console.log(`是否被包含: ${booleanResult ? '是' : '否'}`)
-  }
-})
-```
-
-#### 7. 重叠判断 (Overlaps)
-
-判断两个多边形是否有重叠（不是完全包含）。
-
-```typescript
-analysis.startMeasure({
-  type: 'overlay',
-  overlayOptions: {
-    overlayType: OverlayType.OVERLAPS
-  },
-  onComplete: (result) => {
-    const { booleanResult } = result.value as OverlayResult
-    console.log(`是否重叠: ${booleanResult ? '是' : '否'}`)
-  }
-})
-```
-
-**应用场景**：
-
-- 检测区域冲突
-- 重叠检测
-- 碰撞检测
-
-#### 8. 相邻判断 (Touches)
-
-判断两个多边形是否相邻（有共同边界但不重叠）。
-
-```typescript
-analysis.startMeasure({
-  type: 'overlay',
-  overlayOptions: {
-    overlayType: OverlayType.TOUCHES
-  },
-  onComplete: (result) => {
-    const { booleanResult } = result.value as OverlayResult
-    console.log(`是否相邻: ${booleanResult ? '是' : '否'}`)
-  }
-})
-```
-
-**应用场景**：
-
-- 检查相邻地块
-- 边界检测
-- 邻接关系分析
-
-### 样式配置
-
-```typescript
-interface OverlayOptions {
-  overlayType?: OverlayType // 分析类型（默认 'intersect'）
-  secondPolygon?: Cesium.Cartesian3[] // 第二个多边形坐标
-  secondPolygonEntity?: Cesium.Entity // 第二个多边形实体
-
-  // 结果样式
-  resultFillColor?: string // 结果填充色（默认 '#ff0000'）
-  resultFillOpacity?: number // 结果透明度（默认 0.5）
-  resultOutlineColor?: string // 结果边框色（默认 '#ff0000'）
-  resultOutlineWidth?: number // 结果边框宽（默认 3）
-
-  // 原始多边形样式
-  showOriginalPolygons?: boolean // 显示原始多边形（默认 true）
-  firstPolygonColor?: string // 第一个多边形色（默认 '#0000ff'）
-  secondPolygonColor?: string // 第二个多边形色（默认 '#00ff00'）
-
-  // 标签配置
-  showAreaLabel?: boolean // 显示面积标签（默认 true）
-  showOverlapRatio?: boolean // 显示重叠率（默认 true）
-
-  tolerance?: number // 容差（默认 0.001 米）
-}
-```
-
-### 分析结果
-
-```typescript
-interface OverlayResult {
-  type: OverlayType // 分析类型
-  firstPolygon: Cesium.Cartesian3[] // 第一个多边形
-  secondPolygon: Cesium.Cartesian3[] // 第二个多边形
-  resultPolygon?: Cesium.Cartesian3[] // 结果多边形
-  booleanResult?: boolean // 布尔判断结果
-  firstArea: number // 第一个多边形面积（m²）
-  secondArea: number // 第二个多边形面积（m²）
-  resultArea: number // 结果面积（m²）
-  overlapRatio?: number // 重叠率（0-1）
-  geoJSON?: {
-    // GeoJSON 格式结果
-    first: GeoJSON.Feature<GeoJSON.Polygon>
-    second: GeoJSON.Feature<GeoJSON.Polygon>
-    result?: GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon>
-  }
-}
-```
-
-### 完整示例
-
-```typescript
-import { AutoViewer } from '@auto-cesium/core'
-import { AnalysisPlugin, OverlayType } from '@auto-cesium/plugins'
-import type { OverlayResult } from '@auto-cesium/plugins'
-
-const viewer = new AutoViewer(cesiumViewer)
-const analysis = viewer.use(AnalysisPlugin)
-
-// 场景1：计算两个地块的重叠区域
-function analyzeOverlap() {
   analysis.startMeasure({
-    type: 'overlay',
-    overlayOptions: {
-      overlayType: OverlayType.INTERSECT,
-      resultFillColor: '#ff0000',
-      resultFillOpacity: 0.6,
-      showAreaLabel: true,
-      showOverlapRatio: true,
-      firstPolygonColor: '#0000ff',
-      secondPolygonColor: '#00ff00'
-    },
+    type: type as any,
     onComplete: (result) => {
-      const overlayResult = result.value as OverlayResult
-
-      console.log('=== 叠面分析结果 ===')
-      console.log(`多边形1面积: ${overlayResult.firstArea.toFixed(2)} m²`)
-      console.log(`多边形2面积: ${overlayResult.secondArea.toFixed(2)} m²`)
-      console.log(`交集面积: ${overlayResult.resultArea.toFixed(2)} m²`)
-
-      if (overlayResult.overlapRatio) {
-        console.log(`重叠率: ${(overlayResult.overlapRatio * 100).toFixed(2)}%`)
-      }
-
-      // 导出 GeoJSON
-      if (overlayResult.geoJSON) {
-        console.log('GeoJSON:', JSON.stringify(overlayResult.geoJSON.result))
-      }
+      alert(\`测量完成: \${result.text}\`)
+    },
+    onUpdate: (result) => {
+      document.getElementById('value').textContent = result.text
     }
   })
 }
 
-// 场景2：使用已有多边形进行差集分析
-function analyzeDifference(existingPolygon: Cesium.Cartesian3[]) {
-  analysis.startMeasure({
-    type: 'overlay',
-    overlayOptions: {
-      overlayType: OverlayType.DIFFERENCE,
-      secondPolygon: existingPolygon,
-      resultFillColor: '#0000ff',
-      showOriginalPolygons: true
-    },
-    onComplete: (result) => {
-      const overlayResult = result.value as OverlayResult
-      console.log(`原始面积: ${overlayResult.firstArea.toFixed(2)} m²`)
-      console.log(`扣除面积: ${overlayResult.secondArea.toFixed(2)} m²`)
-      console.log(`剩余面积: ${overlayResult.resultArea.toFixed(2)} m²`)
-    }
-  })
-}
+// UI 绑定
+document.getElementById('btn-distance').onclick = () => startMeasure('distance')
+document.getElementById('btn-area').onclick = () => startMeasure('area')
+document.getElementById('btn-clear').onclick = () => analysis.clearAll()
+```
 
-// 场景3：检查建筑物是否在地块内
-function checkContainment(buildingEntity: Cesium.Entity) {
-  analysis.startMeasure({
-    type: 'overlay',
-    overlayOptions: {
-      overlayType: OverlayType.CONTAINS,
-      secondPolygonEntity: buildingEntity
-    },
-    onComplete: (result) => {
-      const overlayResult = result.value as OverlayResult
-      if (overlayResult.booleanResult) {
-        console.log('✓ 建筑物在地块内')
-      } else {
-        console.log('✗ 建筑物超出地块范围')
+## 场景应用示例
+
+### 场景1：土地规划测量
+
+在城市规划中测量地块面积并生成报告：
+
+```typescript
+import { AnalysisPlugin } from '@auto-cesium/plugins'
+
+class LandPlanningTool {
+  private analysis: AnalysisPlugin
+
+  constructor(viewer: AutoViewer) {
+    this.analysis = viewer.use(AnalysisPlugin, {
+      showMidpoint: true,
+      liveUpdate: true,
+      style: {
+        fillColor: '#4CAF50',
+        fillOpacity: 0.4,
+        lineColor: '#2E7D32',
+        lineWidth: 3
       }
-    }
-  })
-}
-
-// 场景4：批量分析多个区域
-async function batchAnalysis(polygons: Cesium.Cartesian3[][]) {
-  const results: OverlayResult[] = []
-
-  for (let i = 0; i < polygons.length - 1; i++) {
-    const result = await new Promise<OverlayResult>((resolve) => {
-      analysis.startMeasure({
-        type: 'overlay',
-        overlayOptions: {
-          overlayType: OverlayType.INTERSECT,
-          secondPolygon: polygons[i + 1]
-        },
-        onComplete: (result) => {
-          resolve(result.value as OverlayResult)
-        }
-      })
-
-      // 模拟绘制第一个多边形
-      // 实际使用中这里应该是用户交互
     })
-
-    results.push(result)
   }
 
-  console.log(`完成 ${results.length} 个分析`)
-  return results
+  // 测量地块面积
+  measureLandArea(plotName: string) {
+    this.analysis.startMeasure({
+      type: 'area',
+      onComplete: (result) => {
+        const areaM2 = result.value as number
+        const areaAcres = (areaM2 * 0.000247105).toFixed(2) // 转换为英亩
+        const areaMu = (areaM2 * 0.0015).toFixed(2) // 转换为亩
+
+        const report = {
+          plotName,
+          area: {
+            squareMeters: areaM2.toFixed(2),
+            acres: areaAcres,
+            mu: areaMu
+          },
+          timestamp: new Date().toISOString(),
+          coordinates: result.positions
+        }
+
+        console.log('地块测量报告:', report)
+        this.exportReport(report)
+      }
+    })
+  }
+
+  // 导出报告为 GeoJSON
+  exportReport(report: any) {
+    const features = this.analysis.exportGeoJSON()
+    const geojson = {
+      type: 'FeatureCollection',
+      features: features.map((f) => ({
+        ...f,
+        properties: {
+          ...f.properties,
+          ...report
+        }
+      }))
+    }
+
+    // 下载 GeoJSON 文件
+    const blob = new Blob([JSON.stringify(geojson, null, 2)], {
+      type: 'application/json'
+    })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `land-report-${Date.now()}.geojson`
+    a.click()
+  }
+}
+
+// 使用
+const landTool = new LandPlanningTool(viewer)
+landTool.measureLandArea('A区地块')
+```
+
+### 场景2：建筑日照分析
+
+评估建筑物对周边的日照影响：
+
+```typescript
+class SunlightAnalysisTool {
+  private analysis: AnalysisPlugin
+  private results: Array<{ building: string; shadowArea: number; affectedTime: number }>
+
+  constructor(viewer: AutoViewer) {
+    this.analysis = viewer.use(AnalysisPlugin, {
+      style: {
+        fillColor: '#FFC107',
+        fillOpacity: 0.6
+      }
+    })
+    this.results = []
+  }
+
+  // 分析建筑阴影覆盖面积
+  analyzeShadowCoverage(buildingName: string) {
+    console.log(`开始分析 ${buildingName} 的日照影响...`)
+
+    this.analysis.startMeasure({
+      type: 'surfaceArea', // 使用贴地面积测量阴影
+      onComplete: (result) => {
+        const shadowArea = result.value as number
+
+        // 计算日照影响时长（简化计算）
+        const affectedTime = this.calculateAffectedTime(shadowArea)
+
+        this.results.push({
+          building: buildingName,
+          shadowArea,
+          affectedTime
+        })
+
+        this.generateReport()
+      }
+    })
+  }
+
+  // 计算受影响时长（小时）
+  private calculateAffectedTime(shadowArea: number): number {
+    // 简化算法：假设阴影面积与影响时长成正比
+    const baseHours = 8 // 基准日照时长
+    const shadowFactor = shadowArea / 10000 // 每10000平方米影响1小时
+    return Math.min(baseHours, shadowFactor * 2)
+  }
+
+  // 生成日照分析报告
+  generateReport() {
+    const totalAffectedArea = this.results.reduce((sum, r) => sum + r.shadowArea, 0)
+    const avgAffectedTime = this.results.reduce((sum, r) => sum + r.affectedTime, 0) / this.results.length
+
+    const report = {
+      analysisDate: new Date().toLocaleDateString(),
+      buildings: this.results,
+      summary: {
+        totalAffectedArea: totalAffectedArea.toFixed(2) + ' m²',
+        averageAffectedTime: avgAffectedTime.toFixed(1) + ' 小时',
+        compliance: avgAffectedTime < 2 ? '符合规范' : '需要调整'
+      }
+    }
+
+    console.log('日照分析报告:', report)
+    return report
+  }
+
+  // 清除所有分析结果
+  reset() {
+    this.results = []
+    this.analysis.clearAll()
+  }
+}
+
+// 使用
+const sunlightTool = new SunlightAnalysisTool(viewer)
+sunlightTool.analyzeShadowCoverage('A栋住宅楼')
+sunlightTool.analyzeShadowCoverage('B栋商业楼')
+```
+
+### 场景3：道路规划地形剖面
+
+分析道路沿线的地形起伏，优化路线设计：
+
+```typescript
+class RoadPlanningTool {
+  private analysis: AnalysisPlugin
+
+  constructor(viewer: AutoViewer) {
+    this.analysis = viewer.use(AnalysisPlugin, {
+      style: {
+        lineColor: '#2196F3',
+        lineWidth: 4
+      }
+    })
+  }
+
+  // 分析道路剖面
+  analyzeRoadProfile(roadName: string) {
+    this.analysis.startMeasure({
+      type: 'profile',
+      profileOptions: {
+        sampleCount: 200,
+        clampToGround: true
+      },
+      onComplete: (result) => {
+        const profileData = result.value as Array<{
+          distance: number
+          elevation: number
+          position: Cesium.Cartesian3
+        }>
+
+        const analysis = this.analyzeTerrainProfile(profileData)
+
+        console.log(`${roadName} 地形分析:`, analysis)
+        this.visualizeProfile(roadName, profileData, analysis)
+      }
+    })
+  }
+
+  // 分析地形剖面数据
+  private analyzeTerrainProfile(data: any[]) {
+    let maxElevation = -Infinity
+    let minElevation = Infinity
+    let totalClimb = 0
+    let totalDescent = 0
+    let maxSlope = 0
+
+    for (let i = 0; i < data.length; i++) {
+      const current = data[i].elevation
+      maxElevation = Math.max(maxElevation, current)
+      minElevation = Math.min(minElevation, current)
+
+      if (i > 0) {
+        const prev = data[i - 1].elevation
+        const elevDiff = current - prev
+        const distDiff = data[i].distance - data[i - 1].distance
+        const slope = Math.abs(elevDiff / distDiff) * 100
+
+        maxSlope = Math.max(maxSlope, slope)
+
+        if (elevDiff > 0) {
+          totalClimb += elevDiff
+        } else {
+          totalDescent += Math.abs(elevDiff)
+        }
+      }
+    }
+
+    const totalDistance = data[data.length - 1].distance
+
+    return {
+      distance: totalDistance.toFixed(2) + ' m',
+      elevationRange: {
+        min: minElevation.toFixed(2) + ' m',
+        max: maxElevation.toFixed(2) + ' m',
+        difference: (maxElevation - minElevation).toFixed(2) + ' m'
+      },
+      climb: totalClimb.toFixed(2) + ' m',
+      descent: totalDescent.toFixed(2) + ' m',
+      maxSlope: maxSlope.toFixed(2) + '%',
+      slopeCompliance: maxSlope < 8 ? '符合标准' : '超出限制'
+    }
+  }
+
+  // 可视化剖面图（使用图表库）
+  private visualizeProfile(roadName: string, data: any[], analysis: any) {
+    // 这里可以使用 ECharts 或 Chart.js 等图表库
+    const chartData = {
+      title: `${roadName} - 地形剖面图`,
+      xAxis: data.map((d) => d.distance.toFixed(0)),
+      yAxis: data.map((d) => d.elevation.toFixed(2)),
+      analysis
+    }
+
+    console.log('剖面图数据:', chartData)
+    // 实际项目中这里会调用图表库进行渲染
+  }
+}
+
+// 使用
+const roadTool = new RoadPlanningTool(viewer)
+roadTool.analyzeRoadProfile('市政路-东段')
+```
+
+### 场景4：工程方量计算
+
+计算土方工程的挖填方量和成本：
+
+```typescript
+class EarthworkCalculator {
+  private analysis: AnalysisPlugin
+  private costPerCubicMeter = {
+    cut: 25, // 挖方单价 25元/m³
+    fill: 18 // 填方单价 18元/m³
+  }
+
+  constructor(viewer: AutoViewer) {
+    this.analysis = viewer.use(AnalysisPlugin, {
+      style: {
+        fillColor: '#795548',
+        fillOpacity: 0.5
+      }
+    })
+  }
+
+  // 计算场地方量
+  calculateEarthwork(siteName: string, baseElevation: number) {
+    this.analysis.startMeasure({
+      type: 'volume',
+      volumeOptions: {
+        baseElevation,
+        gridSize: 5 // 5米网格精度
+      },
+      onComplete: (result) => {
+        const volume = result.value as {
+          cutVolume: number
+          fillVolume: number
+        }
+
+        const report = this.generateCostReport(siteName, volume)
+        console.log('土方工程报告:', report)
+      }
+    })
+  }
+
+  // 生成成本报告
+  private generateCostReport(siteName: string, volume: any) {
+    const cutCost = volume.cutVolume * this.costPerCubicMeter.cut
+    const fillCost = volume.fillVolume * this.costPerCubicMeter.fill
+    const totalCost = cutCost + fillCost
+
+    // 计算土方平衡率
+    const balanceRate =
+      (Math.min(volume.cutVolume, volume.fillVolume) / Math.max(volume.cutVolume, volume.fillVolume)) * 100
+
+    return {
+      site: siteName,
+      volume: {
+        cut: `${volume.cutVolume.toFixed(2)} m³`,
+        fill: `${volume.fillVolume.toFixed(2)} m³`,
+        balance: `${(volume.cutVolume - volume.fillVolume).toFixed(2)} m³`
+      },
+      cost: {
+        cut: `¥${cutCost.toFixed(2)}`,
+        fill: `¥${fillCost.toFixed(2)}`,
+        total: `¥${totalCost.toFixed(2)}`
+      },
+      balanceRate: `${balanceRate.toFixed(1)}%`,
+      recommendation: balanceRate > 85 ? '土方平衡良好' : '建议调整设计高程'
+    }
+  }
+
+  // 更新单价
+  updateCost(cutPrice: number, fillPrice: number) {
+    this.costPerCubicMeter.cut = cutPrice
+    this.costPerCubicMeter.fill = fillPrice
+  }
+}
+
+// 使用
+const earthworkCalc = new EarthworkCalculator(viewer)
+earthworkCalc.calculateEarthwork('A区建设用地', 125.5)
+```
+
+### 场景5：应急救援指挥
+
+快速评估救援距离和路径：
+
+```typescript
+class EmergencyRescueTool {
+  private analysis: AnalysisPlugin
+  private rescuePoints: Array<{ id: string; position: Cesium.Cartesian3 }>
+
+  constructor(viewer: AutoViewer) {
+    this.analysis = viewer.use(AnalysisPlugin, {
+      showMidpoint: false,
+      liveUpdate: true,
+      style: {
+        lineColor: '#F44336',
+        lineWidth: 4,
+        pointColor: '#D32F2F',
+        pointSize: 12
+      }
+    })
+    this.rescuePoints = []
+  }
+
+  // 测量救援距离
+  measureRescueDistance(fromName: string, toName: string) {
+    console.log(`测量从 ${fromName} 到 ${toName} 的距离...`)
+
+    this.analysis.startMeasure({
+      type: 'distance',
+      onComplete: (result) => {
+        const distanceKm = (result.value as number) / 1000
+        const estimatedTime = this.estimateRescueTime(distanceKm)
+
+        console.log(`
+救援距离评估:
+- 起点: ${fromName}
+- 终点: ${toName}
+- 直线距离: ${distanceKm.toFixed(2)} km
+- 预计耗时: ${estimatedTime} 分钟
+        `)
+      }
+    })
+  }
+
+  // 设置警戒范围
+  setWarningZone(centerName: string, radiusKm: number) {
+    this.analysis.startMeasure({
+      type: 'buffer',
+      bufferOptions: {
+        radius: radiusKm * 1000 // 转换为米
+      },
+      style: {
+        fillColor: '#FF9800',
+        fillOpacity: 0.3,
+        lineColor: '#F57C00'
+      },
+      onComplete: (result) => {
+        console.log(`已设置 ${centerName} 周边 ${radiusKm}km 警戒区域`)
+      }
+    })
+  }
+
+  // 分析最短路径
+  findShortestPath(start: string, end: string) {
+    this.analysis.startMeasure({
+      type: 'shortestPath',
+      pathOptions: {
+        algorithm: 'terrain-aware', // 考虑地形
+        maxSlope: 30 // 最大坡度限制
+      },
+      onComplete: (result) => {
+        const pathData = result.value as {
+          distance: number
+          elevationGain: number
+          difficulty: number
+        }
+
+        console.log(`最短救援路径: ${start} → ${end}`)
+        console.log(`- 路径长度: ${(pathData.distance / 1000).toFixed(2)} km`)
+        console.log(`- 爬升高度: ${pathData.elevationGain.toFixed(0)} m`)
+        console.log(`- 难度评级: ${this.getDifficultyLevel(pathData.difficulty)}`)
+      }
+    })
+  }
+
+  // 评估指挥位置可视域
+  evaluateCommandViewshed(commandPostName: string) {
+    this.analysis.startMeasure({
+      type: 'viewshed',
+      viewshedOptions: {
+        observerHeight: 2.0, // 观察者高度
+        viewDistance: 5000, // 视野距离 5km
+        horizontalAngle: 360,
+        verticalAngle: 90,
+        visibleColor: '#4CAF50',
+        invisibleColor: '#F44336'
+      },
+      onComplete: (result) => {
+        const viewshedData = result.value as {
+          visibleArea: number
+          coverage: number
+        }
+
+        console.log(`指挥位置可视性评估: ${commandPostName}`)
+        console.log(`- 可视区域: ${(viewshedData.visibleArea / 1000000).toFixed(2)} km²`)
+        console.log(`- 覆盖率: ${(viewshedData.coverage * 100).toFixed(1)}%`)
+      }
+    })
+  }
+
+  // 估算救援时间
+  private estimateRescueTime(distanceKm: number): number {
+    const avgSpeed = 60 // 平均速度 60km/h
+    return Math.ceil((distanceKm / avgSpeed) * 60)
+  }
+
+  // 获取难度等级
+  private getDifficultyLevel(difficulty: number): string {
+    if (difficulty < 0.3) return '低'
+    if (difficulty < 0.6) return '中'
+    return '高'
+  }
+}
+
+// 使用示例
+const rescueTool = new EmergencyRescueTool(viewer)
+
+// 测量救援距离
+rescueTool.measureRescueDistance('消防站A', '事故现场')
+
+// 设置警戒区域
+rescueTool.setWarningZone('爆炸中心', 2)
+
+// 寻找最短路径
+rescueTool.findShortestPath('救援队驻地', '被困人员位置')
+
+// 评估指挥位置
+rescueTool.evaluateCommandViewshed('临时指挥中心')
+```
+
+## API 文档
+
+### AnalysisPlugin
+
+#### 配置选项
+
+```typescript
+interface AnalysisPluginOptions {
+  style?: Partial<MeasureStyle>
+  snap?: Partial<SnapConfig>
+  showMidpoint?: boolean
+  liveUpdate?: boolean
 }
 ```
 
-### 注意事项
+#### 方法
 
-1. **绘制流程**：
-   - 先绘制第一个多边形（至少3个点）
-   - 右键或双击完成第一个多边形
-   - 继续绘制第二个多边形
-   - 右键或双击完成，自动执行分析
+**startMeasure(options: MeasureOptions): this**
 
-2. **预定义多边形**：
-   - 使用 `secondPolygon` 或 `secondPolygonEntity` 时只需绘制第一个多边形
+开始量算。
 
-3. **MultiPolygon 支持**：
-   - 对称差和某些复杂操作可能产生 MultiPolygon 结果
-   - 系统会自动显示所有部分
+**stopMeasure(): this**
 
-4. **性能考虑**：
-   - 复杂多边形（上千个顶点）可能影响性能
-   - 建议使用合理的采样精度
+停止当前量算。
 
-5. **坐标系统**：
-   - 所有计算基于 WGS84 坐标系
-   - 使用 Turf.js 进行高精度球面计算
+**clearAll(): this**
 
-6. **错误处理**：
-   - 自相交多边形可能导致分析失败
-   - 监听 `onComplete` 事件中的 `error` 参数
+清除所有量算结果。
 
-AnalysisPlugin 提供了完整的量算和空间分析功能，支持多种测量类型和丰富的自定义选项，适用于各种测量和分析场景。
+**remove(entityId: string): this**
+
+移除指定的量算结果。
+
+**getResults(): MeasureResult[]**
+
+获取所有量算结果。
+
+**getResult(entityId: string): MeasureResult | null**
+
+获取指定的量算结果。
+
+**exportGeoJSON(): GeoJSONFeature[]**
+
+导出为 GeoJSON 格式。
+
+**importGeoJSON(features: GeoJSONFeature[]): this**
+
+从 GeoJSON 导入。
+
+## 参考文档
+
+- [GraphicsPlugin 图形插件](/packages/plugins/graphics)
+- [Cesium 测量示例](https://sandcastle.cesium.com/?src=Measurement.html)
+
+## 版本历史
+
+- v1.0.0 - 初始版本，支持基础测量和高级分析功能
+
+## 许可
+
+MIT License

@@ -100,6 +100,8 @@ export default defineConfig({
             { text: '变换插件', link: '/packages/plugins/transform' },
             { text: '分析插件', link: '/packages/plugins/analysis' },
             { text: '材质插件', link: '/packages/plugins/material' },
+            { text: '场景插件', link: '/packages/plugins/scene' },
+            { text: '3D Tiles插件', link: '/packages/plugins/3dtiles' },
           ]
         }
       ],

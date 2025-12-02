@@ -906,6 +906,46 @@ const videoGeoJSON: GeoJSONFeature = {
 graphics.loadJson(videoGeoJSON)
 ```
 
+#### 24. 粒子系统 (particle)
+
+```typescript
+const particleGeoJSON: GeoJSONFeature = {
+  type: 'Feature',
+  geometry: {
+    type: 'Point',
+    coordinates: [116.4074, 39.9042, 10] // 发射器位置
+  },
+  properties: {
+    type: 'particle',
+    style: {
+      particleType: 'fire',
+      emissionRate: 100,
+      particleLife: 2.0,
+      speed: 3.0,
+      minimumSpeed: 2.5,
+      maximumSpeed: 4.0,
+      startScale: 1.0,
+      endScale: 0.5,
+      startColor: { red: 1.0, green: 0.5, blue: 0.0, alpha: 1.0 },
+      endColor: { red: 1.0, green: 0.0, blue: 0.0, alpha: 0.0 },
+      imageSize: { x: 20, y: 20 },
+      lifetime: -1, // -1 表示 Infinity
+      loop: true
+    },
+    attr: {
+      id: 'particle-001',
+      name: '火焰特效',
+      emitterType: 'cone', // 发射器类型: 'cone' | 'sphere' | 'box' | 'circle'
+      emitterConfig: {
+        angle: 30 // 圆锥发射器角度(度)
+      }
+    }
+  }
+}
+
+graphics.loadJson(particleGeoJSON)
+```
+
 ### 批量加载示例
 
 #### 1. 加载 FeatureCollection
@@ -1815,6 +1855,262 @@ graphics.startDraw({
 })
 ```
 
+### 粒子特效类型（Primitive）
+
+#### 35. 粒子系统 (particle)
+
+粒子系统支持火焰、水枪、爆炸、喷雾、烟雾等多种视觉特效,适用于消防演练、工业模拟、环境效果等场景。
+
+**火焰特效 (fire)**
+
+```typescript
+graphics.startDraw({
+  type: 'particle',
+  style: {
+    particleType: 'fire', // 粒子类型
+    emissionRate: 100, // 发射速率(粒子/秒)
+    particleLife: 2.0, // 粒子生命周期(秒)
+    speed: 3.0, // 粒子速度(米/秒)
+    minimumSpeed: 2.5, // 最小速度
+    maximumSpeed: 4.0, // 最大速度
+    startScale: 1.0, // 起始缩放
+    endScale: 0.5, // 结束缩放
+    startColor: new Cesium.Color(1.0, 0.5, 0.0, 1.0), // 起始颜色(橙色)
+    endColor: new Cesium.Color(1.0, 0.0, 0.0, 0.0), // 结束颜色(红色透明)
+    imageSize: new Cesium.Cartesian2(20, 20), // 粒子图片尺寸
+    emitterModelMatrix: Cesium.Matrix4.fromTranslation(Cesium.Cartesian3.fromDegrees(116.4074, 39.9042, 10)), // 发射器位置矩阵
+    lifetime: Infinity, // 粒子系统生命周期(Infinity为永久)
+    loop: true // 是否循环
+  },
+  attr: { id: 'fire-001', name: '火焰特效' }
+})
+```
+
+**水枪/喷泉特效 (water)**
+
+```typescript
+graphics.startDraw({
+  type: 'particle',
+  style: {
+    particleType: 'water',
+    emissionRate: 200,
+    particleLife: 3.0,
+    speed: 8.0,
+    minimumSpeed: 6.0,
+    maximumSpeed: 10.0,
+    startScale: 1.5,
+    endScale: 2.0,
+    startColor: new Cesium.Color(0.0, 0.5, 1.0, 0.8), // 水蓝色
+    endColor: new Cesium.Color(0.0, 0.3, 0.8, 0.0),
+    imageSize: new Cesium.Cartesian2(15, 15),
+    gravity: new Cesium.Cartesian3(0, 0, -9.8), // 重力加速度
+    emitterModelMatrix: Cesium.Matrix4.fromTranslation(Cesium.Cartesian3.fromDegrees(116.4074, 39.9042, 5)),
+    lifetime: Infinity,
+    loop: true,
+    // 喷射方向(圆锥形发射器)
+    emitter: new Cesium.ConeEmitter(Cesium.Math.toRadians(30)) // 30度圆锥
+  },
+  attr: { id: 'water-001', name: '水枪特效' }
+})
+```
+
+**爆炸特效 (explosion)**
+
+```typescript
+graphics.startDraw({
+  type: 'particle',
+  style: {
+    particleType: 'explosion',
+    emissionRate: 500, // 高发射率
+    burst: [
+      {
+        time: 0.0,
+        minimum: 300,
+        maximum: 500
+      }
+    ], // 爆发式粒子
+    particleLife: 1.5,
+    speed: 15.0,
+    minimumSpeed: 10.0,
+    maximumSpeed: 20.0,
+    startScale: 2.0,
+    endScale: 8.0, // 快速扩散
+    startColor: new Cesium.Color(1.0, 1.0, 0.0, 1.0), // 黄色
+    endColor: new Cesium.Color(0.5, 0.0, 0.0, 0.0), // 暗红色透明
+    imageSize: new Cesium.Cartesian2(30, 30),
+    emitterModelMatrix: Cesium.Matrix4.fromTranslation(Cesium.Cartesian3.fromDegrees(116.4074, 39.9042, 20)),
+    lifetime: 2.0, // 爆炸持续2秒
+    loop: false, // 不循环
+    emitter: new Cesium.SphereEmitter(5.0) // 球形发射器
+  },
+  attr: { id: 'explosion-001', name: '爆炸特效' }
+})
+```
+
+**烟雾特效 (smoke)**
+
+```typescript
+graphics.startDraw({
+  type: 'particle',
+  style: {
+    particleType: 'smoke',
+    emissionRate: 50,
+    particleLife: 4.0,
+    speed: 1.0,
+    minimumSpeed: 0.5,
+    maximumSpeed: 1.5,
+    startScale: 1.0,
+    endScale: 5.0, // 烟雾逐渐扩散
+    startColor: new Cesium.Color(0.3, 0.3, 0.3, 0.8), // 灰色
+    endColor: new Cesium.Color(0.5, 0.5, 0.5, 0.0), // 浅灰透明
+    imageSize: new Cesium.Cartesian2(25, 25),
+    emitterModelMatrix: Cesium.Matrix4.fromTranslation(Cesium.Cartesian3.fromDegrees(116.4074, 39.9042, 2)),
+    lifetime: Infinity,
+    loop: true,
+    // 向上漂浮
+    forces: [
+      (particle) => {
+        const windVector = new Cesium.Cartesian3(1, 0, 2) // 向上和侧风
+        Cesium.Cartesian3.multiplyByScalar(windVector, 0.5, windVector)
+        return windVector
+      }
+    ]
+  },
+  attr: { id: 'smoke-001', name: '烟雾特效' }
+})
+```
+
+**喷雾特效 (spray)**
+
+```typescript
+graphics.startDraw({
+  type: 'particle',
+  style: {
+    particleType: 'spray',
+    emissionRate: 150,
+    particleLife: 2.5,
+    speed: 5.0,
+    minimumSpeed: 4.0,
+    maximumSpeed: 6.0,
+    startScale: 0.8,
+    endScale: 1.5,
+    startColor: new Cesium.Color(1.0, 1.0, 1.0, 0.6), // 白色半透明
+    endColor: new Cesium.Color(0.8, 0.8, 1.0, 0.0),
+    imageSize: new Cesium.Cartesian2(10, 10),
+    emitterModelMatrix: Cesium.Matrix4.fromTranslation(Cesium.Cartesian3.fromDegrees(116.4074, 39.9042, 8)),
+    lifetime: Infinity,
+    loop: true,
+    gravity: new Cesium.Cartesian3(0, 0, -5.0), // 轻微重力
+    emitter: new Cesium.ConeEmitter(Cesium.Math.toRadians(45))
+  },
+  attr: { id: 'spray-001', name: '喷雾特效' }
+})
+```
+
+**雨雪特效 (rain/snow)**
+
+```typescript
+// 雨
+graphics.startDraw({
+  type: 'particle',
+  style: {
+    particleType: 'rain',
+    emissionRate: 1000,
+    particleLife: 3.0,
+    speed: 15.0,
+    startScale: 0.3,
+    endScale: 0.3,
+    startColor: new Cesium.Color(0.6, 0.6, 0.8, 0.5),
+    endColor: new Cesium.Color(0.6, 0.6, 0.8, 0.0),
+    imageSize: new Cesium.Cartesian2(5, 20), // 长条形
+    emitterModelMatrix: Cesium.Matrix4.fromTranslation(Cesium.Cartesian3.fromDegrees(116.4074, 39.9042, 100)),
+    lifetime: Infinity,
+    loop: true,
+    gravity: new Cesium.Cartesian3(0, 0, -20), // 快速下落
+    emitter: new Cesium.BoxEmitter(new Cesium.Cartesian3(500, 500, 10))
+  },
+  attr: { id: 'rain-001', name: '雨特效' }
+})
+
+// 雪
+graphics.startDraw({
+  type: 'particle',
+  style: {
+    particleType: 'snow',
+    emissionRate: 500,
+    particleLife: 8.0,
+    speed: 2.0,
+    startScale: 1.0,
+    endScale: 1.0,
+    startColor: new Cesium.Color(1.0, 1.0, 1.0, 0.9),
+    endColor: new Cesium.Color(1.0, 1.0, 1.0, 0.0),
+    imageSize: new Cesium.Cartesian2(8, 8),
+    emitterModelMatrix: Cesium.Matrix4.fromTranslation(Cesium.Cartesian3.fromDegrees(116.4074, 39.9042, 100)),
+    lifetime: Infinity,
+    loop: true,
+    gravity: new Cesium.Cartesian3(0, 0, -1.5), // 缓慢飘落
+    emitter: new Cesium.BoxEmitter(new Cesium.Cartesian3(500, 500, 10)),
+    // 随机飘动
+    forces: [
+      (particle) => {
+        return new Cesium.Cartesian3(Math.random() - 0.5, Math.random() - 0.5, 0)
+      }
+    ]
+  },
+  attr: { id: 'snow-001', name: '雪特效' }
+})
+```
+
+**完整配置选项**
+
+```typescript
+interface ParticleSystemStyle {
+  // 基础配置
+  particleType: 'fire' | 'water' | 'explosion' | 'smoke' | 'spray' | 'rain' | 'snow' | 'custom'
+  image?: string // 自定义粒子图片URL
+  imageSize?: Cesium.Cartesian2 // 粒子图片尺寸
+
+  // 发射器配置
+  emitter?: Cesium.ParticleEmitter // 发射器类型(圆锥、球形、盒形、圆形)
+  emitterModelMatrix?: Cesium.Matrix4 // 发射器位置和方向矩阵
+  emissionRate?: number // 粒子发射率(个/秒)
+  burst?: Array<{
+    // 爆发式粒子
+    time: number // 发射时间点
+    minimum: number // 最小粒子数
+    maximum: number // 最大粒子数
+  }>
+
+  // 粒子生命周期
+  particleLife?: number // 粒子生命周期(秒)
+  minimumParticleLife?: number // 最小生命周期
+  maximumParticleLife?: number // 最大生命周期
+  lifetime?: number // 粒子系统总生命周期(Infinity为永久)
+  loop?: boolean // 是否循环
+
+  // 粒子运动
+  speed?: number // 粒子速度(米/秒)
+  minimumSpeed?: number // 最小速度
+  maximumSpeed?: number // 最大速度
+  gravity?: Cesium.Cartesian3 // 重力加速度
+  forces?: Array<(particle: Cesium.Particle) => Cesium.Cartesian3> // 自定义力场
+
+  // 粒子缩放
+  startScale?: number // 起始缩放
+  endScale?: number // 结束缩放
+  minimumImageSize?: Cesium.Cartesian2 // 最小图片尺寸
+  maximumImageSize?: Cesium.Cartesian2 // 最大图片尺寸
+
+  // 粒子颜色
+  startColor?: Cesium.Color // 起始颜色
+  endColor?: Cesium.Color // 结束颜色
+
+  // 显示控制
+  show?: boolean // 是否显示
+  sizeInMeters?: boolean // 尺寸是否以米为单位
+}
+```
+
 ### 使用技巧
 
 1. **样式继承**：所有类型都支持 `material`、`opacity`、`outline` 等通用样式属性。
@@ -2480,6 +2776,56 @@ const videoGeoJSON = graphics.toGeoJSON(videoEntity)
 // properties.attr.camera: { ... } (3D投射时的相机参数)
 ```
 
+#### 36. 粒子系统 (particle)
+
+```typescript
+const particleEntity = graphics.startDraw({
+  type: 'particle',
+  style: {
+    particleType: 'fire',
+    emissionRate: 100,
+    particleLife: 2.0,
+    speed: 3.0,
+    startScale: 1.0,
+    endScale: 0.5,
+    startColor: new Cesium.Color(1.0, 0.5, 0.0, 1.0),
+    endColor: new Cesium.Color(1.0, 0.0, 0.0, 0.0),
+    imageSize: new Cesium.Cartesian2(20, 20),
+    emitterModelMatrix: Cesium.Matrix4.fromTranslation(Cesium.Cartesian3.fromDegrees(116.4074, 39.9042, 10)),
+    lifetime: Infinity,
+    loop: true
+  },
+  attr: { id: 'particle-001', name: '火焰特效' }
+})
+
+const particleGeoJSON = graphics.toGeoJSON(particleEntity)
+// 结果示例:
+// {
+//   type: 'Feature',
+//   geometry: {
+//     type: 'Point',
+//     coordinates: [116.4074, 39.9042, 10]
+//   },
+//   properties: {
+//     type: 'particle',
+//     style: {
+//       particleType: 'fire',
+//       emissionRate: 100,
+//       particleLife: 2.0,
+//       speed: 3.0,
+//       startScale: 1.0,
+//       endScale: 0.5,
+//       startColor: { red: 1.0, green: 0.5, blue: 0.0, alpha: 1.0 },
+//       endColor: { red: 1.0, green: 0.0, blue: 0.0, alpha: 0.0 },
+//       imageSize: { x: 20, y: 20 },
+//       lifetime: -1, // Infinity 转换为 -1
+//       loop: true
+//     },
+//     attr: { id: 'particle-001', name: '火焰特效' }
+//   }
+// }
+```
+
 ### 批量导出示例
 
 ```typescript
@@ -3116,6 +3462,343 @@ videoPrimitive?.play?.()
 - `video-fusion` 会自动创建隐藏的 `<video>` 元素并生成 `VideoMaterial`，支持 MP4/WebM/FLV/HLS/RTMP/WEBRTC，`projectionMode` 可在 `2d`/`3d`/`ground` 间切换。
 - `camera` 参数可指定投射相机，启用 `showFrustum` 可实时查看视锥体，便于标定；可通过返回对象上的 `play/pause/stop/setVolume` 等方法控制播放。
 - 若使用 HLS/FLV 流，请在业务入口引入对应播放器库（`hls.js`、`flv.js`）并挂载到全局，GraphicsPlugin 会自动调用。
+
+### 场景 10.1：消防演练粒子特效（`particle`）
+
+```typescript
+import type { ParticleSystemStyle } from '@auto-cesium/plugins'
+
+// 消防演练场景管理器
+class FireDrillManager {
+  private particles: Map<string, Entity | Cesium.Primitive> = new Map()
+
+  constructor(private graphics: GraphicsPlugin) {}
+
+  // 创建火源
+  createFireSource(buildingId: string, position: Cesium.Cartesian3) {
+    const fire = this.graphics.startDraw({
+      type: 'particle',
+      style: {
+        particleType: 'fire',
+        emissionRate: 150,
+        particleLife: 2.5,
+        speed: 4.0,
+        minimumSpeed: 3.0,
+        maximumSpeed: 5.0,
+        startScale: 1.5,
+        endScale: 0.3,
+        startColor: new Cesium.Color(1.0, 0.6, 0.0, 1.0), // 橙黄色火焰
+        endColor: new Cesium.Color(0.8, 0.0, 0.0, 0.0), // 红色透明
+        imageSize: new Cesium.Cartesian2(25, 25),
+        emitterModelMatrix: Cesium.Matrix4.fromTranslation(position),
+        lifetime: Infinity,
+        loop: true
+      },
+      attr: {
+        id: `fire-${buildingId}`,
+        name: `建筑${buildingId}火源`,
+        buildingId,
+        hazardType: 'fire'
+      }
+    })
+
+    this.particles.set(`fire-${buildingId}`, fire!)
+
+    // 同时添加烟雾效果
+    this.createSmoke(buildingId, position)
+  }
+
+  // 创建烟雾
+  createSmoke(buildingId: string, position: Cesium.Cartesian3) {
+    const smokePosition = Cesium.Matrix4.clone(Cesium.Matrix4.fromTranslation(position), new Cesium.Matrix4())
+    Cesium.Matrix4.multiplyByTranslation(
+      smokePosition,
+      new Cesium.Cartesian3(0, 0, 5), // 烟雾在火焰上方
+      smokePosition
+    )
+
+    const smoke = this.graphics.startDraw({
+      type: 'particle',
+      style: {
+        particleType: 'smoke',
+        emissionRate: 80,
+        particleLife: 5.0,
+        speed: 1.5,
+        minimumSpeed: 1.0,
+        maximumSpeed: 2.0,
+        startScale: 1.0,
+        endScale: 6.0, // 烟雾逐渐扩散
+        startColor: new Cesium.Color(0.2, 0.2, 0.2, 0.9), // 深灰色
+        endColor: new Cesium.Color(0.6, 0.6, 0.6, 0.0), // 浅灰透明
+        imageSize: new Cesium.Cartesian2(30, 30),
+        emitterModelMatrix: smokePosition,
+        lifetime: Infinity,
+        loop: true,
+        forces: [
+          (particle) => {
+            // 风向影响
+            const windVector = new Cesium.Cartesian3(0.5, 0.3, 1.5)
+            return Cesium.Cartesian3.multiplyByScalar(windVector, 0.8, new Cesium.Cartesian3())
+          }
+        ]
+      },
+      attr: {
+        id: `smoke-${buildingId}`,
+        name: `建筑${buildingId}烟雾`,
+        buildingId
+      }
+    })
+
+    this.particles.set(`smoke-${buildingId}`, smoke!)
+  }
+
+  // 启动水枪灭火
+  startWaterSpray(truckId: string, position: Cesium.Cartesian3, targetDirection: Cesium.Cartesian3) {
+    const angle = Cesium.Math.toRadians(25) // 水枪喷射角度
+
+    const water = this.graphics.startDraw({
+      type: 'particle',
+      style: {
+        particleType: 'water',
+        emissionRate: 300,
+        particleLife: 2.0,
+        speed: 12.0,
+        minimumSpeed: 10.0,
+        maximumSpeed: 15.0,
+        startScale: 1.0,
+        endScale: 2.0,
+        startColor: new Cesium.Color(0.2, 0.5, 1.0, 0.7), // 水蓝色
+        endColor: new Cesium.Color(0.1, 0.4, 0.9, 0.0),
+        imageSize: new Cesium.Cartesian2(12, 12),
+        emitterModelMatrix: Cesium.Matrix4.fromTranslation(position),
+        gravity: new Cesium.Cartesian3(0, 0, -9.8),
+        lifetime: Infinity,
+        loop: true,
+        emitter: new Cesium.ConeEmitter(angle)
+      },
+      attr: {
+        id: `water-${truckId}`,
+        name: `消防车${truckId}水枪`,
+        truckId,
+        targetDirection
+      }
+    })
+
+    this.particles.set(`water-${truckId}`, water!)
+  }
+
+  // 停止水枪
+  stopWaterSpray(truckId: string) {
+    const waterId = `water-${truckId}`
+    const water = this.particles.get(waterId)
+    if (water) {
+      this.graphics.deleteEntity(water as Entity)
+      this.particles.delete(waterId)
+    }
+  }
+
+  // 火源扑灭
+  extinguishFire(buildingId: string) {
+    // 移除火焰
+    const fireId = `fire-${buildingId}`
+    const fire = this.particles.get(fireId)
+    if (fire) {
+      this.graphics.deleteEntity(fire as Entity)
+      this.particles.delete(fireId)
+    }
+
+    // 保留烟雾一段时间后逐渐消散
+    const smokeId = `smoke-${buildingId}`
+    const smoke = this.particles.get(smokeId)
+    if (smoke) {
+      setTimeout(() => {
+        this.graphics.deleteEntity(smoke as Entity)
+        this.particles.delete(smokeId)
+      }, 10000) // 10秒后烟雾消失
+    }
+  }
+
+  // 清理所有特效
+  clearAll() {
+    this.particles.forEach((particle) => {
+      this.graphics.deleteEntity(particle as Entity)
+    })
+    this.particles.clear()
+  }
+}
+
+// 使用示例
+const fireDrill = new FireDrillManager(graphics)
+
+// 创建火源点
+const firePosition = Cesium.Cartesian3.fromDegrees(116.4074, 39.9042, 15)
+fireDrill.createFireSource('building-A', firePosition)
+
+// 消防车到达，启动水枪
+const truckPosition = Cesium.Cartesian3.fromDegrees(116.4064, 39.904, 2)
+const targetDirection = Cesium.Cartesian3.subtract(firePosition, truckPosition, new Cesium.Cartesian3())
+fireDrill.startWaterSpray('truck-01', truckPosition, targetDirection)
+
+// 5分钟后火灾扑灭
+setTimeout(() => {
+  fireDrill.extinguishFire('building-A')
+  fireDrill.stopWaterSpray('truck-01')
+}, 300000)
+```
+
+**应用要点：**
+
+- **火焰与烟雾叠加**：通过组合 `fire` 和 `smoke` 粒子系统模拟真实火灾场景
+- **水枪喷射**：使用 `ConeEmitter` 和重力模拟水枪轨迹，`emitterModelMatrix` 控制喷射方向
+- **动态控制**：通过 `deleteEntity` 动态添加/移除粒子效果，配合业务逻辑实现交互式演练
+- **性能优化**：合理控制 `emissionRate` 和 `particleLife`，避免大量粒子导致性能下降
+
+### 场景 10.2：工业爆炸模拟（`particle`）
+
+```typescript
+// 爆炸效果管理器
+class ExplosionSimulator {
+  constructor(private graphics: GraphicsPlugin) {}
+
+  // 触发爆炸
+  triggerExplosion(position: Cesium.Cartesian3, intensity: 'small' | 'medium' | 'large' = 'medium') {
+    const config = this.getExplosionConfig(intensity)
+
+    // 第一阶段：爆炸闪光
+    const flash = this.graphics.startDraw({
+      type: 'particle',
+      style: {
+        particleType: 'explosion',
+        emissionRate: 0,
+        burst: [
+          {
+            time: 0.0,
+            minimum: config.flashParticles,
+            maximum: config.flashParticles
+          }
+        ],
+        particleLife: 0.5,
+        speed: 5.0,
+        startScale: 3.0,
+        endScale: 15.0,
+        startColor: new Cesium.Color(1.0, 1.0, 0.8, 1.0), // 明黄色
+        endColor: new Cesium.Color(1.0, 0.5, 0.0, 0.0),
+        imageSize: new Cesium.Cartesian2(40, 40),
+        emitterModelMatrix: Cesium.Matrix4.fromTranslation(position),
+        lifetime: 0.5,
+        loop: false,
+        emitter: new Cesium.SphereEmitter(2.0)
+      },
+      attr: { id: `explosion-flash-${Date.now()}` }
+    })
+
+    // 第二阶段：火球扩散
+    setTimeout(() => {
+      const fireball = this.graphics.startDraw({
+        type: 'particle',
+        style: {
+          particleType: 'explosion',
+          emissionRate: 0,
+          burst: [
+            {
+              time: 0.0,
+              minimum: config.fireballParticles,
+              maximum: config.fireballParticles
+            }
+          ],
+          particleLife: 1.5,
+          speed: config.fireballSpeed,
+          minimumSpeed: config.fireballSpeed * 0.8,
+          maximumSpeed: config.fireballSpeed * 1.2,
+          startScale: 2.0,
+          endScale: 10.0,
+          startColor: new Cesium.Color(1.0, 0.4, 0.0, 1.0), // 橙红色
+          endColor: new Cesium.Color(0.3, 0.0, 0.0, 0.0),
+          imageSize: new Cesium.Cartesian2(35, 35),
+          emitterModelMatrix: Cesium.Matrix4.fromTranslation(position),
+          lifetime: 1.5,
+          loop: false,
+          emitter: new Cesium.SphereEmitter(config.radius)
+        },
+        attr: { id: `explosion-fireball-${Date.now()}` }
+      })
+    }, 200)
+
+    // 第三阶段：烟雾蘑菇云
+    setTimeout(() => {
+      const smokeCloud = this.graphics.startDraw({
+        type: 'particle',
+        style: {
+          particleType: 'smoke',
+          emissionRate: config.smokeRate,
+          particleLife: 8.0,
+          speed: 2.0,
+          minimumSpeed: 1.5,
+          maximumSpeed: 3.0,
+          startScale: 2.0,
+          endScale: 12.0,
+          startColor: new Cesium.Color(0.1, 0.1, 0.1, 0.9), // 深黑色
+          endColor: new Cesium.Color(0.5, 0.5, 0.5, 0.0),
+          imageSize: new Cesium.Cartesian2(40, 40),
+          emitterModelMatrix: Cesium.Matrix4.fromTranslation(position),
+          lifetime: 5.0,
+          loop: false,
+          emitter: new Cesium.SphereEmitter(config.radius * 0.5),
+          forces: [
+            (particle) => {
+              // 向上升腾
+              return new Cesium.Cartesian3((Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 0.3, 2.0)
+            }
+          ]
+        },
+        attr: { id: `explosion-smoke-${Date.now()}` }
+      })
+    }, 800)
+  }
+
+  // 根据强度获取配置
+  private getExplosionConfig(intensity: 'small' | 'medium' | 'large') {
+    const configs = {
+      small: {
+        flashParticles: 100,
+        fireballParticles: 150,
+        fireballSpeed: 8.0,
+        radius: 3.0,
+        smokeRate: 30
+      },
+      medium: {
+        flashParticles: 300,
+        fireballParticles: 400,
+        fireballSpeed: 12.0,
+        radius: 6.0,
+        smokeRate: 60
+      },
+      large: {
+        flashParticles: 600,
+        fireballParticles: 800,
+        fireballSpeed: 20.0,
+        radius: 10.0,
+        smokeRate: 100
+      }
+    }
+    return configs[intensity]
+  }
+}
+
+// 使用示例
+const explosionSim = new ExplosionSimulator(graphics)
+
+// 触发中等强度爆炸
+const explosionPosition = Cesium.Cartesian3.fromDegrees(116.408, 39.9045, 5)
+explosionSim.triggerExplosion(explosionPosition, 'medium')
+```
+
+**应用要点：**
+
+- **分阶段渲染**：通过 `setTimeout` 分阶段触发闪光、火球、烟雾,模拟真实爆炸过程
+- **爆发式粒子**：使用 `burst` 配置在瞬间释放大量粒子，配合 `loop: false` 实现一次性效果
+- **球形发射器**：`SphereEmitter` 实现向四周扩散的爆炸效果
+- **自定义力场**：通过 `forces` 控制烟雾向上升腾，形成蘑菇云效果
 
 ### 场景 11：重新编辑历史标绘
 
