@@ -32,9 +32,10 @@ export abstract class BasePlugin implements ViewerPlugin {
   /**
    * 安装插件
    * @param viewer Viewer 实例
+   * @param args 可选的额外参数，传递给 onInstall
    * 使用 Parameters 提取 ViewerPlugin['install'] 的参数类型以确保类型兼容
    */
-  install(viewer: Parameters<ViewerPlugin['install']>[0]): void | Promise<void> {
+  install(viewer: Parameters<ViewerPlugin['install']>[0], ...args: unknown[]): void | Promise<void> {
     if (this._installed) {
       console.warn(`Plugin "${this.name}" is already installed`)
       return
@@ -46,7 +47,7 @@ export abstract class BasePlugin implements ViewerPlugin {
     this._installed = true
 
     // 调用子类的初始化方法，此时 this.viewer 已经被赋值
-    const result = this.onInstall(this.viewer!)
+    const result = this.onInstall(this.viewer!, ...args)
 
     return result
   }
@@ -55,7 +56,7 @@ export abstract class BasePlugin implements ViewerPlugin {
    * 插件安装时的回调
    * 子类应该重写此方法
    */
-  protected abstract onInstall(viewer: AutoViewer): void | Promise<void>
+  protected abstract onInstall(viewer: AutoViewer, ...args: unknown[]): void | Promise<void>
 
   /**
    * 销毁插件

@@ -6,10 +6,7 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "test/BasePlugin.test.ts"],
   "exclude": ["node_modules", "dist", "**/*.spec.ts"],
-  "references": [
-    { "path": "../core" },
-    { "path": "../shared" }
-  ]
+  "references": [{ "path": "../core" }, { "path": "../shared" }]
 }
