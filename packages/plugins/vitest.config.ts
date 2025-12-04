@@ -6,6 +6,13 @@ export default defineConfig({
     name: '@auto-cesium/plugins',
     environment: 'happy-dom',
     globals: true,
+    // Limit concurrency to avoid "too many open files" error
+    pool: 'forks',
+    poolOptions: {
+      forks: {
+        singleFork: true
+      }
+    },
 
     coverage: {
       provider: 'v8',
@@ -28,7 +35,11 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
       '@auto-cesium/core': path.resolve(__dirname, '../core/src'),
-      '@auto-cesium/shared': path.resolve(__dirname, '../shared/src')
+      '@auto-cesium/shared': path.resolve(__dirname, '../shared/src'),
+      // Mock optional dependencies for testing
+      vue: path.resolve(__dirname, './test/__mocks__/vue.ts'),
+      react: path.resolve(__dirname, './test/__mocks__/react.ts'),
+      'react-dom/client': path.resolve(__dirname, './test/__mocks__/react-dom-client.ts')
     }
   }
 })
